@@ -101,7 +101,7 @@ def register_builtins(aurflux: Aurflux):
                          f"**IN**:\n"
                          f"```py\n{script}\n```\n"
                          f"**OUT**:\n"
-                         f"```py\n{res}\n```"))
+                         f"```py\n{res}\n```"), trashable=True)
 
     @aurflux.commandeer(name="help", parsed=False)
     async def get_help(ctx: MessageContext, help_target: ty.Optional[str]):
