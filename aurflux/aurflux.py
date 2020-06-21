@@ -21,7 +21,7 @@ import inspect
 import logging
 
 logging.getLogger("discord.client").addFilter(lambda r: r.getMessage() != "PyNaCl is not installed, voice will NOT be supported")
-
+logger = logging.getLogger(__name__)
 if ty.TYPE_CHECKING:
     import discord
     from ._types import *
@@ -39,6 +39,7 @@ class AurfluxCog:
         self.router = EventRouter(self.__class__.__name__, self.aurflux.router)
         self.listeners: ty.Dict[ty.Union[EventFunction, EventRouter, EventWaiter], EventMuxer] = {}
         self.route()
+        logging.info(f"[AurfluxCog] {self.__class__.__name__} loaded!")
 
     async def startup(self):
         pass
