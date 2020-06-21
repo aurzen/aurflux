@@ -33,7 +33,6 @@ def _coroify(func):  # todo: move to aurcore
     return __async_wrapper
 
 
-@ext.AutoRepr
 class Command:
 
     def __init__(

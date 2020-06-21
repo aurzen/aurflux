@@ -46,7 +46,8 @@ class AurfluxCog:
         pass
 
     def register(self, cog_member: ty.Union[Command, ty.Tuple[EventMuxer, ty.Union[EventFunction, EventRouter, EventWaiter]]]):
-        if isinstance(cog_member, Command.__class__):
+        print(Command)
+        if isinstance(cog_member, Command):
             self.commands.add(cog_member)
         else:
             muxer, listener = cog_member
