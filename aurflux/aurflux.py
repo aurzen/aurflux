@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import importlib
 
 import discord.errors
 import traceback
@@ -9,10 +10,14 @@ from .config import Config
 from .context import MessageContext
 from .errors import *
 from .response import Response
+import aiohttp
 from . import utils
+import asyncio as aio
 from . import argh
 import re
+import discord.ext
 from aurcore.event import *
+import inspect
 
 if ty.TYPE_CHECKING:
     import discord
@@ -23,14 +28,32 @@ class AurfluxEvent(Event):
     def __init__(self, aurflux, __event_name, *args, **kwargs):
         super().__init__(__event_name, *args, **kwargs)
         self.bot: Aurflux = aurflux
+
+
 class AurfluxCog:
     def __init__(self, aurflux: Aurflux):
         self.aurflux = aurflux
         self.router = EventRouter(self.__class__.__name__, self.aurflux.router)
+        self.listeners: ty.Dict[ty.Union[EventFunction, EventRouter, EventWaiter], EventMuxer] = {}
         self.route()
 
+    async def startup(self):
+        pass
+
+    def register(self, listener_tup: ty.Tuple[EventMuxer, ty.Union[EventFunction, EventRouter, EventWaiter]]):
+        muxer, listener = listener_tup
+        self.listeners[listener] = muxer
+
+    def teardown(self):
+        for listener, muxer in self.listeners.items():
+            if isinstance(listener, EventRouter):
+                muxer.router = None
+            else:
+                muxer.remove_listener(listener)
+
     @abc.abstractmethod
-    def route(self): ...
+    def route(self):
+        ...
 
 
 def __aiterify(obj: ty.Union[ty.Coroutine, ty.AsyncIterable]):
@@ -69,9 +92,8 @@ def register_builtins(aurflux: Aurflux):
         try:
             if cmd not in aurflux.commands:
                 return
-            async with ctx.channel.typing():
-                async for response in __aiterify(aurflux.commands[cmd].execute(ctx)):
-                    await response.execute(ctx)
+            async for response in __aiterify(aurflux.commands[cmd].execute(ctx)):
+                await response.execute(ctx)
         except CommandError as e:
             info_message = f"{e}"
             if argparser := aurflux.commands[cmd].argparser:
@@ -84,10 +106,22 @@ def register_builtins(aurflux: Aurflux):
             await Response(content=info_message).execute(ctx)
 
     @CommandCheck.check(lambda ctx: ctx.author.id == aurflux.admin_id)
+    @aurflux.commandeer(name="reload", parsed=False, private=True)
+    async def exec_(ctx: MessageContext, cog_name: str):
+        reloaded_cogs = []
+        for cog in aurflux.cogs:
+            new_cog = cog
+            if cog.__class__.__name__.lower() == cog_name:
+                module = importlib.reload(inspect.getmodule(cog))
+                new_cog = getattr(module, cog.__class__.__name__)(ctx.aurflux)
+            reloaded_cogs.append(new_cog)
+        ctx.aurflux.cogs = reloaded_cogs
+
+    @CommandCheck.check(lambda ctx: ctx.author.id == aurflux.admin_id)
     @aurflux.commandeer(name="exec", parsed=False, private=True)
     async def exec_(ctx: MessageContext, script: str):
         exec_func = utils.sexec
-        if any(line.strip().startswith("await") for line in script.split("\n")):
+        if "await " in script:
             exec_func = utils.aexec
 
         with utils.Timer() as t:
@@ -128,8 +162,9 @@ def register_builtins(aurflux: Aurflux):
                 title="\U00002754 Command Help",
                 description=f"Help for `{configs['prefix']}{help_target}`")
             if public_cmds[help_target].argparser:
-                embed.add_field(name="Usage", value=public_cmds[help_target].argparser.usage)
+                embed.add_field(name="Usage", value=public_cmds[help_target].long_usage)
             return Response(embed=embed)
+
 
 class Aurflux(discord.Client):
     CONFIG: Config
@@ -141,10 +176,12 @@ class Aurflux(discord.Client):
         self.router = EventRouter(name="aurflux", parent=parent_router)
         self.admin_id = admin_id
         register_builtins(self)
+        self.cogs: ty.List[AurfluxCog] = []
+        self.aiohttp_session = aiohttp.ClientSession()
 
     def commandeer(self, name: ty.Optional[str] = None, parsed: bool = True, private: bool = False) -> ty.Callable[[ty.Callable[[...], ty.Awaitable[Response]]], Command]:
         def command_deco(func: ty.Callable[[...], ty.Awaitable[Response]]) -> Command:
-            cmd = Command(client=self, func=func, name=(name or func.__name__), parsed=parsed, private=private)
+            cmd = Command(aurflux=self, func=func, name=(name or func.__name__), parsed=parsed, private=private)
             if cmd.name in self.commands:
                 raise TypeError(f"Attempting to register command {cmd} when {self.commands[cmd.name]} already exists")
             self.commands[cmd.name] = cmd
@@ -157,8 +194,8 @@ class Aurflux(discord.Client):
         asyncio.create_task(self.router.submit(AurfluxEvent(self, f":{event}", *args, **kwargs)))
 
     def register_cog(self, cog: ty.Type[AurfluxCog]):
-        cog(self)
+        self.cogs.append(cog(self))
 
-
-
-
+    async def startup(self, token, *args, **kwargs):
+        await aio.gather(*[cog.startup() for cog in self.cogs])
+        await self.start(token, *args, **kwargs)

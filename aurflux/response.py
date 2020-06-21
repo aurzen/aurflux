@@ -47,8 +47,12 @@ class Response:
 
     async def execute(self, ctx: MessageContext):
         if self.content or self.embed:
+            content = self.content if self.content else "" + (ctx.author.mention if self.ping else "")
+            if len(content) > 1900:
+                async with ctx.aurflux.aiohttp_session.post("https://p.ze.ax/", data=content) as resp:
+                    content = (await resp.json())["key"]
             message = await ctx.channel.send(
-                content=self.content if self.content else "" + (ctx.author.mention if self.ping else ""),
+                content=content,
                 embed=self.embed,
                 delete_after=self.delete_after.seconds if self.delete_after else None  # todo: check if seconds,
 
@@ -59,13 +63,14 @@ class Response:
         try:
             for reaction in self.reactions:
                 await ctx.message.add_reaction(reaction)
+
             if self.trashable:
-                await ctx.message.add_reaction(aurflux.utils.EMOJIS["trashcan"])
+                await self.message.add_reaction(aurflux.utils.EMOJIS["trashcan"])
                 try:
-                    await ctx.flux.router.wait_for("reaction_add", check=lambda ev: ev.args[0].id == self.message.id and ev.args[1] == ctx.message.author, timeout=15)
+                    await ctx.aurflux.router.wait_for(":reaction_add", check=lambda ev: ev.args[0].message.id == self.message.id and ev.args[1] == ctx.message.author, timeout=15)
                     await self.message.delete()
                 except aio.exceptions.TimeoutError:
-                    await ctx.message.remove_reaction(emoji=aurflux.utils.EMOJIS["trashcan"], member=ctx.guild.me)
+                    await self.message.remove_reaction(emoji=aurflux.utils.EMOJIS["trashcan"], member=ctx.guild.me)
         except discord.errors.NotFound:
             pass
     # def __aiter__(self):

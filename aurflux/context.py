@@ -23,7 +23,7 @@ class Context(abc.ABC):
 
 class GuildChannelContext(Context):
     def __init__(self, bot: Aurflux, channel: discord.abc.GuildChannel):
-        self.flux = bot
+        self.aurflux = bot
         self.channel = channel
 
     @property
@@ -32,14 +32,14 @@ class GuildChannelContext(Context):
 
     @property
     def me(self) -> discord.abc.User:
-        return self.guild.me if self.guild else self.flux.user
+        return self.guild.me if self.guild else self.aurflux.user
 
 
 @ext.AutoRepr
 class MessageContext(GuildChannelContext):
     def __init__(self, bot: Aurflux, message: discord.Message):
         self.message = message
-        self.flux = bot
+        self.aurflux = bot
         self.command: ty.Optional[Command] = None
 
     @property

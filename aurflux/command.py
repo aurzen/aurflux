@@ -38,7 +38,7 @@ class Command:
 
     def __init__(
             self,
-            client: Aurflux,
+            aurflux: Aurflux,
             func: ty.Callable[..., ty.Awaitable],
             name: str,
             parsed: bool,
@@ -47,7 +47,7 @@ class Command:
 
     ):
         self.func = func
-        self.client = client
+        self.aurflux = aurflux
         self.name = name
         self.doc = inspect.getdoc(func)
         self.parsed = parsed
@@ -64,23 +64,23 @@ class Command:
             self.long_usage = func_doc[func_doc.index("\n"):func_doc.rindex(":param")]
 
     def execute(self, ctx: MessageContext):
-        configs = self.client.CONFIG.of(ctx)
+        configs = self.aurflux.CONFIG.of(ctx)
         ctx.command = self
         if (self.argparser is not None) ^ self.parsed:
             raise RuntimeError(f"Parsed command {self} has not been decorated with Argh")
 
-        if ctx.author.id != self.client.admin_id:
+        if ctx.author.id != self.aurflux.admin_id:
             aio.gather(*[_coroify(check)(ctx) for check in self.checks])
 
         args: str = ctx.message.content.removeprefix(configs["prefix"]).removeprefix(self.name).lstrip()
-
-        if self.parsed:
-            assert self.argparser is not None  # typing
-            return self.func(ctx, **self.argparser.parse_args(args.split(" ") if args else []).__dict__)
-        else:
-            # if inspect.isasyncgenfunction(self.func):
-            #     return self.func(ctx, args)
-            return self.func(ctx, args)
+        with ctx.channel.typing():
+            if self.parsed:
+                assert self.argparser is not None  # typing
+                return self.func(ctx, **self.argparser.parse_args(args.split(" ") if args else []).__dict__)
+            else:
+                # if inspect.isasyncgenfunction(self.func):
+                #     return self.func(ctx, args)
+                return self.func(ctx, args)
 
 
 class CommandCheck:
