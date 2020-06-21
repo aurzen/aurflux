@@ -110,7 +110,7 @@ def register_builtins(aurflux: Aurflux):
 
     @CommandCheck.check(lambda ctx: ctx.author.id == aurflux.admin_id)
     @aurflux.commandeer(name="reload", parsed=False, private=True)
-    async def exec_(ctx: MessageContext, cog_name: str):
+    async def reload(ctx: MessageContext, cog_name: str):
         reloaded_cogs = []
         for cog in aurflux.cogs:
             new_cog = cog
