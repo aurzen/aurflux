@@ -38,15 +38,19 @@ class AurfluxCog:
         self.aurflux = aurflux
         self.router = EventRouter(self.__class__.__name__, self.aurflux.router)
         self.listeners: ty.Dict[ty.Union[EventFunction, EventRouter, EventWaiter], EventMuxer] = {}
+        self.commands = set()
         self.route()
         logging.info(f"[AurfluxCog] {self.__class__.__name__} loaded!")
 
     async def startup(self):
         pass
 
-    def register(self, listener_tup: ty.Tuple[EventMuxer, ty.Union[EventFunction, EventRouter, EventWaiter]]):
-        muxer, listener = listener_tup
-        self.listeners[listener] = muxer
+    def register(self, cog_member: ty.Union[Command, ty.Tuple[EventMuxer, ty.Union[EventFunction, EventRouter, EventWaiter]]]):
+        if isinstance(cog_member, Command):
+            self.commands.add(cog_member)
+        else:
+            muxer, listener = cog_member
+            self.listeners[listener] = muxer
 
     def teardown(self):
         for listener, muxer in self.listeners.items():
@@ -54,6 +58,8 @@ class AurfluxCog:
                 muxer.router = None
             else:
                 muxer.remove_listener(listener)
+        for command in self.commands:
+            del self.aurflux.commands[command.name]
 
     @abc.abstractmethod
     def route(self):
