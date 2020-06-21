@@ -54,6 +54,7 @@ class AurfluxCog:
 
     def teardown(self):
         for listener, muxer in self.listeners.items():
+            print(f"Deregistering {listener} on {muxer}")
             if isinstance(listener, EventRouter):
                 muxer.router = None
             else:
