@@ -131,6 +131,7 @@ def register_builtins(aurflux: Aurflux):
                 new_cog = getattr(module, cog.__class__.__name__)(ctx.aurflux)
             reloaded_cogs.append(new_cog)
         ctx.aurflux.cogs = reloaded_cogs
+        return Response()
 
     @CommandCheck.check(lambda ctx: ctx.author.id == aurflux.admin_id)
     @aurflux.commandeer(name="exec", parsed=False, private=True)
