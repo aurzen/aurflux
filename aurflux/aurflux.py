@@ -129,6 +129,7 @@ def register_builtins(aurflux: Aurflux):
                 cog.teardown()
                 module = importlib.reload(inspect.getmodule(cog))
                 new_cog = getattr(module, cog.__class__.__name__)(ctx.aurflux)
+                await new_cog.startup()
             reloaded_cogs.append(new_cog)
         ctx.aurflux.cogs = reloaded_cogs
         return Response()
