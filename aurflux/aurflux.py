@@ -116,6 +116,7 @@ def register_builtins(aurflux: Aurflux):
         for cog in aurflux.cogs:
             new_cog = cog
             if cog.__class__.__name__.lower() == cog_name:
+                cog.teardown()
                 module = importlib.reload(inspect.getmodule(cog))
                 new_cog = getattr(module, cog.__class__.__name__)(ctx.aurflux)
             reloaded_cogs.append(new_cog)
