@@ -18,6 +18,9 @@ import re
 import discord.ext
 from aurcore.event import *
 import inspect
+import logging
+
+logging.getLogger("discord.client").addFilter(lambda r: r.getMessage() != "PyNaCl is not installed, voice will NOT be supported")
 
 if ty.TYPE_CHECKING:
     import discord
