@@ -63,6 +63,7 @@ class AurfluxCog:
                 muxer.remove_listener(listener)
         for command in self.commands:
             del self.aurflux.commands[command.name]
+        self.router.detatch()
 
     @abc.abstractmethod
     def route(self):

@@ -44,7 +44,7 @@ description = "Aurcore!"
 name = "aurcore"
 optional = false
 python-versions = ">3.8"
-version = "0.1.17"
+version = "0.1.23"
 
 [package.dependencies]
 websockets = "6.0"
@@ -156,8 +156,8 @@ attrs = [
     {file = "attrs-19.3.0.tar.gz", hash = "sha256:f7b7ce16570fe9965acd6d30101a28f62fb4a7f9e926b3bbc9b61f8b04247e72"},
 ]
 aurcore = [
-    {file = "aurcore-0.1.17-py3-none-any.whl", hash = "sha256:e57ef2fa0a08a4f76311a321314b485a083826f5e8d85b428c077ecf60b44c78"},
-    {file = "aurcore-0.1.17.tar.gz", hash = "sha256:b77905826d37287f2e5c63f40e378a57bbd0ee208f65e139822a297e98dcd7ca"},
+    {file = "aurcore-0.1.23-py3-none-any.whl", hash = "sha256:bae12d3d9eb9c18ed78a3b376157d6ae1f17367c625f2c4e3fcbf99f375ae9e8"},
+    {file = "aurcore-0.1.23.tar.gz", hash = "sha256:ef038a1e2c121b9d408619b0492ac59a1b85fbc13c5e4ea3f72e0fe53ff043da"},
 ]
 chardet = [
     {file = "chardet-3.0.4-py2.py3-none-any.whl", hash = "sha256:fc323ffcaeaed0e0a02bf4d117757b98aed530d9ed4531e3e15460124c106691"},
