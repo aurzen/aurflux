@@ -49,7 +49,7 @@ class Response:
         if self.content or self.embed:
             content = self.content if self.content else "" + (ctx.author.mention if self.ping else "")
             if len(content) > 1900:
-                async with ctx.aurflux.aiohttp_session.post("https://p.ze.ax/", data=content) as resp:
+                async with ctx.aurflux.aiohttp_session.post("https://h.ze.ax/", data=content) as resp:
                     content = (await resp.json())["key"]
             message = await ctx.channel.send(
                 content=content,
