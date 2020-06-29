@@ -61,6 +61,11 @@ class Command:
         else:
             self.short_usage = func_doc.split("\n")[0]
             self.long_usage = func_doc[func_doc.index("\n"):func_doc.rindex(":param")]
+        if self.private:
+            async def is_admin(ctx: MessageContext):
+                if ctx.author.id != self.aurflux.admin_id:
+                    raise NotWhitelisted
+            self.checks.append(is_admin)
 
     def execute(self, ctx: MessageContext):
         configs = self.aurflux.CONFIG.of(ctx)
@@ -69,7 +74,7 @@ class Command:
             raise RuntimeError(f"Parsed command {self} has not been decorated with Argh")
 
         if ctx.author.id != self.aurflux.admin_id:
-            aio.gather(*[_coroify(check)(ctx) for check in self.checks])
+            await aio.gather(*[_coroify(check)(ctx) for check in self.checks])
 
         args: str = ctx.message.content.removeprefix(configs["prefix"]).removeprefix(self.name).lstrip()
         with ctx.channel.typing():
@@ -151,3 +156,4 @@ class CommandCheck:
             raise BotMissingPermissions(missing)
 
         return perm_predicate
+
