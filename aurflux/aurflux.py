@@ -106,7 +106,7 @@ def register_builtins(aurflux: Aurflux):
         try:
             if cmd not in aurflux.commands:
                 return
-            async for response in __aiterify(aurflux.commands[cmd].execute(ctx)):
+            async for response in __aiterify(await aurflux.commands[cmd].execute(ctx)):
                 await response.execute(ctx)
         except CommandError as e:
             info_message = f"{e}"

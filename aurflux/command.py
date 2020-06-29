@@ -67,7 +67,7 @@ class Command:
                     raise NotWhitelisted
             self.checks.append(is_admin)
 
-    def execute(self, ctx: MessageContext):
+    async def execute(self, ctx: MessageContext):
         configs = self.aurflux.CONFIG.of(ctx)
         ctx.command = self
         if (self.argparser is not None) ^ self.parsed:
