@@ -84,7 +84,7 @@ def __aiterify(obj: ty.Union[ty.Coroutine, ty.AsyncIterable]):
         return obj
 
 
-def register_builtins(aurflux: Aurflux):
+def register_builtins(aurflux: Aurflux, secondary: bool):
     @aurflux.router.endpoint(":ready", decompose=True)
     async def _():
         print("Ready!")
@@ -133,27 +133,27 @@ def register_builtins(aurflux: Aurflux):
             reloaded_cogs.append(new_cog)
         ctx.aurflux.cogs = reloaded_cogs
         return Response()
+    if not secondary:
+        @CommandCheck.check(lambda ctx: ctx.author.id == aurflux.admin_id)
+        @aurflux.commandeer(name="exec", parsed=False, private=True)
+        async def exec_(ctx: MessageContext, script: str):
+            exec_func = utils.sexec
+            if "await " in script:
+                exec_func = utils.aexec
 
-    @CommandCheck.check(lambda ctx: ctx.author.id == aurflux.admin_id)
-    @aurflux.commandeer(name="exec", parsed=False, private=True)
-    async def exec_(ctx: MessageContext, script: str):
-        exec_func = utils.sexec
-        if "await " in script:
-            exec_func = utils.aexec
+            with utils.Timer() as t:
+                # noinspection PyBroadException
+                try:
+                    res = await exec_func(script, globals(), locals())
+                except Exception as e:
+                    res = re.sub(r'File ".*[\\/]([^\\/]+.py)"', r'File "\1"', traceback.format_exc(limit=1))
 
-        with utils.Timer() as t:
-            # noinspection PyBroadException
-            try:
-                res = await exec_func(script, globals(), locals())
-            except Exception as e:
-                res = re.sub(r'File ".*[\\/]([^\\/]+.py)"', r'File "\1"', traceback.format_exc(limit=1))
-
-        return Response((f""
-                         f"Ran in {t.elapsed * 1000:.2f} ms\n"
-                         f"**IN**:\n"
-                         f"```py\n{script}\n```\n"
-                         f"**OUT**:\n"
-                         f"```py\n{res}\n```"), trashable=True)
+            return Response((f""
+                             f"Ran in {t.elapsed * 1000:.2f} ms\n"
+                             f"**IN**:\n"
+                             f"```py\n{script}\n```\n"
+                             f"**OUT**:\n"
+                             f"```py\n{res}\n```"), trashable=True)
 
     @aurflux.commandeer(name="help", parsed=False)
     async def get_help(ctx: MessageContext, help_target: ty.Optional[str]):
@@ -193,8 +193,8 @@ class Aurflux(discord.Client):
         self.commands: ty.Dict[str, Command] = {}
         self.router = EventRouter(name="aurflux", parent=parent_router)
         self.admin_id = admin_id
-        if not secondary:
-            register_builtins(self)
+        # if not secondary:
+        register_builtins(self, secondary)
         self.cogs: ty.List[AurfluxCog] = []
         self.aiohttp_session = aiohttp.ClientSession()
 
