@@ -79,6 +79,10 @@ def ms(key):
                 return dict(inspect.getmembers(i[0]))["f_locals"][key]
             except KeyError:
                 pass
+            try:
+                return dict(inspect.getmembers(i[0]))["f_globals"][key]
+            except KeyError:
+                pass
     raise KeyError("Could not find key " + key)
 
 def __aiterify(obj: ty.Union[ty.Coroutine, ty.AsyncIterable]):
