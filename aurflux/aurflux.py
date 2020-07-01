@@ -69,6 +69,17 @@ class AurfluxCog:
     def route(self):
         ...
 
+def ms(key):
+    try:
+        return dict(inspect.getmembers(
+            inspect.stack()[-1][0]))["f_globals"][key]
+    except KeyError:
+        for i in inspect.stack()[::-1]:
+            try:
+                return dict(inspect.getmembers(i[0]))["f_locals"][key]
+            except KeyError:
+                pass
+    raise KeyError("Could not find key " + key)
 
 def __aiterify(obj: ty.Union[ty.Coroutine, ty.AsyncIterable]):
     if asyncio.iscoroutine(obj) or asyncio.isfuture(obj):
@@ -134,6 +145,8 @@ def register_builtins(aurflux: Aurflux, secondary: bool):
         ctx.aurflux.cogs = reloaded_cogs
         return Response()
     if not secondary:
+
+
         @CommandCheck.check(lambda ctx: ctx.author.id == aurflux.admin_id)
         @aurflux.commandeer(name="exec", parsed=False, private=True)
         async def exec_(ctx: MessageContext, script: str):
