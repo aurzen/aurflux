@@ -3,12 +3,12 @@ from . import ext
 
 import typing as ty
 import functools as fnt
+from . import errors
 
 if ty.TYPE_CHECKING:
     import discord
     from .context import Context
     from ._types import *
-    from .errors import *
     from .aurflux import Aurflux
     from . import argh
     from .config import Config
@@ -64,7 +64,7 @@ class Command:
         if self.private:
             async def is_admin(ctx: MessageContext):
                 if ctx.author.id != self.aurflux.admin_id:
-                    raise NotWhitelisted
+                    raise errors.NotWhitelisted
             self.checks.append(is_admin)
 
     async def execute(self, ctx: MessageContext):
@@ -119,7 +119,7 @@ class CommandCheck:
             if ctx.config is None:
                 raise RuntimeError(f"Config has not been initialized for ctx {ctx} in cmd {Command}")
             if not any(identifier in ctx.config["whitelist"] for identifier in ctx.auth_identifiers):
-                raise NotWhitelisted()
+                raise errors.NotWhitelisted()
             return True
 
         return whitelist_predicate
@@ -136,7 +136,7 @@ class CommandCheck:
             if not missing:
                 return True
 
-            raise UserMissingPermissions(missing)
+            raise errors.UserMissingPermissions(missing)
 
         return perm_predicate
 
@@ -153,7 +153,7 @@ class CommandCheck:
             if not missing:
                 return True
 
-            raise BotMissingPermissions(missing)
+            raise errors.BotMissingPermissions(missing)
 
         return perm_predicate
 
