@@ -4,7 +4,6 @@ from . import ext
 import typing as ty
 
 if ty.TYPE_CHECKING:
-    import discord
     from .context import MessageContext
     from ._types import *
     from .errors import *
@@ -14,6 +13,7 @@ import typing as ty
 import itertools as itt
 import asyncio as aio
 import inspect
+import discord
 import aurflux
 import argparse
 import datetime
