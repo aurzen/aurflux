@@ -104,4 +104,4 @@ class Config(metaclass=aurcore.util.Singleton):
                 yield output_dict
             finally:
                 self._write_config_file(config_id, output_dict)
-            self.cached[config_id] = output_dict
+                self.cached[config_id] = output_dict
