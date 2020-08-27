@@ -72,5 +72,9 @@ class MessageContext(GuildChannelContext):
         return None
 
     @property
+    def config(self) -> ty.Dict[ty.Any, str]:
+        return self.aurflux.CONFIG.of(self.config_identifier)
+
+    @property
     def full_command(self) -> ty.Optional[str]:
-        return f"{self.cfg['prefix']}{self.command.name}"
+        return f"{self.config['prefix']}{self.command.name}"
