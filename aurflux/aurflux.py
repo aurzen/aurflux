@@ -69,6 +69,7 @@ class AurfluxCog:
     def route(self):
         ...
 
+
 def ms(key):
     try:
         return dict(inspect.getmembers(
@@ -85,6 +86,7 @@ def ms(key):
                 pass
     raise KeyError("Could not find key " + key)
 
+
 def __aiterify(obj: ty.Union[ty.Coroutine, ty.AsyncIterable]):
     if asyncio.iscoroutine(obj) or asyncio.isfuture(obj):
         class AiterCoro:
@@ -99,7 +101,7 @@ def __aiterify(obj: ty.Union[ty.Coroutine, ty.AsyncIterable]):
         return obj
 
 
-def register_builtins(aurflux: Aurflux, secondary: bool):
+def register_builtins(aurflux: Aurflux, builtins=True):
     @aurflux.router.endpoint(":ready", decompose=True)
     async def _():
         print("Ready!")
@@ -148,8 +150,8 @@ def register_builtins(aurflux: Aurflux, secondary: bool):
             reloaded_cogs.append(new_cog)
         ctx.aurflux.cogs = reloaded_cogs
         return Response()
-    if not secondary:
 
+    if not builtins:
 
         @CommandCheck.check(lambda ctx: ctx.author.id == aurflux.admin_id)
         @aurflux.commandeer(name="exec", parsed=False, private=True)
