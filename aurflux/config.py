@@ -9,7 +9,7 @@ if ty.TYPE_CHECKING:
 
     ConfigIdentifier: ty.TypeAlias = ty.Union[Context, str, int]
 
-    from ._types import *
+    from .types import *
 import yaml
 import functools as fnt
 import pathlib as pl

@@ -5,7 +5,7 @@ import typing as ty
 
 if ty.TYPE_CHECKING:
     from .context import MessageContext
-    from ._types import *
+    from .types import *
     from .errors import *
     from .aurflux import Aurflux
 

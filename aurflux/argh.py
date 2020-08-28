@@ -24,6 +24,11 @@ def MemberIDType(arg: str) -> int:
         raise argparse.ArgumentError
     return int(match.group(1))
 
+def ChannelIDType(arg: str) -> int:
+    match = re.search(r"<#(\d*)>", arg)
+    if not match:
+        raise argparse.ArgumentError
+    return int(match.group(1))
 
 import traceback
 
@@ -54,7 +59,7 @@ class ArgumentParser(argparse.ArgumentParser):
 
 if ty.TYPE_CHECKING:
     import discord
-    from ._types import *
+    from .types import *
 
 
 # p = argparse.ArgumentParser()

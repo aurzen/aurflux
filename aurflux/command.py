@@ -8,7 +8,7 @@ from . import errors
 if ty.TYPE_CHECKING:
     import discord
     from .context import Context
-    from ._types import *
+    from .types import *
     from .aurflux import Aurflux
     from . import argh
     from .config import Config

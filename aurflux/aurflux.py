@@ -24,7 +24,7 @@ logging.getLogger("discord.client").addFilter(lambda r: r.getMessage() != "PyNaC
 logger = logging.getLogger(__name__)
 if ty.TYPE_CHECKING:
     import discord
-    from ._types import *
+    from .types import *
 
 
 class AurfluxEvent(Event):
