@@ -206,14 +206,14 @@ def register_builtins(aurflux: Aurflux, builtins=True):
 class Aurflux(discord.Client):
     CONFIG: Config
 
-    def __init__(self, name, admin_id: int, parent_router: EventRouter = None, secondary=False, *args, **kwargs):
+    def __init__(self, name, admin_id: int, parent_router: EventRouter = None, builtins=True, *args, **kwargs):
         super(Aurflux, self).__init__(*args, **kwargs)
         self.CONFIG = Config(name)
         self.commands: ty.Dict[str, Command] = {}
         self.router = EventRouter(name="aurflux", parent=parent_router)
         self.admin_id = admin_id
         # if not secondary:
-        register_builtins(self, secondary)
+        register_builtins(self, builtins)
         self.cogs: ty.List[AurfluxCog] = []
         self.aiohttp_session = aiohttp.ClientSession()
 
