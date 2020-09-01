@@ -212,7 +212,7 @@ def register_builtins(aurflux: Aurflux, builtins=True):
                 title="\U00002754 Command Help",
                 description=f"Help for `{configs['prefix']}{help_target}`")
             if public_cmds[help_target].argparser:
-                embed.add_field(name="Usage", value=public_cmds[help_target].long_usage)
+                embed.add_field(name="Usage", value=f"{public_cmds[help_target].short_usage}\n{public_cmds[help_target].long_usage}")
             return Response(embed=embed)
 
 
