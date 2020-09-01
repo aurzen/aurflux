@@ -46,6 +46,7 @@ class Response:
         self.trashable = trashable
 
     async def execute(self, ctx: MessageContext):
+        print(ctx)
         if self.content or self.embed:
             content = self.content if self.content else "" + (ctx.author.mention if self.ping else "")
             if len(content) > 1900:
@@ -64,6 +65,7 @@ class Response:
 
             await self.post_process(ctx, message)
         try:
+            print("reactions!")
             for reaction in self.reactions:
                 await ctx.message.add_reaction(reaction)
 
@@ -74,7 +76,8 @@ class Response:
                     await self.message.delete()
                 except aio.exceptions.TimeoutError:
                     await self.message.remove_reaction(emoji=aurflux.utils.EMOJIS["trashcan"], member=ctx.guild.me)
-        except discord.errors.NotFound:
+        except discord.errors.NotFound as e:
+            print(e)
             pass
     # def __aiter__(self):
     #     async def gen():
