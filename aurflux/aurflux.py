@@ -151,6 +151,8 @@ def register_builtins(aurflux: Aurflux, builtins=True):
         ctx.aurflux.cogs = reloaded_cogs
         return Response()
 
+    @CommandCheck.
+
     if not builtins:
 
         @CommandCheck.check(lambda ctx: ctx.author.id == aurflux.admin_id)
