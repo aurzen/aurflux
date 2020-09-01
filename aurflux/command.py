@@ -50,7 +50,7 @@ class Command:
         self.name = name
         self.doc = inspect.getdoc(func)
         self.parsed = parsed
-        self.checks: ty.List[ty.Callable[[MessageContext], ty.Awaitable[bool]]] = []
+        self.checks: ty.List[ty.Callable[[MessageContext], ty.Union[bool, ty.Awaitable[bool]]]] = []
         self.builtin = False
         self.argparser: ty.Optional[argh.ArgumentParser] = None
         self.private = private
