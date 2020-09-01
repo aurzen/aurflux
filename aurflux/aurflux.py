@@ -151,7 +151,7 @@ def register_builtins(aurflux: Aurflux, builtins=True):
         ctx.aurflux.cogs = reloaded_cogs
         return Response()
 
-    @CommandCheck.has_permissions(discord.Permissions(manage_guild=True ))
+    @CommandCheck.check(CommandCheck.has_permissions(discord.Permissions(manage_guild=True )))
     @aurflux.commandeer(name="setprefix", parsed=False)
     async def set_prefix(ctx: MessageContext, prefix: str, *_):
         """
