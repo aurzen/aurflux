@@ -88,7 +88,7 @@ def ms(key):
 
 
 def __aiterify(obj: ty.Union[ty.Coroutine, ty.AsyncIterable]):
-    if asyncio.iscoroutine(obj) or asyncio.isfuture(obj):
+    if aio.iscoroutine(obj) or aio.isfuture(obj):
         class AiterCoro:
             def __aiter__(self):
                 async def gen():
@@ -164,6 +164,7 @@ def register_builtins(aurflux: Aurflux, builtins=True):
         """
         async with aurflux.CONFIG.writeable_conf(ctx) as cfg:
             cfg["prefix"] = prefix
+        return Response()
 
     if not builtins:
 
