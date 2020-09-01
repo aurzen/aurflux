@@ -155,7 +155,8 @@ def register_builtins(aurflux: Aurflux, builtins=True):
     @aurflux.commandeer(name="setprefix", parsed=False)
     async def set_prefix(ctx: MessageContext, prefix: str, *_):
         """
-        Sets the prefix to
+        Sets the prefix to [prefix]
+        ..setprefix !!
         :param ctx:
         :param prefix:
         :param _:
