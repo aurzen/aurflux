@@ -164,7 +164,7 @@ def register_builtins(aurflux: Aurflux, builtins=True):
         """
         async with aurflux.CONFIG.writeable_conf(ctx) as cfg:
             cfg["prefix"] = prefix
-        return Response(content="a")
+        return Response()
 
     if not builtins:
 

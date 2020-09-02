@@ -50,10 +50,7 @@ class Response:
         if self.content or self.embed:
             content = self.content if self.content else "" + (ctx.author.mention if self.ping else "")
             if len(content) > 1900:
-                print("Content is long!!")
                 async with ctx.aurflux.aiohttp_session.post("https://h.ze.ax/documents", data=content) as resp:
-                    print("resp:")
-                    print(await resp.text())
                     content = (await resp.json(content_type=None))["key"]
             message = await ctx.channel.send(
                 content=content,
@@ -65,7 +62,6 @@ class Response:
 
             await self.post_process(ctx, message)
         try:
-            print("reactions!")
             for reaction in self.reactions:
                 await ctx.message.add_reaction(reaction)
 
