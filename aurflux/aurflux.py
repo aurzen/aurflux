@@ -19,6 +19,7 @@ import discord.ext
 from aurcore.event import EventRouter, EventWaiter, EventMuxer,  EventFunction
 import inspect
 import logging
+import typing as ty
 
 logging.getLogger("discord.client").addFilter(lambda r: r.getMessage() != "PyNaCl is not installed, voice will NOT be supported")
 logger = logging.getLogger(__name__)
