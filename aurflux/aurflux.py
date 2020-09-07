@@ -16,7 +16,7 @@ import asyncio as aio
 from . import argh
 import re
 import discord.ext
-from aurcore.event import *
+from aurcore.event import EventRouter, EventWaiter, EventMuxer,  EventFunction
 import inspect
 import logging
 
@@ -45,25 +45,26 @@ class AurfluxCog:
     async def startup(self):
         pass
 
-    def register(self, cog_member: ty.Union[Command, ty.Tuple[EventMuxer, ty.Union[EventFunction, EventRouter, EventWaiter]]]):
+    def register(self, cog_member: ty.Union[Command,EventMuxer]):
         print(f"Cog registering!")
         print(cog_member)
-        if isinstance(cog_member, Command):
-            self.commands.add(cog_member)
-        else:
-            muxer, listener = cog_member
-            self.listeners[listener] = muxer
+        # if isinstance(cog_member, Command):
+        #     self.commands.add(cog_member)
+        # else:
+        #     self.listeners[cog_member.name] = cog_member
+
 
     def teardown(self):
-        for listener, muxer in self.listeners.items():
-            print(f"Deregistering {listener} on {muxer}")
-            if isinstance(listener, EventRouter):
-                muxer.router = None
-            else:
-                muxer.remove_listener(listener)
-        for command in self.commands:
-            del self.aurflux.commands[command.name]
-        self.router.detatch()
+        pass
+        # for listener, muxer in self.listeners.items():
+        #     print(f"Deregistering {listener} on {muxer}")
+        #     if isinstance(listener, EventRouter):
+        #         muxer.router = None
+        #     else:
+        #         muxer.remove_listener(listener)
+        # for command in self.commands:
+        #     del self.aurflux.commands[command.name]
+        # self.router.detatch()
 
     @abc.abstractmethod
     def route(self):
