@@ -246,7 +246,7 @@ class Aurflux(discord.Client):
 
     def dispatch(self, event, *args, **kwargs):
         super(Aurflux, self).dispatch(event, *args, **kwargs)
-        asyncio.create_task(self.router.submit(AurfluxEvent(self, f":{event}", *args, **kwargs)))
+        aio.create_task(self.router.submit(AurfluxEvent(self, f":{event}", *args, **kwargs)))
 
     def register_cog(self, cog: ty.Type[AurfluxCog]):
         self.cogs.append(cog(self))
