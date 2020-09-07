@@ -16,7 +16,7 @@ import asyncio as aio
 from . import argh
 import re
 import discord.ext
-from aurcore.event import EventRouter, EventWaiter, EventMuxer,  EventFunction
+from aurcore.event import EventRouter, EventWaiter, EventMuxer,  EventFunction, Event
 import inspect
 import logging
 import typing as ty
