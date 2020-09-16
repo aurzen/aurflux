@@ -16,7 +16,7 @@ class FluxCog:
    def __init__(self, flux: FluxClient, name: ty.Optional[str] = None):
       self.name = name or self.__class__.__name__
       self.flux = flux
-      self.router = aur.EventRouter(name, host=self.flux.router.host)
+      self.router = aur.EventRouter(self.name, host=self.flux.router.host)
       self.command_names = set()
       logger.info(f"{self.name} loaded! Under {self.router}")
       self.load()
