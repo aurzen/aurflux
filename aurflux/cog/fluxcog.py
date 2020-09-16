@@ -23,7 +23,7 @@ class FluxCog:
 
    def _commandeer(self, name: ty.Optional[str] = None, parsed: bool = True, private: bool = False) -> ty.Callable[[ty.Callable[[...], ty.Awaitable[Response]]], Command]:
       def command_deco(func: ty.Callable[[...], ty.Awaitable[Response]]) -> Command:
-         cmd = Command(flux=self, func=func, name=(name or func.__name__), parsed=parsed, private=private)
+         cmd = Command(flux=self.flux, func=func, name=(name or func.__name__), parsed=parsed, private=private)
          if cmd.name in self.command_names:
             raise TypeError(f"Attempting to register command {cmd} when one with the same name already exists")
          self.command_names.add(cmd.name)

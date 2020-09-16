@@ -11,7 +11,7 @@ if ty.TYPE_CHECKING:
    import discord
    from . import argh
    from ..context import Context
-   from .. import Flux
+   from .. import FluxClient
 
 import typing as ty
 import asyncio as aio
@@ -34,7 +34,7 @@ class Command(aur.util.AutoRepr):
 
    def __init__(
          self,
-         flux: Flux,
+         flux: FluxClient,
          func: ty.Callable[[Context, ...], ty.Awaitable],
          name: str,
          parsed: bool,
@@ -80,12 +80,12 @@ class Command(aur.util.AutoRepr):
          with ctx.channel.typing():
             if self.parsed:
                assert self.argparser is not None  # typing
-               res = await  self.func(ctx, **self.argparser.parse_args(args.split(" ") if args else []).__dict__)
+               res = self.func(ctx, **self.argparser.parse_args(args.split(" ") if args else []).__dict__)
             else:
 
-               res = await self.func(ctx, args)
+               res = self.func(ctx, args)
 
-         async for resp in res:
+         async for resp in aur.util.AwaitableAiter(res):
             await resp.execute(ctx)
       except errors.CommandError as e:
          info_message = f"{e}"

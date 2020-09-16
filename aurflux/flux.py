@@ -84,10 +84,12 @@ class FluxClient(discord.Client):
          ctx = MessageContext(bot=self, message=message)
 
          prefix = self.CONFIG.of(ctx)["prefix"]
+         print(prefix)
 
          if not message.content.startswith(prefix):
             return
-
+         if message.content.endswith("router"):
+            print(self.router.host)
          cmd = message.content.split(" ", 1)[0][len(prefix):]
          logger.info(f"Command recognized! flux:command:{cmd}")
-         await self.router.submit(event=aur.Event(f"flux:command:{cmd}"))
+         await self.router.submit(event=aur.Event(f"flux:command:{cmd}", ctx=ctx))
