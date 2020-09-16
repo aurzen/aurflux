@@ -1,4 +1,5 @@
 import ast
+import inspect
 import time
 
 import contextlib
@@ -46,3 +47,20 @@ class Timer:
 
    def __exit__(self, exc_type, exc_val, exc_tb):
       self.elapsed = time.perf_counter() - self.elapsed
+
+
+def ms(key):
+   try:
+      return dict(inspect.getmembers(
+         inspect.stack()[-1][0]))["f_globals"][key]
+   except KeyError:
+      for i in inspect.stack()[::-1]:
+         try:
+            return dict(inspect.getmembers(i[0]))["f_locals"][key]
+         except KeyError:
+            pass
+         try:
+            return dict(inspect.getmembers(i[0]))["f_globals"][key]
+         except KeyError:
+            pass
+   raise KeyError("Could not find key " + key)
