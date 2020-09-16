@@ -59,7 +59,7 @@ class FluxClient(discord.Client):
       aio.create_task(self.router.submit(FluxEvent(self, f":{event}", *args, **kwargs)))
 
    def register_cog(self, cog: ty.Type[FluxCog], name: str = None):
-      self.cogs.append(cog(self, name=name))
+      self.cogs.append(cog(flux=self, name=name))
 
    async def startup(self, token, *args, **kwargs):
       async def r():
@@ -70,7 +70,6 @@ class FluxClient(discord.Client):
 
       await aio.gather(*[cog.startup() for cog in self.cogs])
       await self.start(token, *args, **kwargs)
-      print("Started")
 
    async def shutdown(self, *args, **kwargs):
       await self.logout()
