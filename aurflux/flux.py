@@ -11,9 +11,9 @@ import discord.ext
 
 from aurcore import EventRouter
 
-from command import Command
-from config import Config
-from context import MessageContext
+from .command import Command
+from .config import Config
+from .context import MessageContext
 
 __logging.getLogger("discord.client").addFilter(lambda r: r.getMessage() != "PyNaCl is not installed, voice will NOT be supported")
 
