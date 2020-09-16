@@ -87,4 +87,4 @@ class FluxClient(discord.Client):
             return
 
          cmd = message.content.split(" ", 1)[0][len(prefix):]
-         await self.router.submit(event=aur.Event(f":command:{cmd}"))
+         await self.router.submit(event=aur.Event(f"flux:command:{cmd}"))

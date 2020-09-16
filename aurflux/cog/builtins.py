@@ -11,7 +11,7 @@ from .. import utils
 from ..command import CommandCheck, Response
 
 if ty.TYPE_CHECKING:
-   from flux.command import MessageContext
+   from ..context import MessageContext
 
 
 class Builtins(FluxCog):

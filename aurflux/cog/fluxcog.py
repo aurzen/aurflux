@@ -18,7 +18,7 @@ class FluxCog:
       self.flux = flux
       self.router = aur.EventRouter(name, host=self.flux.router.host)
       self.command_names = set()
-      logger.info(f"[FluxCog] {self.__class__.__name__} loaded!")
+      logger.info(f"{self.name} loaded!")
       self.load()
 
    def _commandeer(self, name: ty.Optional[str] = None, parsed: bool = True, private: bool = False) -> ty.Callable[[ty.Callable[[...], ty.Awaitable[Response]]], Command]:
@@ -28,6 +28,7 @@ class FluxCog:
             raise TypeError(f"Attempting to register command {cmd} when one with the same name already exists")
          self.command_names.add(cmd.name)
          self.router.listen_for(f"flux:command:{cmd.name}")(cmd.execute)
+         logger.trace(f"Command {cmd} registered under flux:command:{cmd.name}")
          return cmd
 
       return command_deco
