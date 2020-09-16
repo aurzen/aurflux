@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio as aio
 import logging as __logging
+from loguru import logger
 import typing as ty
 
 import aiohttp
@@ -77,6 +78,7 @@ class FluxClient(discord.Client):
    def register_command_listener(self):
       @self.router.listen_for(":message", decompose=True)
       async def _(message: discord.Message):
+         print("message reciveed")
          if not message.content or message.author is self.user:
             return
          ctx = MessageContext(bot=self, message=message)
@@ -87,4 +89,5 @@ class FluxClient(discord.Client):
             return
 
          cmd = message.content.split(" ", 1)[0][len(prefix):]
+         logger.info(f"Command recognized! flux:command:{cmd}")
          await self.router.submit(event=aur.Event(f"flux:command:{cmd}"))
