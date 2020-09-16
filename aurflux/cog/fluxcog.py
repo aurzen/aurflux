@@ -6,7 +6,7 @@ import typing as ty
 import aurcore as aur
 from loguru import logger
 
-from .. import Command
+from ..command import Command
 
 if ty.TYPE_CHECKING:
    from .. import FluxClient
@@ -16,7 +16,7 @@ class FluxCog:
    def __init__(self, flux: FluxClient, name: ty.Optional[str] = None):
       self.name = name or self.__class__.__name__
       self.flux = flux
-      self.router = aur.EventRouter(name, host=self.flux.router)
+      self.router = aur.EventRouter(name, host=self.flux.router.host)
       self.command_names = set()
       logger.info(f"[FluxCog] {self.__class__.__name__} loaded!")
       self.load()
