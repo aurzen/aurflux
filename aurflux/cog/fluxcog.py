@@ -18,7 +18,7 @@ class FluxCog:
       self.flux = flux
       self.router = aur.EventRouter(name, host=self.flux.router.host)
       self.command_names = set()
-      logger.info(f"{self.name} loaded!")
+      logger.info(f"{self.name} loaded! Under {self.router}")
       self.load()
 
    def _commandeer(self, name: ty.Optional[str] = None, parsed: bool = True, private: bool = False) -> ty.Callable[[ty.Callable[[...], ty.Awaitable[Response]]], Command]:
