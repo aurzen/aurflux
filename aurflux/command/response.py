@@ -1,14 +1,14 @@
 from __future__ import annotations
-
+__package__ = "aurflux.command"
 import typing as ty
 
 if ty.TYPE_CHECKING:
-   from aurflux.context import MessageContext
+   from . import MessageContext
 import aurcore as aur
 import typing as ty
 import asyncio as aio
 import discord
-import aurflux
+from .. import utils
 import datetime
 
 
@@ -43,7 +43,7 @@ class Response(aur.util.AutoRepr):
       if self.content or self.embed:
          content = self.content if self.content else "" + (ctx.author.mention if self.ping else "")
          if len(content) > 1900:
-            async with ctx.aurflux.aiohttp_session.post("https://h.ze.ax/documents", data=content) as resp:
+            async with ctx.flux.aiohttp_session.post("https://h.ze.ax/documents", data=content) as resp:
                content = (await resp.json(content_type=None))["key"]
          message = await ctx.channel.send(
             content=content,
@@ -59,12 +59,12 @@ class Response(aur.util.AutoRepr):
             await ctx.message.add_reaction(reaction)
 
          if self.trashable:
-            await self.message.add_reaction(aurflux.utils.EMOJIS["trashcan"])
+            await self.message.add_reaction(flux.utils.EMOJIS["trashcan"])
             try:
-               await ctx.aurflux.router.wait_for(":reaction_add", check=lambda ev: ev.args[0].message.id == self.message.id and ev.args[1] == ctx.message.author, timeout=15)
+               await ctx.flux.router.wait_for(":reaction_add", check=lambda ev: ev.args[0].message.id == self.message.id and ev.args[1] == ctx.message.author, timeout=15)
                await self.message.delete()
             except aio.exceptions.TimeoutError:
-               await self.message.remove_reaction(emoji=aurflux.utils.EMOJIS["trashcan"], member=ctx.guild.me)
+               await self.message.remove_reaction(emoji=flux.utils.EMOJIS["trashcan"], member=ctx.guild.me)
       except discord.errors.NotFound as e:
          print(e)
          pass

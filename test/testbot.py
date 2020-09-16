@@ -9,7 +9,7 @@ import TOKENS
 class TestBot:
    def __init__(self):
       self.event_router = aur.EventRouterHost(name="triviabot")
-      self.aurflux = aurflux.Aurflux("triviabot", admin_id=TOKENS.ADMIN_ID, parent_router=self.event_router, builtins=False)
+      self.aurflux = aurflux.FluxClient("triviabot", admin_id=TOKENS.ADMIN_ID, parent_router=self.event_router, builtins=False)
 
       # self.aurflux.router.endpoint(":ready")(lambda ev: print("Ready!"))
 

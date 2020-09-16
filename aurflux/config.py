@@ -3,7 +3,7 @@ from __future__ import annotations
 import typing as ty
 
 if ty.TYPE_CHECKING:
-   from aurflux.command.context import Context
+   from flux.command.context import Context
 
    ConfigIdentifier: ty.TypeAlias = ty.Union[Context, str, int]
 
@@ -15,7 +15,7 @@ import contextlib
 import asyncio.locks
 import aurcore
 
-CONFIG_DIR = pl.Path("./.aurfluxconf/")
+CONFIG_DIR = pl.Path("./.fluxconf/")
 CONFIG_DIR.mkdir(exist_ok=True)
 
 CACHED_CONFIGS = 100

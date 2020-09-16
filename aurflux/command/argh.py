@@ -6,8 +6,8 @@ import inspect
 import re
 import typing as ty
 
-from aurflux.command import Command
-from aurflux.errors import *
+from flux.command import Command
+from flux.errors import *
 
 if ty.TYPE_CHECKING:
    pass

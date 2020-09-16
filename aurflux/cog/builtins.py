@@ -6,17 +6,17 @@ import typing as ty
 
 import discord
 
-from . import AurfluxCog
+from . import FluxCog
 from .. import utils
 from ..command import CommandCheck, Response
 
 if ty.TYPE_CHECKING:
-   from aurflux.command import MessageContext
+   from flux.command import MessageContext
 
 
-class Builtins(AurfluxCog):
+class Builtins(FluxCog):
    def load(self):
-      # @CommandCheck.check(lambda ctx: ctx.author.id == self.aurflux.admin_id)
+      # @CommandCheck.check(lambda ctx: ctx.author.id == self.flux.admin_id)
       # @self._commandeer(name="reload", parsed=False, private=True)
       # async def reload(ctx: MessageContext, cog_name: str):
       #    reloaded_cogs = []
@@ -25,10 +25,10 @@ class Builtins(AurfluxCog):
       #       if cog.__class__.__name__.lower() == cog_name:
       #          cog.teardown()
       #          module = importlib.reload(inspect.getmodule(cog))
-      #          new_cog = getattr(module, cog.__class__.__name__)(ctx.aurflux)
+      #          new_cog = getattr(module, cog.__class__.__name__)(ctx.flux)
       #          await new_cog.startup()
       #       reloaded_cogs.append(new_cog)
-      #    ctx.aurflux.cogs = reloaded_cogs
+      #    ctx.flux.cogs = reloaded_cogs
       #    return Response()
 
       @CommandCheck.check(CommandCheck.has_permissions(discord.Permissions(manage_guild=True)))
@@ -42,11 +42,11 @@ class Builtins(AurfluxCog):
          :param _:
          :return:
          """
-         async with self.aurflux.CONFIG.writeable_conf(ctx) as cfg:
+         async with self.flux.CONFIG.writeable_conf(ctx) as cfg:
             cfg["prefix"] = prefix
          return Response()
 
-      @CommandCheck.check(lambda ctx: ctx.author.id == self.aurflux.admin_id)
+      @CommandCheck.check(lambda ctx: ctx.author.id == self.flux.admin_id)
       @self._commandeer(name="exec", parsed=False, private=True)
       async def exec_(ctx: MessageContext, script: str):
          exec_func = utils.sexec
@@ -75,8 +75,8 @@ class Builtins(AurfluxCog):
          :param args:
          :return:
          """
-         configs = self.aurflux.CONFIG.of(ctx)
-         public_cmds = {name: command for name, command in self.aurflux.commands.items() if not command.private and name != "help"}
+         configs = self.flux.CONFIG.of(ctx)
+         public_cmds = {name: command for name, command in self.flux.commands.items() if not command.private and name != "help"}
          if not help_target:
             help_embed = discord.Embed(title=f"{utils.EMOJIS['question']} Command Help", description=f"{configs['prefix']}help <command> for more info")
             for cmd_name, command in public_cmds.items():

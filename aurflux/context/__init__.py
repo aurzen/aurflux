@@ -7,8 +7,8 @@ import aurcore as aur
 
 if ty.TYPE_CHECKING:
    import discord
-   from aurflux.aurflux import Aurflux
-   from aurflux.aurflux import Command
+   from flux.flux import Flux
+   from flux.flux import Command
 
 
 class Context(abc.ABC, aur.util.AutoRepr):
@@ -22,8 +22,8 @@ class Context(abc.ABC, aur.util.AutoRepr):
 
 
 class GuildChannelContext(Context):
-   def __init__(self, bot: Aurflux, channel: discord.abc.GuildChannel):
-      self.aurflux = bot
+   def __init__(self, bot: Flux, channel: discord.abc.GuildChannel):
+      self.flux = bot
       self.channel = channel
 
    @property
@@ -32,13 +32,13 @@ class GuildChannelContext(Context):
 
    @property
    def me(self) -> discord.abc.User:
-      return self.guild.me if self.guild else self.aurflux.user
+      return self.guild.me if self.guild else self.flux.user
 
 
 class MessageContext(GuildChannelContext):
-   def __init__(self, bot: Aurflux, message: discord.Message):
+   def __init__(self, bot: Flux, message: discord.Message):
       self.message = message
-      self.aurflux = bot
+      self.flux = bot
       self.command: ty.Optional[Command] = None
 
    @property
@@ -72,7 +72,7 @@ class MessageContext(GuildChannelContext):
 
    @property
    def config(self) -> ty.Dict[ty.Any, str]:
-      return self.aurflux.CONFIG.of(self.config_identifier)
+      return self.flux.CONFIG.of(self.config_identifier)
 
    @property
    def full_command(self) -> ty.Optional[str]:

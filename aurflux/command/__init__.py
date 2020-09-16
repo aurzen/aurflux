@@ -1,18 +1,18 @@
 from __future__ import annotations
-
+__package__ = "aurflux.command"
 import functools as fnt
 import typing as ty
 
 import aurcore as aur
 
-from aurflux import errors
+from .. import errors
 from .response import Response
 
 if ty.TYPE_CHECKING:
    import discord
    from . import argh
    from ..context import Context
-   from .. import Aurflux
+   from .. import Flux
 
 import typing as ty
 import asyncio as aio
@@ -35,7 +35,7 @@ class Command(aur.util.AutoRepr):
 
    def __init__(
          self,
-         aurflux: Aurflux,
+         flux: Flux,
          func: ty.Callable[[Context, ...], ty.Awaitable],
          name: str,
          parsed: bool,
@@ -44,7 +44,7 @@ class Command(aur.util.AutoRepr):
 
    ):
       self.func = func
-      self.aurflux = aurflux
+      self.flux = flux
       self.name = name
       self.doc = inspect.getdoc(func)
       self.parsed = parsed
@@ -61,19 +61,19 @@ class Command(aur.util.AutoRepr):
          self.long_usage = func_doc[func_doc.index("\n"):func_doc.rindex(":param")]
       if self.private:
          async def is_admin(ctx: MessageContext):
-            if ctx.author.id != self.aurflux.admin_id:
+            if ctx.author.id != self.flux.admin_id:
                raise errors.NotWhitelisted
 
          self.checks.append(is_admin)
 
    async def execute(self, ev: aur.Event):
       ctx = ev.kwargs["ctx"]
-      configs = self.aurflux.CONFIG.of(ctx)
+      configs = self.flux.CONFIG.of(ctx)
       ctx.command = self
       if (self.argparser is not None) ^ self.parsed:
          raise RuntimeError(f"Parsed command {self} has not been decorated with Argh")
 
-      if ctx.author.id != self.aurflux.admin_id:
+      if ctx.author.id != self.flux.admin_id:
          await aio.gather(*[_coroify(check)(ctx) for check in self.checks])
 
       args: str = ctx.message.content.removeprefix(configs["prefix"]).removeprefix(self.name).lstrip()
