@@ -3,11 +3,9 @@ from __future__ import annotations
 import typing as ty
 
 if ty.TYPE_CHECKING:
-   from flux.command.context import Context
-
+   from .context import Context
    ConfigIdentifier: ty.TypeAlias = ty.Union[Context, str, int]
 
-   from .types import *
 import yaml
 import pathlib as pl
 import collections as clc
