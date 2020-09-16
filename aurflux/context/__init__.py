@@ -1,17 +1,17 @@
 from __future__ import annotations
 
-import typing as ty
 import abc
-from aurflux import ext
+import typing as ty
+
+import aurcore as aur
 
 if ty.TYPE_CHECKING:
    import discord
    from aurflux.aurflux import Aurflux
-   from aurflux.aurflux import Config
    from aurflux.aurflux import Command
 
 
-class Context(abc.ABC):
+class Context(abc.ABC, aur.util.AutoRepr):
    @property
    @abc.abstractmethod
    def guild(self) -> discord.Guild: ...
@@ -35,7 +35,6 @@ class GuildChannelContext(Context):
       return self.guild.me if self.guild else self.aurflux.user
 
 
-@ext.AutoRepr
 class MessageContext(GuildChannelContext):
    def __init__(self, bot: Aurflux, message: discord.Message):
       self.message = message

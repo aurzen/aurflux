@@ -10,14 +10,14 @@ from .response import Response
 
 if ty.TYPE_CHECKING:
    import discord
-   from .context import Context
    from . import argh
+   from ..context import Context
    from .. import Aurflux
 
 import typing as ty
 import asyncio as aio
 import inspect
-from .context import MessageContext
+from ..context import MessageContext
 
 
 def _coroify(func):  # todo: move to aurcore
@@ -31,7 +31,7 @@ def _coroify(func):  # todo: move to aurcore
    return __async_wrapper
 
 
-class Command:
+class Command(aur.util.AutoRepr):
 
    def __init__(
          self,

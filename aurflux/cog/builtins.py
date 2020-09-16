@@ -1,9 +1,17 @@
-from . import AurfluxCog, CommandCheck
-from .command import MessageContext, Response
-from . import utils
-import discord
+from __future__ import annotations
+
 import re
 import traceback
+import typing as ty
+
+import discord
+
+from . import AurfluxCog
+from .. import utils
+from ..command import CommandCheck, Response
+
+if ty.TYPE_CHECKING:
+   from aurflux.command import MessageContext
 
 
 class Builtins(AurfluxCog):

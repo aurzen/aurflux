@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 class CommandException(BaseException):
    def __init__(self, message=None, *args):
       if message is not None:

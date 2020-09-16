@@ -1,25 +1,18 @@
 from __future__ import annotations
-from aurflux import ext
 
 import typing as ty
 
 if ty.TYPE_CHECKING:
-   from .context import MessageContext
-   from aurflux.types import *
-   from aurflux.errors import *
-   from aurflux.aurflux import Aurflux
-
+   from aurflux.context import MessageContext
+import aurcore as aur
 import typing as ty
-import itertools as itt
 import asyncio as aio
-import inspect
 import discord
 import aurflux
-import argparse
 import datetime
 
 
-class Response:
+class Response(aur.util.AutoRepr):
    __iter_done = False
    message: ty.Optional[discord.Message]
 

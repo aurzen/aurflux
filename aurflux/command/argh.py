@@ -1,21 +1,16 @@
 from __future__ import annotations
 
-import typing as ty
+import argparse
 import dataclasses
-import discord
+import inspect
 import re
+import typing as ty
 
 from aurflux.command import Command
-from aurflux.config import Config
-from .context import Context
 from aurflux.errors import *
-import argparse
-import inspect
-import sys
 
 if ty.TYPE_CHECKING:
-   from .context import Context
-   from aurflux.aurflux import Aurflux
+   pass
 
 
 def MemberIDType(arg: str) -> int:
@@ -30,9 +25,6 @@ def ChannelIDType(arg: str) -> int:
    if not match:
       raise argparse.ArgumentError
    return int(match.group(1))
-
-
-import traceback
 
 
 class ArgumentParser(argparse.ArgumentParser):
@@ -57,11 +49,6 @@ class ArgumentParser(argparse.ArgumentParser):
 
    def exit(self, status=0, message=None):
       raise CommandInfo(message)
-
-
-if ty.TYPE_CHECKING:
-   import discord
-   from aurflux.types import *
 
 
 # p = argparse.ArgumentParser()

@@ -44,7 +44,7 @@ description = "Aurcore!"
 name = "aurcore"
 optional = false
 python-versions = ">3.8"
-version = "1.0.4"
+version = "1.1.2"
 
 [[package]]
 category = "main"
@@ -221,8 +221,8 @@ attrs = [
     {file = "attrs-20.2.0.tar.gz", hash = "sha256:26b54ddbbb9ee1d34d5d3668dd37d6cf74990ab23c828c2888dccdceee395594"},
 ]
 aurcore = [
-    {file = "aurcore-1.0.4-py3-none-any.whl", hash = "sha256:2cb8f32b233570674432f8222af63c6bc9c552e0d4c432f5b825d43e83b7824f"},
-    {file = "aurcore-1.0.4.tar.gz", hash = "sha256:d7c5620507551a5d61c85e474ffab6894af4e5fcc1a798effcb0360e4c29052e"},
+    {file = "aurcore-1.1.2-py3-none-any.whl", hash = "sha256:9b1552dfcb20b3fb0f5060ef20ea82d7c0a9ac4b2f49d3487bfbce346ea2eea3"},
+    {file = "aurcore-1.1.2.tar.gz", hash = "sha256:3c4dd098570d6e46e13a4e2d4bfa050551e10616e065f0d37942a8577be21189"},
 ]
 chardet = [
     {file = "chardet-3.0.4-py2.py3-none-any.whl", hash = "sha256:fc323ffcaeaed0e0a02bf4d117757b98aed530d9ed4531e3e15460124c106691"},
