@@ -3,8 +3,7 @@ from __future__ import annotations
 import typing as ty
 
 if ty.TYPE_CHECKING:
-   from .context import GuildContext
-   ConfigIdentifier: ty.TypeAlias = ty.Union[GuildContext, str, int]
+   from .context import Context
 
 import yaml
 import pathlib as pl
@@ -49,8 +48,8 @@ class Config(metaclass=aurcore.util.Singleton):
          local_config = {}
       return local_config
 
-   def load_config(self, identifiable: ConfigIdentifier):
-      identifier = identifiable.config_identifier if hasattr(identifiable, "config_identifier") else str(identifiable)
+   def load_config(self, identifiable: Context):
+      identifier = identifiable.config_identifier
       if identifier in self.cached:
          self.cached.move_to_end(identifier, last=False)
          configs = self.cached[identifier]
@@ -68,8 +67,8 @@ class Config(metaclass=aurcore.util.Singleton):
          configs = cleaned_dict
       return configs
 
-   def of(self, identifiable: ConfigIdentifier) -> ty.Dict[str, ty.Any]:
-      identifier = identifiable.config_identifier if hasattr(identifiable, "config_identifier") else str(identifiable)
+   def of(self, identifiable: Context) -> ty.Dict[str, ty.Any]:
+      identifier = identifiable.config_identifier
       if identifier in self.cached:
          self.cached.move_to_end(identifier, last=False)
          configs = self.cached[identifier]
@@ -91,8 +90,8 @@ class Config(metaclass=aurcore.util.Singleton):
       return configs
 
    @contextlib.asynccontextmanager
-   async def writeable_conf(self, identifiable: ConfigIdentifier):
-      config_id = identifiable.config_identifier if hasattr(identifiable, "config_identifier") else str(identifiable)
+   async def writeable_conf(self, identifiable: Context):
+      config_id = identifiable.config_identifier
       async with self.locks[config_id]:
          output_dict = self._load_config_file(config_id)
          try:
