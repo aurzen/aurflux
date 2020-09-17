@@ -82,7 +82,7 @@ class FluxClient(discord.Client):
          print("message reciveed")
          if not message.content or message.author is self.user:
             return
-         ctx = GuildMessageContext(bot=self, message=message)
+         ctx = GuildMessageContext(flux=self, message=message)
 
          prefix = self.CONFIG.of(ctx)["prefix"]
          print(prefix)
