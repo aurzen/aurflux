@@ -73,7 +73,7 @@ class Config(metaclass=aurcore.util.Singleton):
          self.cached.move_to_end(identifier, last=False)
          configs = self.cached[identifier]
       else:
-         local_config = self._load_config_file(identifiable)
+         local_config = self._load_config_file(identifier)
          print(local_config)
          combined_dict = {**self.base_config, **local_config}
          cleaned_dict = {k: combined_dict[k] for k in self.base_config}
