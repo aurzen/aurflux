@@ -15,12 +15,12 @@ class Context(abc.ABC, aur.util.AutoRepr):
    def __init__(self, flux: FluxClient):
       self.flux = flux
 
-   @abc.abstractmethod
    @property
+   @abc.abstractmethod
    def me(self) -> discord.abc.User: ...
 
-   @abc.abstractmethod
    @property
+   @abc.abstractmethod
    def config_identifier(self) -> int: ...
 
    @property
@@ -47,9 +47,9 @@ class GuildTextChannelContext(Context):
       return self.guild.me
 
 
-class MessageContext(GuildTextChannelContext):
+class GuildMessageContext(GuildTextChannelContext):
    def __init__(self, flux: FluxClient, message: discord.Message):
-      super(MessageContext, self).__init__(flux=flux, channel=message.channel)
+      super(GuildMessageContext, self).__init__(flux=flux, channel=message.channel)
       self.message = message
 
    @property
