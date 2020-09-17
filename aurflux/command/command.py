@@ -65,7 +65,7 @@ class Command(aur.util.AutoRepr):
 
          self.checks.append(is_admin)
 
-   async def execute(self, ev: aur.Event):
+   async def execute(self, ev: aur.Event) -> None:
       ctx = ev.kwargs["ctx"]
       configs = self.flux.CONFIG.of(ctx)
       ctx.command = self

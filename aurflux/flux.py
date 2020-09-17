@@ -76,7 +76,8 @@ class FluxClient(discord.Client):
       await self.logout()
 
    def register_command_listener(self):
-      @self.router.listen_for(":message", decompose=True)
+      @self.router.listen_for(":message")
+      @aur.Eventful.decompose
       async def _(message: discord.Message):
          print("message reciveed")
          if not message.content or message.author is self.user:
@@ -92,4 +93,6 @@ class FluxClient(discord.Client):
             print(self.router.host)
          cmd = message.content.split(" ", 1)[0][len(prefix):]
          logger.info(f"Command recognized! flux:command:{cmd}")
+         print("submitting event")
+         print(aur.Event(f"flux:command:{cmd}", ctx=ctx))
          await self.router.submit(event=aur.Event(f"flux:command:{cmd}", ctx=ctx))

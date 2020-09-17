@@ -33,17 +33,19 @@ class Builtins(FluxCog):
 
       @CommandCheck.check(CommandCheck.has_permissions(discord.Permissions(manage_guild=True)))
       @self._commandeer(name="setprefix", parsed=False)
-      async def set_prefix(ctx: MessageContext, prefix: str, *_):
+      async def set_prefix(ctx: MessageContext, prefix: str):
          """
-         Sets the prefix to [prefix]
+         Sets the prefix to [prefix].
          ..setprefix !!
+
+         Ignores surrounding whitespace. Please don't.
          :param ctx:
          :param prefix:
          :param _:
          :return:
          """
          async with self.flux.CONFIG.writeable_conf(ctx) as cfg:
-            cfg["prefix"] = prefix
+            cfg["prefix"] = prefix.strip()
          return Response()
 
       @CommandCheck.check(lambda ctx: ctx.author.id == self.flux.admin_id)
@@ -68,13 +70,14 @@ class Builtins(FluxCog):
                           f"```py\n{res}\n```"), trashable=True)
 
       @self._commandeer(name="help", parsed=False)
-      async def get_help(ctx: MessageContext, help_target: ty.Optional[str]):
+      async def get_help(ctx: MessageContext, help_target: ty.Optional[str], *x):
          """
          help [command_name]
          :param ctx:
          :param args:
          :return:
          """
+         print(x)
          configs = self.flux.CONFIG.of(ctx)
          public_cmds = {name: command for name, command in self.flux.commands.items() if not command.private and name != "help"}
          if not help_target:
