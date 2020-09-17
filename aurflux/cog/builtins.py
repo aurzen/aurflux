@@ -77,7 +77,6 @@ class Builtins(FluxCog):
          :param args:
          :return:
          """
-         print(x)
          configs = self.flux.CONFIG.of(ctx)
          public_cmds = {name: command for name, command in self.flux.commands.items() if not command.private and name != "help"}
          if not help_target:

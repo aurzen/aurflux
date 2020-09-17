@@ -39,7 +39,6 @@ class Response(aur.util.AutoRepr):
       self.trashable = trashable
 
    async def execute(self, ctx: MessageContext):
-      print(ctx)
       if self.content or self.embed:
          content = self.content if self.content else "" + (ctx.author.mention if self.ping else "")
          if len(content) > 1900:
@@ -59,14 +58,13 @@ class Response(aur.util.AutoRepr):
             await ctx.message.add_reaction(reaction)
 
          if self.trashable:
-            await self.message.add_reaction(flux.utils.EMOJIS["trashcan"])
+            await self.message.add_reaction(utils.EMOJIS["trashcan"])
             try:
                await ctx.flux.router.wait_for(":reaction_add", check=lambda ev: ev.args[0].message.id == self.message.id and ev.args[1] == ctx.message.author, timeout=15)
                await self.message.delete()
             except aio.exceptions.TimeoutError:
-               await self.message.remove_reaction(emoji=flux.utils.EMOJIS["trashcan"], member=ctx.guild.me)
+               await self.message.remove_reaction(emoji=utils.EMOJIS["trashcan"], member=ctx.guild.me)
       except discord.errors.NotFound as e:
-         print(e)
          pass
    # def __aiter__(self):
    #     async def gen():

@@ -79,21 +79,16 @@ class FluxClient(discord.Client):
       @self.router.listen_for(":message")
       @aur.Eventful.decompose
       async def _(message: discord.Message):
-         print("message reciveed")
          if not message.content or message.author is self.user:
             return
          ctx = GuildMessageContext(flux=self, message=message)
 
          prefix = self.CONFIG.of(ctx)["prefix"]
-         print(prefix)
 
          if not message.content.startswith(prefix):
             return
-         if message.content.endswith("router"):
-            print(self.router.host)
          cmd = message.content.split(" ", 1)[0][len(prefix):]
          logger.info(f"Command recognized! flux:command:{cmd}")
-         print("submitting event")
 
          # print(aur.Event(f"flux:command:{cmd}", ctx=ctx))
          await self.router.submit(event=aur.Event(f"flux:command:{cmd}", ctx=ctx))

@@ -48,24 +48,24 @@ class Config(metaclass=aurcore.util.Singleton):
          local_config = {}
       return local_config
 
-   def load_config(self, identifiable: Context):
-      identifier = identifiable.config_identifier
-      if identifier in self.cached:
-         self.cached.move_to_end(identifier, last=False)
-         configs = self.cached[identifier]
-      else:
-         local_config = self._load_config_file(identifier)
-         combined_dict = {**self.base_config, **local_config}
-         cleaned_dict = {k: combined_dict[k] for k in self.base_config}
-         if cleaned_dict != local_config:
-            self._write_config_file(identifier, cleaned_dict)
-
-         self.cached[identifier] = cleaned_dict
-         if len(self.cached) > CACHED_CONFIGS:
-            self.cached.popitem()
-
-         configs = cleaned_dict
-      return configs
+   # def load_config(self, identifiable: Context):
+   #    identifier = identifiable.config_identifier
+   #    if identifier in self.cached:
+   #       self.cached.move_to_end(identifier, last=False)
+   #       configs = self.cached[identifier]
+   #    else:
+   #       local_config = self._load_config_file(identifier)
+   #       combined_dict = {**self.base_config, **local_config}
+   #       cleaned_dict = {k: combined_dict[k] for k in self.base_config}
+   #       if cleaned_dict != local_config:
+   #          self._write_config_file(identifier, cleaned_dict)
+   #
+   #       self.cached[identifier] = cleaned_dict
+   #       if len(self.cached) > CACHED_CONFIGS:
+   #          self.cached.popitem()
+   #
+   #       configs = cleaned_dict
+   #    return configs
 
    def of(self, identifiable: Context) -> ty.Dict[str, ty.Any]:
       identifier = identifiable.config_identifier
@@ -73,10 +73,12 @@ class Config(metaclass=aurcore.util.Singleton):
          self.cached.move_to_end(identifier, last=False)
          configs = self.cached[identifier]
       else:
-         local_config = self.load_config(identifiable)
+         local_config = self._load_config_file(identifiable)
+         print(local_config)
          combined_dict = {**self.base_config, **local_config}
          cleaned_dict = {k: combined_dict[k] for k in self.base_config}
-
+         print(cleaned_dict)
+         print(cleaned_dict == local_config)
          if cleaned_dict != local_config:
             self._write_config_file(identifier, cleaned_dict)
 
