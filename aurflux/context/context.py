@@ -21,8 +21,8 @@ class Context(abc.ABC, aur.util.AutoRepr):
       return self.guild.id
 
 
-class GuildChannelContext(Context):
-   def __init__(self, bot: FluxClient, channel: discord.abc.GuildChannel):
+class GuildTextChannelContext(Context):
+   def __init__(self, bot: FluxClient, channel: discord.TextChannel):
       self.flux = bot
       self.channel = channel
 
@@ -35,19 +35,15 @@ class GuildChannelContext(Context):
       return self.guild.me if self.guild else self.flux.user
 
 
-class MessageContext(GuildChannelContext):
+class MessageContext(GuildTextChannelContext):
    def __init__(self, bot: FluxClient, message: discord.Message):
+      super(MessageContext, self).__init__(bot=bot, channel=message.channel)
       self.message = message
-      self.flux = bot
       self.command: ty.Optional[Command] = None
 
    @property
    def deprefixed_cont(self) -> str:
       return self.message.content.removeprefix(self.cfg["prefix"])
-
-   @property
-   def channel(self) -> discord.TextChannel:
-      return self.message.channel
 
    @property
    def author(self) -> ty.Union[discord.User, discord.Member]:
