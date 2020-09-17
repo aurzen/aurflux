@@ -34,12 +34,12 @@ class Config(metaclass=aurcore.util.Singleton):
       self.cached: clc.OrderedDict = clc.OrderedDict()  # mypy weirdness
       self.locks: ty.Dict[int, asyncio.locks.Lock] = clc.defaultdict(asyncio.locks.Lock)
 
-   def _write_config_file(self, config_id, data):
+   def _write_config_file(self, config_id: ty.Union[int, str], data):
       local_config_path: pl.Path = self.config_dir / f"{config_id}.yaml"
       with local_config_path.open("w") as f:
          yaml.safe_dump(data, f)
 
-   def _load_config_file(self, config_id):
+   def _load_config_file(self, config_id: ty.Union[int, str]):
       local_config_path: pl.Path = self.config_dir / f"{config_id}.yaml"
       try:
          with local_config_path.open("r") as f:
@@ -73,7 +73,7 @@ class Config(metaclass=aurcore.util.Singleton):
          self.cached.move_to_end(identifier, last=False)
          configs = self.cached[identifier]
       else:
-         local_config = self.load_config(identifier)
+         local_config = self.load_config(identifiable)
          combined_dict = {**self.base_config, **local_config}
          cleaned_dict = {k: combined_dict[k] for k in self.base_config}
 
