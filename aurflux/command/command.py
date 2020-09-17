@@ -10,13 +10,13 @@ from .response import Response
 if ty.TYPE_CHECKING:
    import discord
    from . import argh
-   from ..context import Context
+   from ..context import GuildContext
    from .. import FluxClient
 
 import typing as ty
 import asyncio as aio
 import inspect
-from ..context import MessageContext
+from ..context import GuildMessageContext
 
 
 def _coroify(func):  # todo: move to aurcore
@@ -35,7 +35,7 @@ class Command(aur.util.AutoRepr):
    def __init__(
          self,
          flux: FluxClient,
-         func: ty.Callable[[Context, ...], ty.Awaitable],
+         func: ty.Callable[[GuildContext, ...], ty.Awaitable],
          name: str,
          parsed: bool,
          private: bool = False,
@@ -47,7 +47,7 @@ class Command(aur.util.AutoRepr):
       self.name = name
       self.doc = inspect.getdoc(func)
       self.parsed = parsed
-      self.checks: ty.List[ty.Callable[[MessageContext], ty.Union[bool, ty.Awaitable[bool]]]] = []
+      self.checks: ty.List[ty.Callable[[GuildMessageContext], ty.Union[bool, ty.Awaitable[bool]]]] = []
       self.builtin = False
       self.argparser: ty.Optional[argh.ArgumentParser] = None
       self.private = private
@@ -59,7 +59,7 @@ class Command(aur.util.AutoRepr):
          self.short_usage = func_doc.split("\n")[0]
          self.long_usage = func_doc[func_doc.index("\n"):func_doc.rindex(":param")]
       if self.private:
-         async def is_admin(ctx: MessageContext):
+         async def is_admin(ctx: GuildMessageContext):
             if ctx.author.id != self.flux.admin_id:
                raise errors.NotWhitelisted
 
@@ -100,7 +100,7 @@ class Command(aur.util.AutoRepr):
 
 
 class CommandCheck:
-   CheckPredicate: ty.TypeAlias = ty.Callable[[MessageContext], ty.Awaitable[bool]]
+   CheckPredicate: ty.TypeAlias = ty.Callable[[GuildMessageContext], ty.Awaitable[bool]]
    CommandTransformDeco: ty.TypeAlias = ty.Callable[[Command], Command]
 
    @staticmethod
@@ -113,21 +113,21 @@ class CommandCheck:
 
    @staticmethod
    def or_(*predicates: CheckPredicate) -> CheckPredicate:
-      async def orred_predicate(ctx: MessageContext) -> bool:
+      async def orred_predicate(ctx: GuildMessageContext) -> bool:
          return any(await predicate(ctx) for predicate in predicates)
 
       return orred_predicate
 
    @staticmethod
    def and_(*predicates: CheckPredicate) -> CheckPredicate:
-      async def anded_predicate(ctx: MessageContext) -> bool:
+      async def anded_predicate(ctx: GuildMessageContext) -> bool:
          return all(await predicate(ctx) for predicate in predicates)
 
       return anded_predicate
 
    @staticmethod
    def whitelist() -> CheckPredicate:
-      async def whitelist_predicate(ctx: MessageContext) -> bool:
+      async def whitelist_predicate(ctx: GuildMessageContext) -> bool:
          if ctx.config is None:
             raise RuntimeError(f"Config has not been initialized for ctx {ctx} in cmd {Command}")
          if not any(identifier in ctx.config["whitelist"] for identifier in ctx.auth_identifiers):
@@ -157,7 +157,7 @@ class CommandCheck:
          required_perms: discord.Permissions
    ) -> CheckPredicate:
 
-      async def perm_predicate(ctx: MessageContext):
+      async def perm_predicate(ctx: GuildMessageContext):
          ctx_perms: discord.Permissions = ctx.channel.permissions_for(ctx.guild.me)
 
          missing = [perm for perm, value in required_perms if getattr(ctx_perms, perm) != value]

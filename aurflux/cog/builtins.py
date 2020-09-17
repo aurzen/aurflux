@@ -11,7 +11,7 @@ from .. import utils
 from ..command import CommandCheck, Response
 
 if ty.TYPE_CHECKING:
-   from ..context import MessageContext
+   from ..context import GuildMessageContext
 
 
 class Builtins(FluxCog):
@@ -33,7 +33,7 @@ class Builtins(FluxCog):
 
       @CommandCheck.check(CommandCheck.has_permissions(discord.Permissions(manage_guild=True)))
       @self._commandeer(name="setprefix", parsed=False)
-      async def set_prefix(ctx: MessageContext, prefix: str):
+      async def set_prefix(ctx: GuildMessageContext, prefix: str):
          """
          Sets the prefix to [prefix].
          ..setprefix !!
@@ -50,7 +50,7 @@ class Builtins(FluxCog):
 
       @CommandCheck.check(lambda ctx: ctx.author.id == self.flux.admin_id)
       @self._commandeer(name="exec", parsed=False, private=True)
-      async def exec_(ctx: MessageContext, script: str):
+      async def exec_(ctx: GuildMessageContext, script: str):
          exec_func = utils.sexec
          if "await " in script:
             exec_func = utils.aexec
@@ -70,7 +70,7 @@ class Builtins(FluxCog):
                           f"```py\n{res}\n```"), trashable=True)
 
       @self._commandeer(name="help", parsed=False)
-      async def get_help(ctx: MessageContext, help_target: ty.Optional[str], *x):
+      async def get_help(ctx: GuildMessageContext, help_target: ty.Optional[str], *x):
          """
          help [command_name]
          :param ctx:

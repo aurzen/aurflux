@@ -14,7 +14,7 @@ from aurcore import EventRouter
 
 from .command import Command
 from .config import Config
-from .context import MessageContext
+from .context import GuildMessageContext
 
 __logging.getLogger("discord.client").addFilter(lambda r: r.getMessage() != "PyNaCl is not installed, voice will NOT be supported")
 
@@ -82,7 +82,7 @@ class FluxClient(discord.Client):
          print("message reciveed")
          if not message.content or message.author is self.user:
             return
-         ctx = MessageContext(bot=self, message=message)
+         ctx = GuildMessageContext(bot=self, message=message)
 
          prefix = self.CONFIG.of(ctx)["prefix"]
          print(prefix)
@@ -94,5 +94,6 @@ class FluxClient(discord.Client):
          cmd = message.content.split(" ", 1)[0][len(prefix):]
          logger.info(f"Command recognized! flux:command:{cmd}")
          print("submitting event")
-         print(aur.Event(f"flux:command:{cmd}", ctx=ctx))
+
+         # print(aur.Event(f"flux:command:{cmd}", ctx=ctx))
          await self.router.submit(event=aur.Event(f"flux:command:{cmd}", ctx=ctx))

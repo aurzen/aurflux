@@ -10,7 +10,7 @@ from ..command import Command
 
 if ty.TYPE_CHECKING:
    from .. import FluxClient
-   from ..context import MessageContext
+   from ..context import GuildMessageContext
    from ..command import Response
    from ..types_ import *
 

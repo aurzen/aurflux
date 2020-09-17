@@ -3,8 +3,8 @@ from __future__ import annotations
 import typing as ty
 
 if ty.TYPE_CHECKING:
-   from .context import Context
-   ConfigIdentifier: ty.TypeAlias = ty.Union[Context, str, int]
+   from .context import GuildContext
+   ConfigIdentifier: ty.TypeAlias = ty.Union[GuildContext, str, int]
 
 import yaml
 import pathlib as pl

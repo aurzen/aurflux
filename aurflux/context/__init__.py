@@ -1,1 +1,1 @@
-from .context import MessageContext, GuildTextChannelContext, Context
+from .guildcontext import GuildMessageContext, GuildTextChannelGuildContext, GuildContext
