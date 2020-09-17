@@ -31,6 +31,7 @@ class Builtins(FluxCog):
       #    ctx.flux.cogs = reloaded_cogs
       #    return Response()
 
+
       @CommandCheck.check(CommandCheck.has_permissions(discord.Permissions(manage_guild=True)))
       @self._commandeer(name="setprefix", parsed=False)
       async def set_prefix(ctx: GuildMessageContext, prefix: str):
@@ -78,7 +79,7 @@ class Builtins(FluxCog):
          :return:
          """
          configs = self.flux.CONFIG.of(ctx)
-         public_cmds = {name: command for name, command in self.flux.commands.items() if not command.private and name != "help"}
+         public_cmds = {command.name: command for cog in self.flux.cogs for command in cog.commands if not command.private and command.name != "help"}
          if not help_target:
             help_embed = discord.Embed(title=f"{utils.EMOJIS['question']} Command Help", description=f"{configs['prefix']}help <command> for more info")
             for cmd_name, command in public_cmds.items():

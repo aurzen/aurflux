@@ -44,7 +44,7 @@ class FluxClient(discord.Client):
       self.router = EventRouter(name="flux", host=parent_router)
       self.CONFIG: Config = Config(name)
 
-      self.commands: ty.Dict[str, Command] = {}
+      # self.commands: ty.Dict[str, Command] = {}
       self.admin_id = admin_id
       self.cogs: ty.List[FluxCog] = []
 

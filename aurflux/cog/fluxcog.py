@@ -20,7 +20,7 @@ class FluxCog:
       self.name = name or self.__class__.__name__
       self.flux = flux
       self.router = aur.EventRouter(self.name, host=self.flux.router.host)
-      self.command_names: ty.Set[str] = set()
+      self.commands: ty.List[Command] = []
       logger.info(f"{self.name} loaded! Under {self.router}")
       self.load()
 
@@ -29,7 +29,7 @@ class FluxCog:
          cmd = Command(flux=self.flux, func=func, name=(name or func.__name__), parsed=parsed, private=private)
          if cmd.name in self.command_names:
             raise TypeError(f"Attempting to register command {cmd} when one with the same name already exists")
-         self.command_names.add(cmd.name)
+         self.commands.append(cmd)
          self.router.listen_for(f"flux:command:{cmd.name}")(cmd.execute)
          logger.trace(f"Command {cmd} registered under flux:command:{cmd.name}")
          return cmd
