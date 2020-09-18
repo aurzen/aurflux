@@ -228,13 +228,6 @@ class Builtins(FluxCog):
          :param auth_ctx: Auth Context
          :return:
          """
-         print(f"Getting help! ctx: {ctx}")
-         print(type(ctx))
-         print(ctx.config_identifier)
-         print("auth")
-         print(auth_ctx)
-         print(auth_ctx.config_identifier)
-         print(type(auth_ctx))
          configs = self.flux.CONFIG.of(ctx)
          authorized_cmds: ty.Dict[str, Command] = {command.name: command for cog in self.flux.cogs for command in cog.commands if
                                                    Auth.accepts(auth_ctx, command) and command.name != "help"}
@@ -242,7 +235,8 @@ class Builtins(FluxCog):
          if not help_target:
             help_embed = discord.Embed(title=f"{utils.EMOJIS['question']} Command Help", description=f"{configs['prefix']}help <command> for more info")
             for cmd_name, command in authorized_cmds.items():
-               help_embed.add_field(name=cmd_name, value=f"{configs['prefix']}{command.short_usage}", inline=False)
+               usage = "\n".join([f"{configs['prefix']}{usage}" for usage in command.short_usage.split("\n")])
+               help_embed.add_field(name=cmd_name, value=usage, inline=False)
 
             return Response(embed=help_embed)
 
