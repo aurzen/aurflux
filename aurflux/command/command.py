@@ -50,10 +50,10 @@ class Command(aur.util.AutoRepr, AuthAware):
       self.cog = cog
       self.name = name
       self.doc = inspect.getdoc(func)
-      self.parsed = parsed
+      self.parsed = False  # todo: argparser
       # self.checks: ty.List[ty.Callable[[GuildMessageContext], ty.Union[bool, ty.Awaitable[bool]]]] = []
       self.builtin = False
-      self.argparser: ty.Optional[argh.ArgumentParser] = None
+      # self.argparser: ty.Optional[argh.ArgumentParser] = None
       self.default_auths_: ty.List[Record] = default_auths
       self.provide_auth = provide_auth
       func_doc = inspect.getdoc(self.func)
@@ -64,8 +64,8 @@ class Command(aur.util.AutoRepr, AuthAware):
       except ValueError as e:
          raise ValueError(f"{e} : {self.name}")
       self.short_usage = short_usage.strip()
-      self.description = long_usage .strip()
-      self.param_usage : ty.List[ty.List[str]] = [param_line.split(":") for param_line in params.strip().split("\n")]
+      self.description = long_usage.strip()
+      self.param_usage: ty.List[ty.List[str]] = [param_line.split(":") for param_line in params.strip().split("\n")]
       # else:
       #    self.short_usage: str = func_doc.split("\n")[0]
       #    raw_doc = func_doc[func_doc.index("\n"):func_doc.index(":param")].strip()
@@ -77,8 +77,8 @@ class Command(aur.util.AutoRepr, AuthAware):
       auth_ctx = ev.auth_ctx
       cmd_args = ev.cmd_args
 
-      if (self.argparser is not None) ^ self.parsed:
-         raise RuntimeError(f"Parsed command {self} has not been decorated with Argh")
+      # if (self.argparser is not None) ^ self.parsed:
+      #    raise RuntimeError(f"Parsed command {self} has not been decorated with Argh")
 
       if not Auth.accepts(auth_ctx, self):
          await Response(content="Forbidden", errored=True).execute(msg_ctx)
@@ -87,24 +87,24 @@ class Command(aur.util.AutoRepr, AuthAware):
       try:
          auths = {"auth_ctx": auth_ctx} if self.provide_auth else {}
          with msg_ctx.channel.typing():
-            if self.parsed:
-               assert self.argparser is not None  # typing
-               res = self.func(msg_ctx, **auths, **self.argparser.parse_args(cmd_args.split(" ") if cmd_args else []).__dict__)
-            else:
+            # if self.parsed:
+            # assert self.argparser is not None  # typing
+            # res = self.func(msg_ctx, **auths, **self.argparser.parse_args(cmd_args.split(" ") if cmd_args else []).__dict__)
+            # else:
 
-               res = self.func(msg_ctx, cmd_args, **auths)
+            res = self.func(msg_ctx, cmd_args, **auths)
 
          async for resp in aur.util.AwaitableAiter(res):
             await resp.execute(msg_ctx)
       except errors.CommandError as e:
          info_message = f"{e}"
-         if self.argparser:
-            info_message += f"\n```{self.argparser.format_help()}```"
+         # if self.argparser:
+         #    info_message += f"\n```{self.argparser.format_help()}```"
          await Response(content=info_message, errored=True).execute(msg_ctx)
       except errors.CommandInfo as e:
          info_message = f"{e}"
-         if self.argparser:
-            info_message += f"\n```{self.argparser.format_help()}```"
+         # if self.argparser:
+         #    info_message += f"\n```{self.argparser.format_help()}```"
          await Response(content=info_message).execute(msg_ctx)
       except Exception as e:
          await Response(content=f"```Unexpected Exception:\n{str(e)}\n```", errored=True).execute(msg_ctx)
