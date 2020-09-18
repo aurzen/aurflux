@@ -42,6 +42,7 @@ class Command(aur.util.AutoRepr, AuthAware):
          func: CommandFunc,
          name: str,
          parsed: bool,
+         decompose: bool,
          default_auths: ty.List[Record],
          provide_auth,
    ):
@@ -51,6 +52,8 @@ class Command(aur.util.AutoRepr, AuthAware):
       self.name = name
       self.doc = inspect.getdoc(func)
       self.parsed = False  # todo: argparser
+      self.decompose = decompose
+
       # self.checks: ty.List[ty.Callable[[GuildMessageContext], ty.Union[bool, ty.Awaitable[bool]]]] = []
       self.builtin = False
       # self.argparser: ty.Optional[argh.ArgumentParser] = None
@@ -91,8 +94,10 @@ class Command(aur.util.AutoRepr, AuthAware):
             # assert self.argparser is not None  # typing
             # res = self.func(msg_ctx, **auths, **self.argparser.parse_args(cmd_args.split(" ") if cmd_args else []).__dict__)
             # else:
-
-            res = self.func(msg_ctx, cmd_args, **auths)
+            if self.decompose:
+               res = self.func(msg_ctx, *ev.args, **ev.kwargs, **auths)
+            else:
+               res = self.func(msg_ctx, cmd_args, **auths)
 
          async for resp in aur.util.AwaitableAiter(res):
             await resp.execute(msg_ctx)

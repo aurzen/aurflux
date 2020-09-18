@@ -74,12 +74,12 @@ def ms(key):
    raise KeyError("Could not find key " + key)
 
 
-def find_cmd_or_cog(flux: FluxClient, name: str, only=ty.Optional[ty.Literal["cog", "command"]]) -> ty.Optional[ty.Union[Command, FluxCog]]:
+def find_cmd_or_cog(flux: FluxClient, name: str, only=ty.Optional[ty.Literal["cog", "command"]], case_sens = False) -> ty.Optional[ty.Union[Command, FluxCog]]:
    for cog in flux.cogs:
-      if only != "command" and cog.name == name:
+      if only != "command" and cog.name.lower() == name.lower():
          return cog
       for command in cog.commands:
-         if only != "cog" and command.name == name:
+         if only != "cog" and command.name.lower() == name.lower():
             return command
 
    return None

@@ -24,11 +24,11 @@ class FluxCog(AuthAware):
       logger.info(f"{self.name} loaded! Under {self.router}")
       self.load()
 
-   def _commandeer(self, name: ty.Optional[str] = None, parsed: bool = True, default_auths: ty.List[Record] = None, provide_auth=False) -> ty.Callable[[CommandFunc], Command]:
+   def _commandeer(self, name: ty.Optional[str] = None, parsed: bool = True, decompose: bool =False, default_auths: ty.List[Record] = None, provide_auth=False) -> ty.Callable[[CommandFunc], Command]:
       default_auths = default_auths or [Record.deny_all()]
 
       def command_deco(func: CommandFunc) -> Command:
-         cmd = Command(flux=self.flux, cog=self, func=func, name=(name or func.__name__), parsed=parsed, default_auths=default_auths, provide_auth=provide_auth)
+         cmd = Command(flux=self.flux, cog=self, func=func, name=(name or func.__name__), parsed=parsed, decompose=decompose, default_auths=default_auths, provide_auth=provide_auth)
          if cmd.name in [c.name for c in self.commands]:
             raise TypeError(f"Attempting to register command {cmd} when one with the same name already exists")
          self.commands.append(cmd)
