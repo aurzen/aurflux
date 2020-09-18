@@ -210,7 +210,7 @@ class Builtins(FluxCog):
 
          record = Record(rule=rule, target_id=target_id, target_type=rule_type.upper())
          await Auth.add_record(ctx, auth_id=cmd_or_cog.auth_id, record=record)
-         return Response()
+         return Response(f"Added record {record}")
 
       @self._commandeer(name="help", parsed=False, default_auths=[Record.allow_all()], provide_auth=True)
       async def __get_help(ctx: GuildMessageContext, help_target: ty.Optional[str], *, auth_ctx: AuthAwareContext):
