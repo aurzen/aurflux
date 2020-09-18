@@ -265,7 +265,7 @@ class Builtins(FluxCog):
          # print(cmd.long_usage)
          print(cmd.param_usage)
          for arg, detail in cmd.param_usage:
-            embed.add_field(name=arg, value=detail, inline=False)
+            embed.add_field(name=arg.strip(), value=detail.strip().replace("\\n", "\n"), inline=False)
             # embed.add_field(name=detail,value="", inline=False)
 
          # args, details = list(zip(*cmd.long_usage))

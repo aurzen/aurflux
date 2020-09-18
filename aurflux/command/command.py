@@ -68,7 +68,7 @@ class Command(aur.util.AutoRepr, AuthAware):
          raise ValueError(f"{e} : {self.name}")
       self.short_usage = short_usage.strip()
       self.description = long_usage.strip()
-      self.param_usage: ty.List[ty.List[str]] = [param_line.replace("\\n","\n").split(":") for param_line in params.strip().split("\n")]
+      self.param_usage: ty.List[ty.List[str]] = [param_line.split(":") for param_line in params.strip().split("\n")]
       # else:
       #    self.short_usage: str = func_doc.split("\n")[0]
       #    raw_doc = func_doc[func_doc.index("\n"):func_doc.index(":param")].strip()
