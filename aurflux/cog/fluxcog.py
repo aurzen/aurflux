@@ -26,7 +26,7 @@ class FluxCog(AuthAware):
 
    def _commandeer(self, name: ty.Optional[str] = None, parsed: bool = True, decompose: bool = False, default_auths: ty.List[Record] = None, provide_auth=False) -> ty.Callable[
       [CommandFunc], Command]:
-      # default_auths = default_auths or [Record.deny_all()]
+      default_auths = default_auths or []
 
       def command_deco(func: CommandFunc) -> Command:
          cmd = Command(flux=self.flux, cog=self, func=func, name=(name or func.__name__), parsed=parsed, decompose=decompose, default_auths=default_auths,
