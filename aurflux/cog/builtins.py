@@ -6,7 +6,7 @@ import typing as ty
 
 import discord
 import ast
-from auth import Record, Auth, AuthList
+from ..auth import Record, Auth, AuthList
 from . import FluxCog
 from .. import utils
 import json
