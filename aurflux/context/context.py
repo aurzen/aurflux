@@ -1,14 +1,13 @@
 from __future__ import annotations
 
+import abc
+import typing as ty
 from abc import ABCMeta
 from builtins import property
 
-import abc
-import typing as ty
-
 import aurcore as aur
 
-from auth import AuthList
+from ..auth import AuthList
 
 if ty.TYPE_CHECKING:
    import discord
