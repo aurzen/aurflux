@@ -77,7 +77,7 @@ class FluxClient(discord.Client):
    async def startup(self, token, *args, **kwargs):
       async def r():
          await self.router.wait_for(":ready", check=lambda x: True)
-         print("Discord.py ready!")
+         logger.log("Discord.py ready!")
 
       aio.create_task(r())
 

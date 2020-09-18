@@ -31,7 +31,6 @@ class Builtins(FluxCog):
       "member"     : "member",
    }
 
-
    def load(self):
       def parse_auth_id(ctx: GuildMessageContext, type_: str, target_: str) -> int:
          if type_ == "member":
@@ -104,8 +103,11 @@ class Builtins(FluxCog):
          :param args:
          :return:
          """
+         try:
+            mock_type, mock_target, command = args.split(" ", 2)
+         except (ValueError, AttributeError):
+            raise CommandError(f"See `help asif` for usage")
 
-         mock_type, mock_target, command = args.split(" ", 2)
          MOCK_TYPES = {
             "u"   : "user",
             "user": "user",
@@ -121,9 +123,6 @@ class Builtins(FluxCog):
          cmd = utils.find_cmd_or_cog(self.flux, cmd_name, only="command")
          if not cmd:
             raise CommandError(f"Command {cmd_name} not found")
-         print("RUNNING ASIF WITH CTX")
-         print(ctx.config_identifier)
-         print(ctx)
          if Auth.accepts(ctx, cmd):
             await self.flux.router.submit(event=CommandEvent(flux=self.flux, msg_ctx=ctx, auth_ctx=auth_ctx, cmd_name=cmd_name, cmd_args=cmd_args))
          else:
@@ -196,7 +195,11 @@ class Builtins(FluxCog):
          :param auth_str:
          :return:
          """
-         rule_subject, rule, rule_target_id_raw, rule_type = auth_str.split(" ")
+         try:
+            rule_subject, rule, rule_target_id_raw, rule_type = auth_str.split(" ")
+         except (ValueError, AttributeError):
+            raise CommandError(f"See `help auth` for usage")
+
          rule_subject = rule_subject.lower()
          rule = rule.upper()
          rule_type = rule_type.lower()
@@ -264,8 +267,6 @@ class Builtins(FluxCog):
 
          embed.add_field(name="Usage", value=cmd.short_usage, inline=False)
 
-         # print(cmd.long_usage)
-         print(cmd.param_usage)
          for arg, detail in cmd.param_usage:
             embed.add_field(name=arg.strip(), value=detail.strip(), inline=False)
             # embed.add_field(name=detail,value="", inline=False)

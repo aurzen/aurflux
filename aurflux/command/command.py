@@ -9,7 +9,7 @@ import aurcore as aur
 from .response import Response
 from .. import errors
 from ..auth import Auth, AuthAware
-
+from loguru import logger
 if ty.TYPE_CHECKING:
    from ..types_ import *
    from . import argh
@@ -80,8 +80,7 @@ class Command(aur.util.AutoRepr, AuthAware):
       auth_ctx = ev.auth_ctx
       cmd_args = ev.cmd_args
 
-      # if (self.argparser is not None) ^ self.parsed:
-      #    raise RuntimeError(f"Parsed command {self} has not been decorated with Argh")
+      logger.trace(f"Command {self} executing in {msg_ctx}")
 
       if not Auth.accepts(auth_ctx, self):
          await Response(content="Forbidden", errored=True).execute(msg_ctx)
@@ -113,7 +112,7 @@ class Command(aur.util.AutoRepr, AuthAware):
          await Response(content=info_message).execute(msg_ctx)
       except Exception as e:
          await Response(content=f"```Unexpected Exception:\n{str(e)}\n```", errored=True).execute(msg_ctx)
-         print(traceback.format_exc())
+         logger.error(traceback.format_exc())
 
    @property
    def auth_id(self):
@@ -123,6 +122,8 @@ class Command(aur.util.AutoRepr, AuthAware):
    def default_auths(self):
       return self.default_auths_
 
+   def __str__(self):
+      return f"Command {self.name} in {self.cog}: {self.func}"
 # class CommandCheck:
 #    CheckPredicate: ty.TypeAlias = ty.Callable[[GuildMessageContext], ty.Awaitable[bool]]
 #    CommandTransformDeco: ty.TypeAlias = ty.Callable[[Command], Command]

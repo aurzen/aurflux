@@ -21,13 +21,18 @@ class FluxCog(AuthAware):
       self.flux = flux
       self.router = aur.EventRouter(self.name, host=self.flux.router.host)
       self.commands: ty.List[Command] = []
-      logger.info(f"{self.name} loaded! Under {self.router}")
+      logger.info(f"Cog {self.name} registered! Under {self.router}")
       self.load()
 
-   def _commandeer(self, name: ty.Optional[str] = None, parsed: bool = True, decompose: bool = False, default_auths: ty.List[Record] = None, provide_auth=False) -> ty.Callable[
-      [CommandFunc], Command]:
+   def _commandeer(
+         self,
+         name: ty.Optional[str] = None,
+         parsed: bool = True,
+         decompose: bool = False,
+         default_auths: ty.List[Record] = None,
+         provide_auth=False
+   ) -> ty.Callable[[CommandFunc], Command]:
       default_auths = default_auths or []
-
       def command_deco(func: CommandFunc) -> Command:
          cmd = Command(flux=self.flux, cog=self, func=func, name=(name or func.__name__), parsed=parsed, decompose=decompose, default_auths=default_auths,
                        provide_auth=provide_auth)
@@ -35,7 +40,8 @@ class FluxCog(AuthAware):
             raise TypeError(f"Attempting to register command {cmd} when one with the same name already exists")
          self.commands.append(cmd)
          self.router.listen_for(f"flux:command:{cmd.name}")(cmd.execute)
-         logger.trace(f"Command {cmd} registered under flux:command:{cmd.name}")
+
+         logger.info(f"Command {cmd} registered under flux:command:{cmd.name}")
          return cmd
 
       return command_deco
@@ -57,6 +63,8 @@ class FluxCog(AuthAware):
    #     self.listeners[cog_member.name] = cog_member
 
    def teardown(self):
+      logger.info(f"Cog {self.name} detaching from {self.router}")
+
       self.router.detach()
 
    @property

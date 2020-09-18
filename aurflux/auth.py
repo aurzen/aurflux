@@ -5,7 +5,7 @@ import dataclasses as dtcs
 import abc
 import itertools as itt
 import discord
-
+from loguru import logger
 if ty.TYPE_CHECKING:
    from cog import FluxCog
    # from command import
@@ -89,23 +89,18 @@ class Auth:
    @staticmethod
    def accepts(ctx: AuthAwareContext, cmd: Command):
       auths = ctx.config["auths"]
-      print("\nAccepts?")
-      print(ctx.config_identifier)
-      print(auths.keys())
-      print(cmd.auth_id)
-      # print(auths[cmd.auth_id])
+      logger.trace(f"Evaluating authentication for {cmd}")
       cog_specifics = Auth.order_records([Record(**record) for record in (auths.get(cmd.cog.auth_id, []))])
       cmd_specifics = Auth.order_records([Record(**record) for record in (auths.get(cmd.auth_id, []))])
       cog_defaults = Auth.order_records(cmd.cog.default_auths)
       cmd_defaults = Auth.order_records(cmd.default_auths)
 
       accept = False
-      print(f"Evaluating rules for {cmd.name}")
-      print(f"Context: {ctx}")
+
       for record in itt.chain(cog_defaults, cmd_defaults, cog_specifics, cmd_specifics, [Record.admin_record(ctx.config["admin_id"])]):
-         print(f"Evaluating {record}")
+         logger.trace(f"Evaluating {record}")
          res = record.evaluate(ctx)
-         print(res)
+         logger.trace(f"Result: {res}")
          if res is not None:
             accept = res
       return accept

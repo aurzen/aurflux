@@ -34,7 +34,7 @@ class Config(metaclass=aurcore.util.Singleton):
 
       with (self.config_dir / "base.yaml").open("r") as f:
          self.base_config = yaml.safe_load(f)
-      self.cached: clc.OrderedDict = clc.OrderedDict()  # mypy weirdness
+      self.cached: clc.OrderedDict = clc.OrderedDict()
       self.locks: ty.Dict[str, asyncio.locks.Lock] = clc.defaultdict(asyncio.locks.Lock)
 
    def _write_config_file(self, config_id: str, data):
@@ -51,25 +51,6 @@ class Config(metaclass=aurcore.util.Singleton):
          local_config = {}
       return local_config
 
-   # def load_config(self, identifiable: Context):
-   #    identifier = identifiable.config_identifier
-   #    if identifier in self.cached:
-   #       self.cached.move_to_end(identifier, last=False)
-   #       configs = self.cached[identifier]
-   #    else:
-   #       local_config = self._load_config_file(identifier)
-   #       combined_dict = {**self.base_config, **local_config}
-   #       cleaned_dict = {k: combined_dict[k] for k in self.base_config}
-   #       if cleaned_dict != local_config:
-   #          self._write_config_file(identifier, cleaned_dict)
-   #
-   #       self.cached[identifier] = cleaned_dict
-   #       if len(self.cached) > CACHED_CONFIGS:
-   #          self.cached.popitem()
-   #
-   #       configs = cleaned_dict
-   #    return configs
-
    def of(self, identifiable: ConfigContext) -> ty.Dict[str, ty.Any]:
       identifier = identifiable.config_identifier
       if identifier in self.cached:
@@ -77,11 +58,8 @@ class Config(metaclass=aurcore.util.Singleton):
          configs = self.cached[identifier]
       else:
          local_config = self._load_config_file(identifier)
-         print(local_config)
          combined_dict = {**self.base_config, **local_config}
          cleaned_dict = {k: combined_dict[k] for k in self.base_config}
-         print(cleaned_dict)
-         print(cleaned_dict == local_config)
          if cleaned_dict != local_config:
             self._write_config_file(identifier, cleaned_dict)
 
@@ -91,11 +69,10 @@ class Config(metaclass=aurcore.util.Singleton):
 
          configs = cleaned_dict
 
-      # ctx.cfg = configs
       return configs
 
    @contextlib.asynccontextmanager
-   async def writeable_conf(self, identifiable: ConfigContext) -> dict :
+   async def writeable_conf(self, identifiable: ConfigContext):
       config_id = identifiable.config_identifier
       async with self.locks[config_id]:
          output_dict = self._load_config_file(config_id)
@@ -104,6 +81,3 @@ class Config(metaclass=aurcore.util.Singleton):
          finally:
             self._write_config_file(config_id, output_dict)
             self.cached[config_id] = output_dict
-
-   def flush(self):
-      self.cached = clc.OrderedDict()
