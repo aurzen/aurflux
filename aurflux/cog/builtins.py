@@ -89,10 +89,11 @@ class Builtins(FluxCog):
       @self._commandeer(name="asif", parsed=False, default_auths=[Record.allow_all()])
       async def __asif(ctx: GuildMessageContext, args: str):
          """
-         asif <target>/{target} command args*
+         asif [type] <target>/{target} command args*
          ==
          Runs `command` as if it was being run by a `target` user, member, role, or permission-haver
          ==
+         type: [user/role/member/permissions/u/r/m/p] the type of `target`
          target: <user/member/role>/{perms}. Simulates usage by a given user, member, member with a role, or member that has a set of permissions. See s.ze.ax/perm for {perms} structure
          command: Name of the Command to run as `target`
          args: command arguments to pass to the Command
