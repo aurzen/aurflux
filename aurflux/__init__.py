@@ -1,4 +1,4 @@
-from .flux import FluxClient, FluxEvent
+from .flux import FluxClient, FluxEvent, CommandEvent
 from .config import Config
 from .errors import *
 

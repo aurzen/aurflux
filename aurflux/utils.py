@@ -1,3 +1,4 @@
+from __future__ import annotations
 import ast
 import inspect
 import time
@@ -5,6 +6,13 @@ import time
 import contextlib
 import datetime
 import re
+
+import typing as ty
+
+if ty.TYPE_CHECKING:
+   from .flux import FluxClient
+   from .command import Command
+   from .cog import FluxCog
 
 EMOJIS = {"white_check_mark": "\U00002705",
           "x"               : "\U0000274c",
@@ -36,8 +44,8 @@ async def aexec(script: str, globals_=None, locals_=None):
 
 
 def find_mentions(message_content):
-   matches = re.findall(r"<#(\d+)>", message_content)
-   return [int(x) for x in matches]
+   matches = re.finditer(r"<?(@!|@|@&|#)?(\d{17,20})>?", message_content)
+   return [int(x.group(2)) for x in matches]
 
 
 class Timer:
@@ -64,3 +72,14 @@ def ms(key):
          except KeyError:
             pass
    raise KeyError("Could not find key " + key)
+
+
+def find_cmd_or_cog(flux: FluxClient, name: str, only=ty.Optional[ty.Literal["cog", "command"]]) -> ty.Optional[ty.Union[Command, FluxCog]]:
+   for cog in flux.cogs:
+      if only != "command" and cog.name == name:
+         return cog
+      for command in cog.commands:
+         if only != "cog" and command.name == name:
+            return command
+
+   return None

@@ -1,71 +1,169 @@
 from __future__ import annotations
 
+from abc import ABCMeta
+from builtins import property
+
 import abc
 import typing as ty
 
 import aurcore as aur
 
+from auth import AuthList
+
 if ty.TYPE_CHECKING:
    import discord
    from .. import FluxClient
-   from ..command import Command
 
 
-class Context(abc.ABC, aur.util.AutoRepr):
-   def __init__(self, flux: FluxClient):
+class ConfigContext(aur.util.AutoRepr):
+   def __init__(self, flux: FluxClient, **kwargs):
       self.flux = flux
 
    @property
    @abc.abstractmethod
-   def me(self) -> discord.abc.User: ...
+   def config_identifier(self) -> str: ...
+
+   @property
+   def config(self) -> ty.Dict[str, ty.Any]:
+      return self.flux.CONFIG.of(self)
+
+   @property
+   def me(self) -> discord.abc.User:
+      return self.flux.user
+
+
+class _GuildAware(ConfigContext):
+   def __init__(self, **kwargs):
+      super().__init__(**kwargs)
 
    @property
    @abc.abstractmethod
-   def config_identifier(self) -> int: ...
+   def guild(self) -> discord.Guild: ...
 
    @property
-   def config(self) -> ty.Dict[ty.Any, str]:
-      return self.flux.CONFIG.of(self.config_identifier)
+   def config_identifier(self) -> str:
+      return str(self.guild.id)
 
 
-class GuildTextChannelContext(Context):
+class _Messageable(ConfigContext):
+   def __init__(self, **kwargs):
+      super().__init__(**kwargs)
 
-   def __init__(self, flux: FluxClient, channel: discord.TextChannel):
-      super(GuildTextChannelContext, self).__init__(flux=flux)
+   @property
+   @abc.abstractmethod
+   def dest(self) -> discord.abc.Messageable: ...
+
+
+class AuthAwareContext(ConfigContext):
+   def __init__(self, **kwargs):
+      super().__init__(**kwargs)
+
+   @property
+   @abc.abstractmethod
+   def auth_identifiers(self) -> AuthList: ...
+
+
+class ManualAuthContext(AuthAwareContext):
+
+   def __init__(self, auth_list: AuthList, config_identifier: str, **kwargs):
+      super().__init__(**kwargs)
+      self.auth_list = auth_list
+      self.config_identifier_ = config_identifier
+
+   @property
+   def auth_identifiers(self) -> AuthList:
+      return self.auth_list
+
+   @property
+   def config_identifier(self) -> str:
+      return self.config_identifier_
+
+
+class GuildMemberContext(AuthAwareContext, _GuildAware):
+
+   def __init__(self, member: discord.Member, **kwargs):
+      super().__init__(**kwargs)
+      self.member = member
+
+   @property
+   def auth_identifiers(self) -> AuthList:
+      return AuthList(
+         user=self.member.id,
+         roles=[role.id for role in self.member.roles],
+         permissions=self.member.guild_permissions
+      )
+
+   def guild(self) -> discord.Guild:
+      return self.member.guild
+
+
+class MessageContext(AuthAwareContext, metaclass=ABCMeta):
+   def __init__(self, message: discord.Message, **kwargs):
+      super().__init__(**kwargs)
+      self.message = message
+
+   @property
+   def author(self) -> ty.Union[discord.Member, discord.User]:
+      return self.message.author
+
+   @property
+   def dest(self) -> discord.abc.Messageable:
+      return self.message.channel
+
+
+class GuildTextChannelContext(_GuildAware, _Messageable):
+
+   def __init__(self, channel: discord.TextChannel, **kwargs):
+      super().__init__(**kwargs)
       self.channel = channel
 
    @property
    def guild(self) -> discord.Guild:
       return self.channel.guild
 
-   @property
-   def config_identifier(self) -> int:
-      return self.channel.id
 
    @property
    def me(self) -> discord.abc.User:
       return self.guild.me
 
-
-class GuildMessageContext(GuildTextChannelContext):
-   def __init__(self, flux: FluxClient, message: discord.Message):
-      super(GuildMessageContext, self).__init__(flux=flux, channel=message.channel)
-      self.message = message
-
    @property
-   def author(self) -> ty.Union[discord.User, discord.Member]:
-      return self.message.author
+   def dest(self) -> discord.abc.Messageable:
+      return self.channel
 
 
-class DMChannelContext(Context):
-   def __init__(self, flux: FluxClient, channel: discord.DMChannel):
-      super(DMChannelContext, self).__init__(flux=flux)
+class DMChannelContext(_Messageable, AuthAwareContext):
+   def __init__(self, channel: discord.DMChannel, **kwargs):
+      super().__init__(**kwargs)
       self.channel = channel
 
    @property
-   def me(self) -> discord.abc.User:
+   def recipient(self) -> discord.User:
+      return self.channel.recipient
+
+   @property
+   def me(self) -> discord.User:
       return self.channel.me
 
    @property
-   def config_identifier(self) -> int:
-      return self.channel.recipient.id
+   def config_identifier(self) -> str:
+      return str(self.channel.recipient.id)
+
+   @property
+   def auth_identifiers(self) -> AuthList:
+      return AuthList(
+         user=self.recipient.id,
+      )
+
+
+class GuildMessageContext(GuildTextChannelContext, MessageContext, GuildMemberContext):
+   def __init__(self, message: discord.Message, **kwargs):
+      super().__init__(message=message, channel=message.channel, member=message.author, **kwargs)
+
+   @property
+   def author(self) -> discord.Member:
+      return self.member
+
+
+class DMMessageContext(DMChannelContext, MessageContext):
+   def __init__(self, **kwargs):
+      super().__init__(**kwargs)
