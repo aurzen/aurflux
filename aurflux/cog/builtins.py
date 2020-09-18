@@ -66,7 +66,8 @@ class Builtins(FluxCog):
             return ManualAuthContext(flux=self.flux, auth_list=AuthList(user=member, roles=[r.id for r in member.roles], permissions=member.guild_permissions),
                                      config_identifier=str(ctx.guild.id))
          if type_ == "role":
-            return ManualAuthContext(flux=self.flux, auth_list=AuthList(roles=[auth_id]), config_identifier=str(ctx.guild.id))
+            role = ctx.guild.get_role(auth_id)
+            return ManualAuthContext(flux=self.flux, auth_list=AuthList(roles=[auth_id], permissions=role.permissions), config_identifier=str(ctx.guild.id))
 
          if type_ == "permissions":
             return ManualAuthContext(flux=self.flux, auth_list=AuthList(permissions=discord.Permissions(permissions=auth_id)), config_identifier=str(ctx.guild.id))
