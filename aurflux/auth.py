@@ -106,7 +106,7 @@ class Auth:
             if res is not None:
                accepts_list = res
          accepts = accepts and accepts_list
-      return accepts_list
+      return accepts
 
    @staticmethod
    async def add_record(ctx: AuthAwareContext, auth_id: str, record: Record):
