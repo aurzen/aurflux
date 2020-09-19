@@ -64,7 +64,7 @@ class Response(aur.util.AutoRepr):
                await self.message.delete()
             except aio.exceptions.TimeoutError:
                await self.message.remove_reaction(emoji=utils.EMOJIS["trashcan"], member=ctx.guild.me)
-      except discord.errors.NotFound as e:
+      except (discord.errors.NotFound, discord.errors.Forbidden) as e:
          pass
    # def __aiter__(self):
    #     async def gen():
