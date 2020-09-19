@@ -44,6 +44,7 @@ class Command(aur.util.AutoRepr, AuthAware):
          parsed: bool,
          decompose: bool,
          default_auths: ty.List[Record],
+         override_auths: ty.List[Record],
          provide_auth,
    ):
       self.func = func

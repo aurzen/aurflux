@@ -86,8 +86,8 @@ class Builtins(FluxCog):
       #    ctx.flux.cogs = reloaded_cogs
       #    return Response()
 
-      @self._commandeer(name="asif", parsed=False, default_auths=[Record.allow_all()])
-      async def __asif(ctx: GuildMessageContext, args: str):
+      @self._commandeer(name="asif", parsed=False, default_auths=[Record.allow_all()], provide_auth=True)
+      async def __asif(ctx: GuildMessageContext, args: str, *, auth_ctx: AuthAwareContext):
          """
          asif [type] <target>/{target} command args*
          ==
@@ -119,11 +119,11 @@ class Builtins(FluxCog):
             raise CommandError(f"`{mock_type}` must be in [{', '.join(MOCK_TYPES.keys())}]")
 
          cmd_name, cmd_args, *_ = [*command.split(" ", 1), None]
-         auth_ctx = parse_auth_context(ctx=ctx, type_=mock_type, target_=mock_target)
+         mock_auth_ctx = parse_auth_context(ctx=ctx, type_=mock_type, target_=mock_target)
          cmd = utils.find_cmd_or_cog(self.flux, cmd_name, only="command")
          if not cmd:
             raise CommandError(f"Command {cmd_name} not found")
-         if Auth.accepts(ctx, cmd):
+         if Auth.accepts_all([mock_auth_ctx, auth_ctx], cmd):
             await self.flux.router.submit(event=CommandEvent(flux=self.flux, msg_ctx=ctx, auth_ctx=auth_ctx, cmd_name=cmd_name, cmd_args=cmd_args))
          else:
             raise CommandError(f"Can only mock commands you have access to")

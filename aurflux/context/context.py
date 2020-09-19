@@ -59,19 +59,20 @@ class AuthAwareContext(ConfigContext):
 
    @property
    @abc.abstractmethod
-   def auth_identifiers(self) -> AuthList: ...
+   def auth_lists(self) -> [AuthList]: ...
+
 
 
 class ManualAuthContext(AuthAwareContext):
 
-   def __init__(self, auth_list: AuthList, config_identifier: str, **kwargs):
+   def __init__(self, auth_lists: ty.List[AuthList], config_identifier: str, **kwargs):
       super().__init__(**kwargs)
-      self.auth_list = auth_list
+      self.auth_list = auth_lists
       self.config_identifier_ = config_identifier
 
    @property
-   def auth_identifiers(self) -> AuthList:
-      return self.auth_list
+   def auth_lists(self) -> [AuthList]:
+      return [self.auth_list]
 
    @property
    def config_identifier(self) -> str:
@@ -85,12 +86,12 @@ class GuildMemberContext(AuthAwareContext, _GuildAware):
       self.member = member
 
    @property
-   def auth_identifiers(self) -> AuthList:
-      return AuthList(
+   def auth_lists(self) -> [AuthList]:
+      return [AuthList(
          user=self.member.id,
          roles=[role.id for role in self.member.roles],
          permissions=self.member.guild_permissions
-      )
+      )]
 
    def guild(self) -> discord.Guild:
       return self.member.guild
@@ -148,10 +149,14 @@ class DMChannelContext(_Messageable, AuthAwareContext):
       return str(self.channel.recipient.id)
 
    @property
-   def auth_identifiers(self) -> AuthList:
-      return AuthList(
+   def dest(self) -> discord.abc.Messageable:
+      return self.recipient.dm_channel
+
+   @property
+   def auth_lists(self) -> [AuthList]:
+      return [AuthList(
          user=self.recipient.id,
-      )
+      )]
 
 
 class GuildMessageContext(GuildTextChannelContext, MessageContext, GuildMemberContext):

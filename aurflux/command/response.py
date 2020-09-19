@@ -31,7 +31,7 @@ class Response(aur.util.AutoRepr):
    ):
       self.content = content
       self.embed = embed
-      self.delete_after = delete_after if isinstance(delete_after, datetime.timedelta) or not delete_after else datetime.timedelta(seconds=delete_after)
+      self.delete_after: ty.Optional[datetime.timedelta] = delete_after if isinstance(delete_after, datetime.timedelta) or not delete_after else datetime.timedelta(seconds=delete_after)
       self.errored = errored
       self.reactions = reaction or (("❌",) if self.errored else ("✅",))
       self.ping = ping

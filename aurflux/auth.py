@@ -6,6 +6,7 @@ import abc
 import itertools as itt
 import discord
 from loguru import logger
+
 if ty.TYPE_CHECKING:
    from cog import FluxCog
    # from command import
@@ -52,12 +53,12 @@ class Record:
    def allow_all(cls):
       return cls(rule="ALLOW", target_id=0, target_type="ALL")
 
-   def evaluate(self, ctx: AuthAwareContext) -> ty.Optional[bool]:
+   def evaluate(self, auth_list: AuthList) -> ty.Optional[bool]:
       if (
             (self.target_type == "ALL") or
-            (self.target_type == "PERMISSION" and ctx.auth_identifiers.permissions and discord.Permissions(permissions=self.target_id) <= ctx.auth_identifiers.permissions) or
-            (self.target_type == "ROLE" and self.target_id in ctx.auth_identifiers.roles) or
-            (self.target_type == "MEMBER" and self.target_id == ctx.auth_identifiers.user)
+            (self.target_type == "PERMISSION" and auth_list.permissions and discord.Permissions(permissions=self.target_id) <= auth_list.permissions) or
+            (self.target_type == "ROLE" and self.target_id in auth_list.roles) or
+            (self.target_type == "MEMBER" and self.target_id == auth_list.user)
       ):
          return self.rule == "ALLOW"
       return None
@@ -95,15 +96,17 @@ class Auth:
       cog_defaults = Auth.order_records(cmd.cog.default_auths)
       cmd_defaults = Auth.order_records(cmd.default_auths)
 
-      accept = False
-
-      for record in itt.chain(cog_defaults, cmd_defaults, cog_specifics, cmd_specifics, [Record.admin_record(ctx.config["admin_id"])]):
-         logger.trace(f"Evaluating {record}")
-         res = record.evaluate(ctx)
-         logger.trace(f"Result: {res}")
-         if res is not None:
-            accept = res
-      return accept
+      accepts = True # True if ALL auth_lists evaluate to True
+      for auth_list in ctx.auth_lists:
+         accepts_list = False # True if the last applicable record is True
+         for record in itt.chain(cog_defaults, cmd_defaults, cog_specifics, cmd_specifics, [Record.admin_record(ctx.config["admin_id"])]):
+            logger.trace(f"Evaluating {record}")
+            res = record.evaluate(auth_list)
+            logger.trace(f"Result: {res}")
+            if res is not None:
+               accepts_list = res
+         accepts = accepts and accepts_list
+      return accepts_list
 
    @staticmethod
    async def add_record(ctx: AuthAwareContext, auth_id: str, record: Record):
