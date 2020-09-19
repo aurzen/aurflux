@@ -78,6 +78,10 @@ class AuthAware:
 
    @property
    @abc.abstractmethod
+   def override_auths(self) -> ty.List[Record]: ...
+
+   @property
+   @abc.abstractmethod
    def auth_id(self) -> str: ...
 
 
@@ -91,15 +95,19 @@ class Auth:
    def accepts(ctx: AuthAwareContext, cmd: Command):
       auths = ctx.config["auths"]
       logger.trace(f"Evaluating authentication for {cmd}")
-      cog_specifics = Auth.order_records([Record(**record) for record in (auths.get(cmd.cog.auth_id, []))])
-      cmd_specifics = Auth.order_records([Record(**record) for record in (auths.get(cmd.auth_id, []))])
+
       cog_defaults = Auth.order_records(cmd.cog.default_auths)
       cmd_defaults = Auth.order_records(cmd.default_auths)
+
+      cog_specifics = Auth.order_records([Record(**record) for record in (auths.get(cmd.cog.auth_id, []))])
+      cmd_specifics = Auth.order_records([Record(**record) for record in (auths.get(cmd.auth_id, []))])
+
+      cmd_overrides = Auth.order_records(cmd.override_auths)
 
       accepts = True # True if ALL auth_lists evaluate to True
       for auth_list in ctx.auth_lists:
          accepts_list = False # True if the last applicable record is True
-         for record in itt.chain(cog_defaults, cmd_defaults, cog_specifics, cmd_specifics, [Record.admin_record(ctx.config["admin_id"])]):
+         for record in itt.chain(cog_defaults, cmd_defaults, cog_specifics, cmd_specifics, cmd_overrides, [Record.admin_record(ctx.config["admin_id"])]):
             logger.trace(f"Evaluating {record}")
             res = record.evaluate(auth_list)
             logger.trace(f"Result: {res}")

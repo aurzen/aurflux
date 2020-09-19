@@ -10,6 +10,7 @@ from .response import Response
 from .. import errors
 from ..auth import Auth, AuthAware
 from loguru import logger
+
 if ty.TYPE_CHECKING:
    from ..types_ import *
    from . import argh
@@ -59,6 +60,8 @@ class Command(aur.util.AutoRepr, AuthAware):
       self.builtin = False
       # self.argparser: ty.Optional[argh.ArgumentParser] = None
       self.default_auths_: ty.List[Record] = default_auths
+      self.override_auths_: ty.List[Record] = override_auths
+
       self.provide_auth = provide_auth
       func_doc = inspect.getdoc(self.func)
       if not func_doc:
@@ -122,6 +125,12 @@ class Command(aur.util.AutoRepr, AuthAware):
    @property
    def default_auths(self):
       return self.default_auths_
+
+
+   @property
+   def override_auths(self):
+      return self.default_auths_
+
 
    def __str__(self):
       return f"Command {self.name} in {self.cog}: {self.func}"
