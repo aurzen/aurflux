@@ -87,7 +87,7 @@ class Builtins(FluxCog):
       #    return Response()
 
       @self._commandeer(name="asif", parsed=False, default_auths=[Record.allow_all()], provide_auth=True)
-      async def __asif(ctx: GuildMessageContext, args: str, *, auth_ctx: AuthAwareContext):
+      async def __asif(ctx: GuildMessageContext, args: str, *, auth_ctxs: ty.List[AuthAwareContext]):
          """
          asif [type] <target>/{target} command args*
          ==
@@ -123,10 +123,10 @@ class Builtins(FluxCog):
          cmd = utils.find_cmd_or_cog(self.flux, cmd_name, only="command")
          if not cmd:
             raise CommandError(f"Command {cmd_name} not found")
-         if Auth.accepts_all([mock_auth_ctx, auth_ctx], cmd):
-            await self.flux.router.submit(event=CommandEvent(flux=self.flux, msg_ctx=ctx, auth_ctx=auth_ctx, cmd_name=cmd_name, cmd_args=cmd_args))
+         if Auth.accepts_all(auth_ctxs + [mock_auth_ctx], cmd):
+            await self.flux.router.submit(event=CommandEvent(flux=self.flux, msg_ctx=ctx, auth_ctxs=auth_ctxs + [mock_auth_ctx], cmd_name=cmd_name, cmd_args=cmd_args))
          else:
-            raise CommandError(f"Can only mock commands you have access to")
+            raise CommandError(f"Can only mock commands that you have access to")
 
          return Response()
 
@@ -187,9 +187,9 @@ class Builtins(FluxCog):
          Authorizes some group (member, has a role, or has a permission) to use a command or a cog
          ==
          name: Command name or Cog name;
-         rule: [ALLOW,DENY];
+         rule: [ALLOW/DENY];
          id: <member/role>/{perm} The target member or role or permission to allow;
-         id_type: [MEMBER, ROLE, PERMISSION] Whatever `id` corresponds to
+         id_type: [MEMBER/ROLE/PERMISSION] Whatever `id` corresponds to
          ==
          :param ctx:
          :param auth_str:

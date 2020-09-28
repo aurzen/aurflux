@@ -46,7 +46,7 @@ class Command(aur.util.AutoRepr, AuthAware):
          decompose: bool,
          default_auths: ty.List[Record],
          override_auths: ty.List[Record],
-         provide_auth,
+         provide_auths,
    ):
       self.func = func
       self.flux = flux
@@ -62,7 +62,7 @@ class Command(aur.util.AutoRepr, AuthAware):
       self.default_auths_: ty.List[Record] = default_auths
       self.override_auths_: ty.List[Record] = override_auths
 
-      self.provide_auth = provide_auth
+      self.provide_auths = provide_auths
       func_doc = inspect.getdoc(self.func)
       if not func_doc:
          raise RuntimeError(f"{self.func} lacks a docstring!")
@@ -81,17 +81,17 @@ class Command(aur.util.AutoRepr, AuthAware):
 
    async def execute(self, ev: CommandEvent) -> None:
       msg_ctx = ev.msg_ctx
-      auth_ctx = ev.auth_ctx
+      auth_ctxs = ev.auth_ctxs
       cmd_args = ev.cmd_args
 
       logger.trace(f"Command {self} executing in {msg_ctx}")
 
-      if not Auth.accepts(auth_ctx, self):
+      if not Auth.accepts_all(auth_ctxs, self):
          await Response(content="Forbidden", errored=True).execute(msg_ctx)
          return
 
       try:
-         auths = {"auth_ctx": auth_ctx} if self.provide_auth else {}
+         auths = {"auth_ctxs": auth_ctxs} if self.provide_auths else {}
          with msg_ctx.channel.typing():
             # if self.parsed:
             # assert self.argparser is not None  # typing
@@ -106,13 +106,9 @@ class Command(aur.util.AutoRepr, AuthAware):
             await resp.execute(msg_ctx)
       except errors.CommandError as e:
          info_message = f"{e}"
-         # if self.argparser:
-         #    info_message += f"\n```{self.argparser.format_help()}```"
          await Response(content=info_message, errored=True).execute(msg_ctx)
       except errors.CommandInfo as e:
          info_message = f"{e}"
-         # if self.argparser:
-         #    info_message += f"\n```{self.argparser.format_help()}```"
          await Response(content=info_message).execute(msg_ctx)
       except Exception as e:
          await Response(content=f"```Unexpected Exception:\n{str(e)}\n```", errored=True).execute(msg_ctx)

@@ -31,13 +31,23 @@ class FluxCog(AuthAware):
          decompose: bool = False,
          default_auths: ty.List[Record] = None,
          override_auths: ty.List[Record] = None,
-         provide_auth=False
+         provide_auths=False
    ) -> ty.Callable[[CommandFunc], Command]:
       default_auths = default_auths or []
       override_auths = override_auths or []
+
       def command_deco(func: CommandFunc) -> Command:
-         cmd = Command(flux=self.flux, cog=self, func=func, name=(name or func.__name__), parsed=parsed, decompose=decompose, default_auths=default_auths, override_auths=override_auths,
-                       provide_auth=provide_auth)
+         cmd = Command(
+            flux=self.flux,
+            cog=self,
+            func=func,
+            name=(name or func.__name__),
+            parsed=parsed,
+            decompose=decompose,
+            default_auths=default_auths,
+            override_auths=override_auths,
+            provide_auths=provide_auths
+         )
          if cmd.name in [c.name for c in self.commands]:
             raise TypeError(f"Attempting to register command {cmd} when one with the same name already exists")
          self.commands.append(cmd)
@@ -72,6 +82,10 @@ class FluxCog(AuthAware):
    @property
    def default_auths(self) -> ty.List[Record]:
       return [Record.deny_all()]
+
+   @property
+   def override_auths(self) -> ty.List[Record]:
+      return []
 
    @abc.abstractmethod
    def load(self): ...

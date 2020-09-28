@@ -102,19 +102,22 @@ class Auth:
       cog_specifics = Auth.order_records([Record(**record) for record in (auths.get(cmd.cog.auth_id, []))])
       cmd_specifics = Auth.order_records([Record(**record) for record in (auths.get(cmd.auth_id, []))])
 
+      cog_overrides = Auth.order_records(cmd.cog.override_auths)
       cmd_overrides = Auth.order_records(cmd.override_auths)
 
-      accepts = True # True if ALL auth_lists evaluate to True
-      for auth_list in ctx.auth_lists:
-         accepts_list = False # True if the last applicable record is True
-         for record in itt.chain(cog_defaults, cmd_defaults, cog_specifics, cmd_specifics, cmd_overrides, [Record.admin_record(ctx.config["admin_id"])]):
-            logger.trace(f"Evaluating {record}")
-            res = record.evaluate(auth_list)
-            logger.trace(f"Result: {res}")
-            if res is not None:
-               accepts_list = res
-         accepts = accepts and accepts_list
+      accepts = False  # True if the last applicable record is True
+      for record in itt.chain(cog_defaults, cmd_defaults, cog_specifics, cmd_specifics, cog_overrides, cmd_overrides, [Record.admin_record(ctx.config["admin_id"])]):
+         logger.trace(f"Evaluating {record}")
+         res = record.evaluate(ctx.auth_list)
+         logger.trace(f"Result: {res}")
+         if res is not None:
+            accepts = res
+
       return accepts
+
+   @staticmethod
+   def accepts_all(ctxs: ty.List[AuthAwareContext], cmd: Command):
+      return all(Auth.accepts(ctx, cmd) for ctx in ctxs)
 
    @staticmethod
    async def add_record(ctx: AuthAwareContext, auth_id: str, record: Record):
