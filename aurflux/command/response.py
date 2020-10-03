@@ -4,7 +4,7 @@ import typing as ty
 
 if ty.TYPE_CHECKING:
    from .. import context
-   from ..context import MessageCtx
+   from ..context import MessageCtx, CommandCtx
 import aurcore as aur
 import typing as ty
 import asyncio as aio
@@ -45,12 +45,12 @@ class Response(aur.util.AutoRepr):
       self.post_process = post_process or (lambda *_: aio.sleep(0))
       self.trashable = trashable
 
-   async def execute(self, ctx: MessageCtx):
+   async def execute(self, ctx: CommandCtx):
       if self.content or self.embed:
          content = self.content if self.content else "" + (ctx.author.mention if self.ping else "")
          if len(content) > 1900:
             content = utils.haste(ctx.flux.aiohttp_session, content)
-         message = await ctx.channel.send(
+         message = await ctx.msg_ctx.channel.send(
             content=content,
             embed=self.embed,
             delete_after=self.delete_after.seconds if self.delete_after else None  # todo: check if seconds,
@@ -58,19 +58,20 @@ class Response(aur.util.AutoRepr):
          )
          self.message = message
 
-         await self.post_process(ctx, message)
+         await self.post_process(ctx.msg_ctx, message)
       try:
          for reaction in self.reactions:
-            await ctx.message.add_reaction(reaction)
-
+            await ctx.msg_ctx.message.add_reaction(reaction)
+            print("reaction added!")
          if self.trashable:
             await self.message.add_reaction(utils.EMOJIS["trashcan"])
             try:
-               await ctx.flux.router.wait_for(":reaction_add", check=lambda ev: ev.args[0].message.id == self.message.id and ev.args[1] == ctx.message.author, timeout=15)
+               await ctx.msg_ctx.flux.router.wait_for(":reaction_add", check=lambda ev: ev.args[0].message.id == self.message.id and ev.args[1] == ctx.msg_ctx.message.author, timeout=15)
                await self.message.delete()
             except aio.exceptions.TimeoutError:
-               await self.message.remove_reaction(emoji=utils.EMOJIS["trashcan"], member=ctx.guild.me)
+               await self.message.remove_reaction(emoji=utils.EMOJIS["trashcan"], member=ctx.msg_ctx.guild.me)
       except (discord.errors.NotFound, discord.errors.Forbidden) as e:
+         print(e)
          pass
    # def __aiter__(self):
    #     async def gen():
