@@ -2,7 +2,7 @@ from __future__ import annotations
 import ast
 import inspect
 import time
-
+import urllib.parse
 import contextlib
 import datetime
 import re
@@ -48,7 +48,8 @@ def find_mentions(message_content):
    matches = re.finditer(r"<?(@!|@|@&|#)?(\d{17,20})>?", message_content)
    return [int(x.group(2)) for x in matches]
 
-def regex_parse(regex : re.Pattern, content: str, groups: ty.List[int]):
+
+def regex_parse(regex: re.Pattern, content: str, groups: ty.List[int]):
    group_tuple = regex.fullmatch(content).groups()
    return [group_tuple[i] for i in groups]
 
@@ -93,3 +94,11 @@ def find_cmd_or_cog(flux: FluxClient, name: str, only=ty.Optional[ty.Literal["co
             return command
 
    return None
+
+
+def copylink(to_copy: str, embed=True) -> str:
+   link = f"https://x.ze.ax/copy?{urllib.parse.quote(to_copy)}"
+   if embed:
+      return f"[{to_copy}]({link})"
+   else:
+      return link

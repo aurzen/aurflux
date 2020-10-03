@@ -95,18 +95,18 @@ class Command(aur.util.AutoRepr, AuthAware):
             if self.decompose:
                res = self.func(cmd_ctx, *ev.args, **ev.kwargs)
             else:
-               res = self.func(cmd_ctx, cmd_ctx.cmd_args)
+               res = self.func(cmd_ctx, ev.cmd_args)
 
          async for resp in aur.util.AwaitableAiter(res):
             await resp.execute(cmd_ctx)
       except errors.CommandError as e:
          info_message = f"{e}"
-         await Response(content=info_message, errored=True).execute(cmd_ctx.msg_ctx)
+         await Response(content=info_message, errored=True).execute(cmd_ctx)
       except errors.CommandInfo as e:
          info_message = f"{e}"
-         await Response(content=info_message).execute(cmd_ctx.msg_ctx)
+         await Response(content=info_message).execute(cmd_ctx)
       except Exception as e:
-         await Response(content=f"```Unexpected Exception:\n{str(e)}\n```", errored=True).execute(cmd_ctx.msg_ctx)
+         await Response(content=f"```Unexpected Exception:\n{str(e)}\n```", errored=True).execute(cmd_ctx)
          logger.error(traceback.format_exc())
 
    @property

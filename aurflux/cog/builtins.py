@@ -1,24 +1,22 @@
 from __future__ import annotations
 
+import datetime
+import json
 import re
 import traceback
 import typing as ty
 
 import discord
-import ast
-from ..auth import Record, Auth, AuthList
+
 from . import FluxCog
-from .. import utils
-import json
-from .. import FluxEvent, CommandEvent
+from .. import CommandEvent, utils
+from ..auth import Auth, AuthList, Record
 from ..command import Response
-from ..command.argh import Arg
+from ..context import GuildMessageCtx, ManualAuthCtx, ManualAuthorCtx
 from ..errors import CommandError
-from ..context import GuildMemberCtx, ManualAuthCtx, ManualAuthorCtx
-import datetime
 
 if ty.TYPE_CHECKING:
-   from ..context import CommandCtx, GuildMessageCtx, AuthAwareCtx, MessageCtx, GuildAwareCtx, AuthorAwareCtx
+   from ..context import CommandCtx, GuildAwareCtx
    from ..command import Command
 
 
@@ -251,19 +249,27 @@ class Builtins(FluxCog):
          :param target_raw:
          :return:
          """
-         if not (target := utils.find_mentions(target_raw)):
-            raise CommandError(f"Cannot find a user/member in `{target_raw}`. It should either be an ID or a mention")
-         if isinstance(ctx.msg_ctx, GuildMessageCtx):
-            target = ctx.guild.get_member(target)
+         if not target_raw:
+            target = ctx.author_ctx.author
          else:
-            target = await ctx.msg_ctx.flux.get_user(target)
+            if not (target := utils.find_mentions(target_raw)):
+               raise CommandError(f"Cannot find a user/member in `{target_raw}`. It should either be an ID or a mention")
 
-         embed = discord.Embed(title=f"{target}'s Userinfo", url=str(target.avatar_url), color=target.color)
-         embed.add_field(name="Display Name", value=target.display_name, inline=True)
-         embed.add_field(name="ID", value=str(target.id), inline=False)
-         embed.add_field(name="Latest Join", value=target.joined_at.strftime("%I:%M:%S %p on %a, %b %d, %Y"))
+            if isinstance(ctx.msg_ctx, GuildMessageCtx):
+               target = ctx.msg_ctx.guild.get_member(target)
+            else:
+               target = await ctx.msg_ctx.flux.get_user(target)
+
+         embed = discord.Embed(title=f"{target}'s Userinfo",  color=target.color)
+         embed.set_thumbnail(url=str(target.avatar_url))
+         embed.add_field(name="Display Name", value=utils.copylink(target.display_name), inline=True)
+         embed.add_field(name="ID", value=utils.copylink(str(target.id)), inline=False)
+         embed.add_field(name="Latest Join", value=utils.copylink(target.joined_at.strftime("%I:%M:%S %p on %a, %b %d, %Y")), inline=False)
+         embed.add_field(name="Creation Date", value=utils.copylink(target.created_at.strftime("%I:%M:%S %p on %a, %b %d, %Y")), inline=False)
 
          if isinstance(ctx.msg_ctx, GuildMessageCtx):
+            if target.color != discord.Color.default():
+               embed.add_field(name="Color", value=utils.copylink(str(target.color.value)), inline=False)
             if target.premium_since:
                delta = (datetime.datetime.utcnow() - target.premium_since).days
                D_IN_M = 29.53
@@ -280,11 +286,20 @@ class Builtins(FluxCog):
             roles = ",".join(role.mention for role in (target.roles or ())[::-1])
             if len(roles) >= 2048:
                url = utils.haste(self.flux.aiohttp_session, "\n".join(f"{role.id}:{role.name}" for role in target.roles))
-               roles = f"[roles]({url})"
+               roles = f"(roles)[{url}]"
             embed.add_field(name="Roles", value=roles)
 
-            embed.add_field(name="Permissions in this channel", value=f"[Permissions](https://discordapi.com/permissions.html#{target.permissions_in(ctx.msg_ctx.channel)})")
-            embed.add_field(name="Server Permissions", value=f"[Permissions](https://discordapi.com/permissions.html#{target.permissions_in(ctx.msg_ctx.channel)})")
+            embed.add_field(
+               name="Permissions in this channel",
+               value=f"[Permissions](https://discordapi.com/permissions.html#{target.permissions_in(ctx.msg_ctx.channel).value})",
+               inline=False
+            )
+            embed.add_field(
+               name="Server Permissions",
+               value=f"[Permissions](https://discordapi.com/permissions.html#{target.guild_permissions.value})",
+               inline=False
+            )
+         return Response(embed=embed)
 
       @self._commandeer(name="help", parsed=False, default_auths=[Record.allow_all()])
       async def __get_help(ctx: CommandCtx, help_target: ty.Optional[str]):
