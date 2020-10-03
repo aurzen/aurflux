@@ -10,13 +10,13 @@ from loguru import logger
 if ty.TYPE_CHECKING:
    from cog import FluxCog
    # from command import
-   from .context import ConfigAware, GuildMessageContext, AuthAwareContext
+   from .context import ConfigAware, GuildMessageCtx, AuthAwareCtx
    from .command import Command
 
 
 @dtcs.dataclass
 class AuthList:
-   user: int = None
+   user: ty.Optional[int] = None
    roles: ty.List[int] = dtcs.field(default_factory=list)
    permissions: ty.Optional[discord.Permissions] = None
 
@@ -92,7 +92,7 @@ class Auth:
       return sorted(records, key=lambda record: Record.PRECEDENCE[record.target_type])
 
    @staticmethod
-   def accepts(ctx: AuthAwareContext, cmd: Command):
+   def accepts(ctx: AuthAwareCtx, cmd: Command):
       auths = ctx.config["auths"]
       logger.trace(f"Evaluating authentication for {cmd}")
 
@@ -116,11 +116,11 @@ class Auth:
       return accepts
 
    @staticmethod
-   def accepts_all(ctxs: ty.List[AuthAwareContext], cmd: Command):
+   def accepts_all(ctxs: ty.List[AuthAwareCtx], cmd: Command):
       return all(Auth.accepts(ctx, cmd) for ctx in ctxs)
 
    @staticmethod
-   async def add_record(ctx: AuthAwareContext, auth_id: str, record: Record):
+   async def add_record(ctx: AuthAwareCtx, auth_id: str, record: Record):
       async with ctx.flux.CONFIG.writeable_conf(ctx) as cfg_w:
          if auth_id in cfg_w["auths"]:
             cfg_w["auths"][auth_id] = [auth_rec for auth_rec in cfg_w["auths"][auth_id] if auth_rec["target_id"] != record.target_id]

@@ -4,6 +4,7 @@ import abc
 import typing as ty
 from abc import ABCMeta
 from builtins import property
+import dataclasses as dtcs
 
 import aurcore as aur
 
@@ -14,7 +15,15 @@ if ty.TYPE_CHECKING:
    from .. import FluxClient
 
 
-class ConfigContext(aur.util.AutoRepr):
+@dtcs.dataclass
+class CommandCtx(aur.util.AutoRepr):
+   msg_ctx: MessageCtx
+   author_ctx: AuthorAwareCtx
+   auth_ctxs: ty.List[AuthAwareCtx]
+
+
+
+class ConfigCtx(aur.util.AutoRepr):
    def __init__(self, flux: FluxClient, **kwargs):
       self.flux = flux
 
@@ -31,7 +40,7 @@ class ConfigContext(aur.util.AutoRepr):
       return self.flux.user
 
 
-class _GuildAware(ConfigContext):
+class GuildAwareCtx(ConfigCtx):
    def __init__(self, **kwargs):
       super().__init__(**kwargs)
 
@@ -43,8 +52,28 @@ class _GuildAware(ConfigContext):
    def config_identifier(self) -> str:
       return str(self.guild.id)
 
+# class GuildCommandCtx(CommandCtx, GuildAwareCtx):
+#    def __init__(self, guild: discord.Guild, **kwargs):
+#       super().__init__(**kwargs)
+#       self.guild_ = guild
+#
+#    @property
+#    def guild(self) -> discord.Guild:
+#       return self.guild_
 
-class _Messageable(ConfigContext):
+
+
+
+class AuthorAwareCtx(ConfigCtx):
+   def __init__(self, **kwargs):
+      super().__init__(**kwargs)
+
+   @property
+   @abc.abstractmethod
+   def author(self) -> ty.Union[discord.User, discord.Member]: ...
+
+
+class _MessageableCtx(ConfigCtx):
    def __init__(self, **kwargs):
       super().__init__(**kwargs)
 
@@ -53,7 +82,7 @@ class _Messageable(ConfigContext):
    def dest(self) -> discord.abc.Messageable: ...
 
 
-class AuthAwareContext(ConfigContext):
+class AuthAwareCtx(ConfigCtx):
    def __init__(self, **kwargs):
       super().__init__(**kwargs)
 
@@ -62,24 +91,43 @@ class AuthAwareContext(ConfigContext):
    def auth_list(self) -> AuthList: ...
 
 
-
-class ManualAuthContext(AuthAwareContext):
+class ManualAuthCtx(AuthAwareCtx):
 
    def __init__(self, auth_list: AuthList, config_identifier: str, **kwargs):
       super().__init__(**kwargs)
-      self.auth_list = auth_list
+      self.auth_list_ = auth_list
       self.config_identifier_ = config_identifier
 
    @property
    def auth_list(self) -> AuthList:
-      return self.auth_list
+      return self.auth_list_
 
    @property
    def config_identifier(self) -> str:
       return self.config_identifier_
 
 
-class GuildMemberContext(AuthAwareContext, _GuildAware):
+class ManualAuthorCtx(AuthorAwareCtx):
+   def __init__(self, author: ty.Union[discord.User, discord.Member], **kwargs):
+      super().__init__(**kwargs)
+      self.author_ = author
+
+   @property
+   def author(self) -> ty.Union[discord.User, discord.Member]:
+      return self.author_
+
+
+class ManualGuildCtx(GuildAwareCtx):
+   def __init__(self, guild: discord.Guild, **kwargs):
+      super().__init__(**kwargs)
+      self.guild_ = guild
+
+   @property
+   def guild(self) -> discord.Guild:
+      return self.guild_
+
+
+class GuildMemberCtx(AuthAwareCtx, GuildAwareCtx):
 
    def __init__(self, member: discord.Member, **kwargs):
       super().__init__(**kwargs)
@@ -97,7 +145,7 @@ class GuildMemberContext(AuthAwareContext, _GuildAware):
       return self.member.guild
 
 
-class MessageContext(AuthAwareContext, metaclass=ABCMeta):
+class MessageCtx(AuthAwareCtx, AuthorAwareCtx, metaclass=ABCMeta):
    def __init__(self, message: discord.Message, **kwargs):
       super().__init__(**kwargs)
       self.message = message
@@ -111,7 +159,7 @@ class MessageContext(AuthAwareContext, metaclass=ABCMeta):
       return self.message.channel
 
 
-class GuildTextChannelContext(_GuildAware, _Messageable):
+class GuildTextChannelCtx(GuildAwareCtx, _MessageableCtx):
 
    def __init__(self, channel: discord.TextChannel, **kwargs):
       super().__init__(**kwargs)
@@ -120,7 +168,6 @@ class GuildTextChannelContext(_GuildAware, _Messageable):
    @property
    def guild(self) -> discord.Guild:
       return self.channel.guild
-
 
    @property
    def me(self) -> discord.abc.User:
@@ -131,7 +178,7 @@ class GuildTextChannelContext(_GuildAware, _Messageable):
       return self.channel
 
 
-class DMChannelContext(_Messageable, AuthAwareContext):
+class DMChannelCtx(_MessageableCtx, AuthAwareCtx):
    def __init__(self, channel: discord.DMChannel, **kwargs):
       super().__init__(**kwargs)
       self.channel = channel
@@ -159,7 +206,7 @@ class DMChannelContext(_Messageable, AuthAwareContext):
       )
 
 
-class GuildMessageContext(GuildTextChannelContext, MessageContext, GuildMemberContext):
+class GuildMessageCtx(GuildTextChannelCtx, MessageCtx, GuildMemberCtx):
    def __init__(self, message: discord.Message, **kwargs):
       super().__init__(message=message, channel=message.channel, member=message.author, **kwargs)
 
@@ -168,6 +215,7 @@ class GuildMessageContext(GuildTextChannelContext, MessageContext, GuildMemberCo
       return self.member
 
 
-class DMMessageContext(DMChannelContext, MessageContext):
+class DMMessageCtx(DMChannelCtx, MessageCtx):
    def __init__(self, **kwargs):
       super().__init__(**kwargs)
+

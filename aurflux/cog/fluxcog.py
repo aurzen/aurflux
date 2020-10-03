@@ -9,7 +9,7 @@ from ..command import Command
 
 if ty.TYPE_CHECKING:
    from .. import FluxClient
-   from ..context import GuildMessageContext
+   from ..context import GuildMessageCtx
    from ..command import Response
    from ..types_ import *
    from ..auth import Record

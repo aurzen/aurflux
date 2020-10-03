@@ -80,38 +80,33 @@ class Command(aur.util.AutoRepr, AuthAware):
       #    self.long_usage: ty.List[ty.List[str, str]] = [doc_line.split(":") for doc_line in raw_doc.split("\n")]
 
    async def execute(self, ev: CommandEvent) -> None:
-      msg_ctx = ev.msg_ctx
-      auth_ctxs = ev.auth_ctxs
-      cmd_args = ev.cmd_args
+      cmd_ctx = ev.cmd_ctx
 
-      logger.trace(f"Command {self} executing in {msg_ctx}")
 
-      if not Auth.accepts_all(auth_ctxs, self):
-         await Response(content="Forbidden", errored=True).execute(msg_ctx)
+      logger.trace(f"Command {self} executing in {cmd_ctx.msg_ctx}")
+
+      if not Auth.accepts_all(cmd_ctx.auth_ctxs, self):
+         await Response(content="Forbidden", errored=True).execute(cmd_ctx.msg_ctx)
          return
 
       try:
-         auths = {"auth_ctxs": auth_ctxs} if self.provide_auths else {}
-         with msg_ctx.channel.typing():
-            # if self.parsed:
-            # assert self.argparser is not None  # typing
-            # res = self.func(msg_ctx, **auths, **self.argparser.parse_args(cmd_args.split(" ") if cmd_args else []).__dict__)
-            # else:
+         with cmd_ctx.msg_ctx.channel.typing():
+
             if self.decompose:
-               res = self.func(msg_ctx, *ev.args, **ev.kwargs, **auths)
+               res = self.func(cmd_ctx, *ev.args, **ev.kwargs)
             else:
-               res = self.func(msg_ctx, cmd_args, **auths)
+               res = self.func(cmd_ctx, cmd_ctx.cmd_args)
 
          async for resp in aur.util.AwaitableAiter(res):
-            await resp.execute(msg_ctx)
+            await resp.execute(cmd_ctx)
       except errors.CommandError as e:
          info_message = f"{e}"
-         await Response(content=info_message, errored=True).execute(msg_ctx)
+         await Response(content=info_message, errored=True).execute(cmd_ctx.msg_ctx)
       except errors.CommandInfo as e:
          info_message = f"{e}"
-         await Response(content=info_message).execute(msg_ctx)
+         await Response(content=info_message).execute(cmd_ctx.msg_ctx)
       except Exception as e:
-         await Response(content=f"```Unexpected Exception:\n{str(e)}\n```", errored=True).execute(msg_ctx)
+         await Response(content=f"```Unexpected Exception:\n{str(e)}\n```", errored=True).execute(cmd_ctx.msg_ctx)
          logger.error(traceback.format_exc())
 
    @property

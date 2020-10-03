@@ -14,7 +14,7 @@ from aurcore import EventRouter
 
 from .command import Command
 from .config import Config
-from .context import GuildMessageContext, AuthAwareContext
+from .context import GuildMessageCtx, AuthAwareCtx
 from loguru import logger
 # __logging.getLogger("discord.client").addFilter(lambda r: r.getMessage() != "PyNaCl is not installed, voice will NOT be supported")
 
@@ -24,7 +24,7 @@ if ty.TYPE_CHECKING:
    discord.Permissions()
    from .cog import FluxCog
    from aurcore import EventRouterHost
-   from .context import AuthAwareContext, MessageContext
+   from .context import CommandCtx, AuthAwareCtx, MessageCtx, AuthorAwareCtx
 
 
 class FluxEvent(aur.Event):
@@ -34,11 +34,10 @@ class FluxEvent(aur.Event):
 
 
 class CommandEvent(FluxEvent):
-   def __init__(self, flux: FluxClient, msg_ctx: MessageContext, auth_ctxs: ty.List[AuthAwareContext], cmd_args: ty.Optional[str], cmd_name: str):
+   def __init__(self, flux: FluxClient, cmd_ctx : CommandCtx, cmd_args: ty.Optional[str], cmd_name: str):
       super(CommandEvent, self).__init__(flux, f"flux:command:{cmd_name}")
       self.cmd_name = cmd_name
-      self.msg_ctx = msg_ctx
-      self.auth_ctxs = auth_ctxs
+      self.cmd_ctx = CommandCtx
       self.cmd_args = cmd_args
 
 
@@ -77,7 +76,7 @@ class FluxClient(discord.Client):
    async def startup(self, token, *args, **kwargs):
       async def r():
          await self.router.wait_for(":ready", check=lambda x: True)
-         logger.log("Discord.py ready!")
+         logger.info("Discord.py ready!")
 
       aio.create_task(r())
 
@@ -93,7 +92,10 @@ class FluxClient(discord.Client):
       async def _(message: discord.Message):
          if not message.content or message.author is self.user:
             return
-         ctx = GuildMessageContext(flux=self, message=message)
+         if message.guild:
+            ctx = GuildMessageCtx(flux=self, message=message)
+         else:
+            ctx = MessageCtx(flux=self, message=message)
 
          prefix = self.CONFIG.of(ctx)["prefix"]
 
@@ -104,4 +106,4 @@ class FluxClient(discord.Client):
          logger.info(f"Command recognized! flux:command:{cmd_name}")
 
          # print(aur.Event(f"flux:command:{cmd}", ctx=ctx))
-         await self.router.submit(event=CommandEvent(flux=self, msg_ctx=ctx, auth_ctxs=[ctx], cmd_name=cmd_name, cmd_args=args.strip() if args else None))
+         await self.router.submit(event=CommandEvent(flux=self, cmd_ctx=CommandCtx(ctx, ctx, [ctx]), cmd_name=cmd_name, cmd_args=args.strip() if args else None))

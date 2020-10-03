@@ -1,1 +1,2 @@
-from .context import ConfigContext, GuildMessageContext, GuildTextChannelContext, DMChannelContext, AuthAwareContext, MessageContext, GuildMemberContext, ManualAuthContext
+from .context import (AuthAwareCtx, AuthorAwareCtx, CommandCtx, ConfigCtx, DMChannelCtx, GuildAwareCtx, GuildMemberCtx, GuildMessageCtx, GuildTextChannelCtx, ManualAuthCtx,
+                      ManualAuthorCtx, ManualAuthorCtx, ManualGuildCtx, MessageCtx)

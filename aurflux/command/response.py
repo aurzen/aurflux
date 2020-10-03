@@ -3,13 +3,20 @@ __package__ = "aurflux.command"
 import typing as ty
 
 if ty.TYPE_CHECKING:
-   from . import MessageContext
+   from .. import context
+   from ..context import MessageCtx
 import aurcore as aur
 import typing as ty
 import asyncio as aio
 import discord
 from .. import utils
 import datetime
+
+class Message(aur.util.AutoRepr):
+   pass
+
+   def __init__(self, message_ctx: context.MessageCtx, author_ctx: context.GuildMessageCtx):
+      pass
 
 
 class Response(aur.util.AutoRepr):
@@ -25,7 +32,7 @@ class Response(aur.util.AutoRepr):
          reaction: ty.Optional[ty.Iterable[ty.Union[discord.Emoji, str]]] = None,
          errored: bool = False,
          ping: bool = False,
-         post_process: ty.Optional[ty.Callable[[MessageContext, discord.Message], ty.Coroutine]] = None,
+         post_process: ty.Optional[ty.Callable[[MessageCtx, discord.Message], ty.Coroutine]] = None,
          trashable: bool = False
          # reaction: str = ""  # todo: white check mark
    ):
@@ -38,12 +45,11 @@ class Response(aur.util.AutoRepr):
       self.post_process = post_process or (lambda *_: aio.sleep(0))
       self.trashable = trashable
 
-   async def execute(self, ctx: MessageContext):
+   async def execute(self, ctx: MessageCtx):
       if self.content or self.embed:
          content = self.content if self.content else "" + (ctx.author.mention if self.ping else "")
          if len(content) > 1900:
-            async with ctx.flux.aiohttp_session.post("https://h.ze.ax/documents", data=content) as resp:
-               content = (await resp.json(content_type=None))["key"]
+            content = utils.haste(ctx.flux.aiohttp_session, content)
          message = await ctx.channel.send(
             content=content,
             embed=self.embed,

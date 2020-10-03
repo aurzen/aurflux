@@ -14,10 +14,11 @@ from .. import FluxEvent, CommandEvent
 from ..command import Response
 from ..command.argh import Arg
 from ..errors import CommandError
-from ..context import GuildMemberContext, ManualAuthContext
+from ..context import GuildMemberCtx, ManualAuthCtx, ManualAuthorCtx
+import datetime
 
 if ty.TYPE_CHECKING:
-   from ..context import GuildMessageContext, AuthAwareContext, MessageContext
+   from ..context import CommandCtx, GuildMessageCtx, AuthAwareCtx, MessageCtx, GuildAwareCtx, AuthorAwareCtx
    from ..command import Command
 
 
@@ -32,7 +33,7 @@ class Builtins(FluxCog):
    }
 
    def load(self):
-      def parse_auth_id(ctx: GuildMessageContext, type_: str, target_: str) -> int:
+      def parse_auth_id(ctx: GuildAwareCtx, type_: str, target_: str) -> int:
          if type_ == "member":
             ids_ = utils.find_mentions(target_)
 
@@ -52,24 +53,31 @@ class Builtins(FluxCog):
             p_dict = json.loads(target_)
             return discord.Permissions(**p_dict).value
 
-      def parse_auth_context(ctx: GuildMessageContext, type_: str, target_: str) -> ManualAuthContext:
+      def parse_auth_context(ctx: GuildAwareCtx, type_: str, target_: str) -> ManualAuthCtx:
          if type_ == "user":
             ids_ = utils.find_mentions(target_)
             if not ids_:
                raise CommandError(f"No user ID found in {target_}")
 
-            return ManualAuthContext(flux=self.flux, auth_list=AuthList(user=self.flux.get_user(ids_[0])), config_identifier=ids_[0])
+            return ManualAuthCtx(flux=self.flux, auth_list=AuthList(user=self.flux.get_user(ids_[0]).id), config_identifier=ids_[0])
          auth_id = parse_auth_id(ctx, type_=type_, target_=target_)
          if type_ == "member":
             member = ctx.guild.get_member(auth_id)
-            return ManualAuthContext(flux=self.flux, auth_list=AuthList(user=member, roles=[r.id for r in member.roles], permissions=member.guild_permissions),
-                                     config_identifier=str(ctx.guild.id))
+            if not member:
+               raise CommandError(f"No member found with id `{auth_id}`")
+            return ManualAuthCtx(flux=self.flux, auth_list=AuthList(user=member.id, roles=[r.id for r in member.roles], permissions=member.guild_permissions),
+                                 config_identifier=str(ctx.guild.id))
          if type_ == "role":
             role = ctx.guild.get_role(auth_id)
-            return ManualAuthContext(flux=self.flux, auth_list=AuthList(roles=[auth_id], permissions=role.permissions), config_identifier=str(ctx.guild.id))
+            if not role:
+               raise CommandError(f"No role found with id `{auth_id}`")
+            return ManualAuthCtx(flux=self.flux, auth_list=AuthList(roles=[auth_id], permissions=role.permissions), config_identifier=str(ctx.guild.id))
 
          if type_ == "permissions":
-            return ManualAuthContext(flux=self.flux, auth_list=AuthList(permissions=discord.Permissions(permissions=auth_id)), config_identifier=str(ctx.guild.id))
+            try:
+               return ManualAuthCtx(flux=self.flux, auth_list=AuthList(permissions=discord.Permissions(permissions=auth_id)), config_identifier=str(ctx.guild.id))
+            except TypeError as e:
+               raise CommandError(f"Permissions `{auth_id}` could not be parsed. See:\n{e}")
 
       # @CommandCheck.check(lambda ctx: ctx.author.id == self.flux.admin_id)
       # @self._commandeer(name="reload", parsed=False, private=True)
@@ -86,8 +94,8 @@ class Builtins(FluxCog):
       #    ctx.flux.cogs = reloaded_cogs
       #    return Response()
 
-      @self._commandeer(name="asif", parsed=False, default_auths=[Record.allow_all()], provide_auth=True)
-      async def __asif(ctx: GuildMessageContext, args: str, *, auth_ctxs: ty.List[AuthAwareContext]):
+      @self._commandeer(name="asif", parsed=False, default_auths=[Record.allow_all()])
+      async def __asif(ctx: CommandCtx, args: str, ):
          """
          asif [type] <target>/{target} command args*
          ==
@@ -119,19 +127,23 @@ class Builtins(FluxCog):
             raise CommandError(f"`{mock_type}` must be in [{', '.join(MOCK_TYPES.keys())}]")
 
          cmd_name, cmd_args, *_ = [*command.split(" ", 1), None]
-         mock_auth_ctx = parse_auth_context(ctx=ctx, type_=mock_type, target_=mock_target)
+         mock_auth_ctx = parse_auth_context(ctx=ctx.msg_ctx, type_=mock_type, target_=mock_target)
+         mock_author_ctx = ManualAuthorCtx(ctx.msg_ctx.message.guild.get_member(mock_target)) if ctx.msg_ctx.message.guild else ctx.author_ctx
+
          cmd = utils.find_cmd_or_cog(self.flux, cmd_name, only="command")
+
          if not cmd:
             raise CommandError(f"Command {cmd_name} not found")
-         if Auth.accepts_all(auth_ctxs + [mock_auth_ctx], cmd):
-            await self.flux.router.submit(event=CommandEvent(flux=self.flux, msg_ctx=ctx, auth_ctxs=auth_ctxs + [mock_auth_ctx], cmd_name=cmd_name, cmd_args=cmd_args))
+         if Auth.accepts_all(ctx.auth_ctxs + [mock_auth_ctx], cmd):
+            await self.flux.router.submit(
+               event=CommandEvent(flux=self.flux, cmd_ctx=CommandCtx(ctx.msg_ctx, mock_author_ctx, ctx.auth_ctxs + [mock_auth_ctx]), cmd_name=cmd_name, cmd_args=cmd_args))
          else:
             raise CommandError(f"Can only mock commands that you have access to")
 
          return Response()
 
       @self._commandeer(name="setprefix", parsed=False, default_auths=[Record.allow_perm(discord.Permissions(manage_guild=True))])
-      async def __set_prefix(ctx: GuildMessageContext, prefix: str):
+      async def __set_prefix(ctx: CommandCtx, prefix: str):
          """
          setprefix prefix
          ==
@@ -144,12 +156,12 @@ class Builtins(FluxCog):
          :param prefix:
          :return:
          """
-         async with self.flux.CONFIG.writeable_conf(ctx) as cfg:
+         async with self.flux.CONFIG.writeable_conf(ctx.msg_ctx) as cfg:
             cfg["prefix"] = prefix.strip()
          return Response()
 
-      @self._commandeer(name="exec", parsed=False, default_auths=[Record.deny_all()])
-      async def __exec(ctx: GuildMessageContext, script: str):
+      @self._commandeer(name="exec", parsed=False, override_auths=[Record.deny_all()])
+      async def __exec(ctx: CommandCtx, script: str):
          """
          exec ute order 66
          ==
@@ -180,7 +192,7 @@ class Builtins(FluxCog):
                           f"```py\n{res}\n```"), trashable=True)
 
       @self._commandeer(name="auth", parsed=False, default_auths=[Record.allow_perm(discord.Permissions(manage_guild=True))])
-      async def __auth(ctx: GuildMessageContext, auth_str):
+      async def __auth(ctx: CommandCtx, auth_str):
          """
          auth name [rule] <id>/{perm} [id_type]
          ==
@@ -210,16 +222,46 @@ class Builtins(FluxCog):
          if rule not in ["ALLOW", "DENY"]:
             raise CommandError(f'rule {rule} not in ["ALLOW","DENY"]')
          try:
-            target_id = parse_auth_id(ctx, type_=self.RULETYPES[rule_type], target_=rule_target_id_raw)
+            target_id = parse_auth_id(ctx.msg_ctx, type_=self.RULETYPES[rule_type], target_=rule_target_id_raw)
          except KeyError:
             raise CommandError(f"Rule type {rule_type} not in {self.RULETYPES.keys()}")
 
          record = Record(rule=rule, target_id=target_id, target_type=rule_type.upper())
-         await Auth.add_record(ctx, auth_id=cmd_or_cog.auth_id, record=record)
+         await Auth.add_record(ctx.msg_ctx, auth_id=cmd_or_cog.auth_id, record=record)
          return Response(f"Added record {record}")
 
-      @self._commandeer(name="help", parsed=False, default_auths=[Record.allow_all()], provide_auth=True)
-      async def __get_help(ctx: GuildMessageContext, help_target: ty.Optional[str], *, auth_ctx: AuthAwareContext):
+      @self._comandeer(name="userinfo", parsed=False, default_auths=[Record.deny_all()])
+      async def __userinfo(ctx: CommandCtx, target_raw):
+         if not (target := utils.find_mentions(target_raw)):
+            raise CommandError(f"Cannot find a user/member in `{target_raw}`. It should either be an ID or a mention")
+         target = ctx.msg_ctx.author
+         embed = discord.Embed(title=f"{target}'s Userinfo", url=str(target.avatar_url), color=target.color)
+         embed.add_field(name="Display Name", value=target.display_name, inline=True)
+         embed.add_field(name="ID", value=str(target.id), inline=False)
+         embed.add_field(name="Latest Join", value=target.joined_at.strftime("%I:%M:%S %p on %a, %b %d, %Y"))
+
+
+
+         if isinstance(target, discord.Member):
+            if target.premium_since:
+               delta = (datetime.datetime.utcnow() - target.premium_since).days
+               D_IN_M = 29.53
+               D_IN_Y = 365.25
+               if delta < 7:
+                  output = f"{delta} days"
+               elif delta < D_IN_M:  # average month length
+                  output = f"{delta // 7} weeks"
+               elif delta < D_IN_Y * 2 + 1:
+                  output = f"{delta // D_IN_M} months"
+               else:
+                  output = f"{delta // D_IN_Y} years"
+               embed.add_field(name="Boosting for ", value=output)
+            roles = ",".join(role.mention for role in (target.roles or ())[::-1])
+            embed.add_field(name="Roles", value=",".join(role.mention for role in (target.roles or ())[::-1]))
+
+
+      @self._commandeer(name="help", parsed=False, default_auths=[Record.allow_all()])
+      async def __get_help(ctx: CommandCtx, help_target: ty.Optional[str]):
          """
          help (command_name)
          ==
@@ -233,9 +275,9 @@ class Builtins(FluxCog):
          :param auth_ctx: Auth Context
          :return:
          """
-         configs = self.flux.CONFIG.of(ctx)
+         configs = self.flux.CONFIG.of(ctx.msg_ctx)
          authorized_cmds: ty.Dict[str, Command] = {command.name: command for cog in self.flux.cogs for command in cog.commands if
-                                                   Auth.accepts(auth_ctx, command) and command.name != "help"}
+                                                   Auth.accepts_all(ctx.auth_ctxs, command) and command.name != "help"}
 
          if not help_target:
             help_embed = discord.Embed(title=f"{utils.EMOJIS['question']} Command Help", description=f"{configs['prefix']}help <command> for more info")

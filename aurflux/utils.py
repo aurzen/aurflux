@@ -13,6 +13,7 @@ if ty.TYPE_CHECKING:
    from .flux import FluxClient
    from .command import Command
    from .cog import FluxCog
+   import aiohttp.client
 
 EMOJIS = {"white_check_mark": "\U00002705",
           "x"               : "\U0000274c",
@@ -55,6 +56,11 @@ class Timer:
 
    def __exit__(self, exc_type, exc_val, exc_tb):
       self.elapsed = time.perf_counter() - self.elapsed
+
+
+async def haste(session: aiohttp.client.ClientSession, content: str):
+   async with session.post("https://h.ze.ax/documents", data=content) as resp:
+      return f"https://h.ze.ax/{(await resp.json(content_type=None))['key']}"
 
 
 def ms(key):

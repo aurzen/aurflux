@@ -3,7 +3,7 @@ from __future__ import annotations
 import typing as ty
 
 if ty.TYPE_CHECKING:
-   from .context import ConfigContext
+   from .context import ConfigCtx
 
 import yaml
 import pathlib as pl
@@ -51,7 +51,7 @@ class Config(metaclass=aurcore.util.Singleton):
          local_config = {}
       return local_config
 
-   def of(self, identifiable: ConfigContext) -> ty.Dict[str, ty.Any]:
+   def of(self, identifiable: ConfigCtx) -> ty.Dict[str, ty.Any]:
       identifier = identifiable.config_identifier
       if identifier in self.cached:
          self.cached.move_to_end(identifier, last=False)
@@ -72,7 +72,7 @@ class Config(metaclass=aurcore.util.Singleton):
       return configs
 
    @contextlib.asynccontextmanager
-   async def writeable_conf(self, identifiable: ConfigContext):
+   async def writeable_conf(self, identifiable: ConfigCtx):
       config_id = identifiable.config_identifier
       async with self.locks[config_id]:
          output_dict = self._load_config_file(config_id)
