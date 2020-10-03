@@ -30,7 +30,7 @@ async def sexec(script: str, globals_=None, locals_=None):
    if isinstance(stmts[-1], ast.Expr):
       if len(stmts) > 1:
          exec(compile(ast.Module(body=stmts[:-1], type_ignores=[]), filename="<ast>", mode="exec"), exec_context)
-      return eval(compile(ast.Expression(body=stmts[-1].value), filename="<ast>", mode="eval"), exec_context)
+      return eval(compile(ast.Expression(expr_body=stmts[-1].value), filename="<ast>", mode="eval"), exec_context)
    else:
       exec(script, globals_, locals_)
 
@@ -47,6 +47,10 @@ async def aexec(script: str, globals_=None, locals_=None):
 def find_mentions(message_content):
    matches = re.finditer(r"<?(@!|@|@&|#)?(\d{17,20})>?", message_content)
    return [int(x.group(2)) for x in matches]
+
+def regex_parse(regex : re.Pattern, content: str, groups: ty.List[int]):
+   group_tuple = regex.fullmatch(content).groups()
+   return [group_tuple[i] for i in groups]
 
 
 class Timer:

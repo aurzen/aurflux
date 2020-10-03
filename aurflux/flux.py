@@ -14,7 +14,7 @@ from aurcore import EventRouter
 
 from .command import Command
 from .config import Config
-from .context import GuildMessageCtx, AuthAwareCtx
+from .context import GuildMessageCtx, AuthAwareCtx, CommandCtx, MessageCtx
 from loguru import logger
 # __logging.getLogger("discord.client").addFilter(lambda r: r.getMessage() != "PyNaCl is not installed, voice will NOT be supported")
 
@@ -35,7 +35,7 @@ class FluxEvent(aur.Event):
 
 class CommandEvent(FluxEvent):
    def __init__(self, flux: FluxClient, cmd_ctx : CommandCtx, cmd_args: ty.Optional[str], cmd_name: str):
-      super(CommandEvent, self).__init__(flux, f"flux:command:{cmd_name}")
+      super().__init__(flux, f"flux:command:{cmd_name}")
       self.cmd_name = cmd_name
       self.cmd_ctx = CommandCtx
       self.cmd_args = cmd_args
@@ -106,4 +106,5 @@ class FluxClient(discord.Client):
          logger.info(f"Command recognized! flux:command:{cmd_name}")
 
          # print(aur.Event(f"flux:command:{cmd}", ctx=ctx))
+         print(self.router)
          await self.router.submit(event=CommandEvent(flux=self, cmd_ctx=CommandCtx(ctx, ctx, [ctx]), cmd_name=cmd_name, cmd_args=args.strip() if args else None))
