@@ -50,8 +50,8 @@ class Builtins(FluxCog):
                raise CommandError(f"No role found with ID {target_}")
             return role_id
          if type_ == "permissions":
-            p_dict = json.loads(target_)
-            return discord.Permissions(**p_dict).value
+            p_dict: ty.List[str] = json.loads(target_)
+            return discord.Permissions(**{p: True for p in p_dict}).value
 
       def parse_auth_context(ctx: GuildAwareCtx, type_: str, target_: str) -> ManualAuthCtx:
          if type_ == "user":
@@ -101,9 +101,10 @@ class Builtins(FluxCog):
          ==
          Runs `command` as if it was being run by a `target` user, member, role, or permission-haver
          ==
-         type: [user/role/member/permissions/u/r/m/p] the type of `target`;
-         target: <user/member/role>/{perms}. Simulates usage by a given user, member,
+         [type]: [user/role/member/permissions/u/r/m/p] the type of `target`;
+         <target>: <user/member/role>. Simulates usage by a given user, member,
          member with a role, or member that has a set of permissions. See s.ze.ax/perm for {perms} structure;
+         {target}: JSON Array of permissions to simulate having
          command: Name of the Command to run as `target`;
          args: command arguments to pass to the Command
          ==
@@ -111,8 +112,11 @@ class Builtins(FluxCog):
          :param args:
          :return:
          """
+
          try:
-            mock_type, mock_target, command = args.split(" ", 2)
+            mock_type, mock_target, command, command_args = utils.regex_parse(re.compile(r"(\S+)\s+(\S+)\s+((\[[^\]]*\])|([^\s\[]+))\s+(\S+)\s*(.*)"),
+                                                                              args,
+                                                                              [x - 1 for x in [1, 2, 3, 6, 7]])
          except (ValueError, AttributeError):
             raise CommandError(f"See `help asif` for usage")
 
@@ -147,7 +151,7 @@ class Builtins(FluxCog):
          """
          setprefix prefix
          ==
-          Sets the bot prefix to `prefix`
+         Sets the bot prefix to `prefix`
          Ignores surrounding whitespace. Please don't.
          ==
          prefix: The string to put before a command name. Strips leading and trailing spaces.
@@ -199,8 +203,10 @@ class Builtins(FluxCog):
          Authorizes some group (member, has a role, or has a permission) to use a command or a cog
          ==
          name: Command name or Cog name;
-         rule: [ALLOW/DENY];
-         id: <member/role>/{perm} The target member or role or permission to allow;
+         [rule]: [ALLOW/DENY];
+         <id>: <member/role> The target member or role to allow;
+         {perm:} A permission JSON array representing a set of permissions that a user must have ALL of.
+         ex. ["manage_server","kick_members"]
          id_type: [MEMBER/ROLE/PERMISSION] Whatever `id` corresponds to
          ==
          :param ctx:
@@ -208,7 +214,9 @@ class Builtins(FluxCog):
          :return:
          """
          try:
-            rule_subject, rule, rule_target_id_raw, rule_type = auth_str.split(" ")
+            rule_subject, rule, rule_target_id_raw, rule_type = utils.regex_parse(re.compile(r"(\S+)\s+(\S+)\s+((\[[^\]]*\])|([^\s\[]+))\s+(\S+)"),
+                                                                                  auth_str,
+                                                                                  [x - 1 for x in [1, 2, 3, 6]])
          except (ValueError, AttributeError):
             raise CommandError(f"See `help auth` for usage")
 
@@ -230,19 +238,32 @@ class Builtins(FluxCog):
          await Auth.add_record(ctx.msg_ctx, auth_id=cmd_or_cog.auth_id, record=record)
          return Response(f"Added record {record}")
 
-      @self._comandeer(name="userinfo", parsed=False, default_auths=[Record.deny_all()])
+      @self._commandeer(name="userinfo", parsed=False, default_auths=[Record.allow_perm(discord.Permissions(manage_guild=True))])
       async def __userinfo(ctx: CommandCtx, target_raw):
+         """
+         userinfo (<user/member>)
+         ==
+         Authorizes some group (member, has a role, or has a permission) to use a command or a cog
+         ==
+         <user/member>: The target member/user to userinfo. Defaults to caller if not provided.
+         ==
+         :param ctx:
+         :param target_raw:
+         :return:
+         """
          if not (target := utils.find_mentions(target_raw)):
             raise CommandError(f"Cannot find a user/member in `{target_raw}`. It should either be an ID or a mention")
-         target = ctx.msg_ctx.author
+         if isinstance(ctx.msg_ctx, GuildMessageCtx):
+            target = ctx.guild.get_member(target)
+         else:
+            target = await ctx.msg_ctx.flux.get_user(target)
+
          embed = discord.Embed(title=f"{target}'s Userinfo", url=str(target.avatar_url), color=target.color)
          embed.add_field(name="Display Name", value=target.display_name, inline=True)
          embed.add_field(name="ID", value=str(target.id), inline=False)
          embed.add_field(name="Latest Join", value=target.joined_at.strftime("%I:%M:%S %p on %a, %b %d, %Y"))
 
-
-
-         if isinstance(target, discord.Member):
+         if isinstance(ctx.msg_ctx, GuildMessageCtx):
             if target.premium_since:
                delta = (datetime.datetime.utcnow() - target.premium_since).days
                D_IN_M = 29.53
@@ -257,8 +278,13 @@ class Builtins(FluxCog):
                   output = f"{delta // D_IN_Y} years"
                embed.add_field(name="Boosting for ", value=output)
             roles = ",".join(role.mention for role in (target.roles or ())[::-1])
-            embed.add_field(name="Roles", value=",".join(role.mention for role in (target.roles or ())[::-1]))
+            if len(roles) >= 2048:
+               url = utils.haste(self.flux.aiohttp_session, "\n".join(f"{role.id}:{role.name}" for role in target.roles))
+               roles = f"[roles]({url})"
+            embed.add_field(name="Roles", value=roles)
 
+            embed.add_field(name="Permissions in this channel", value=f"[Permissions](https://discordapi.com/permissions.html#{target.permissions_in(ctx.msg_ctx.channel)})")
+            embed.add_field(name="Server Permissions", value=f"[Permissions](https://discordapi.com/permissions.html#{target.permissions_in(ctx.msg_ctx.channel)})")
 
       @self._commandeer(name="help", parsed=False, default_auths=[Record.allow_all()])
       async def __get_help(ctx: CommandCtx, help_target: ty.Optional[str]):
@@ -275,6 +301,7 @@ class Builtins(FluxCog):
          :param auth_ctx: Auth Context
          :return:
          """
+         print("HELP!")
          configs = self.flux.CONFIG.of(ctx.msg_ctx)
          authorized_cmds: ty.Dict[str, Command] = {command.name: command for cog in self.flux.cogs for command in cog.commands if
                                                    Auth.accepts_all(ctx.auth_ctxs, command) and command.name != "help"}

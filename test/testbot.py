@@ -1,7 +1,11 @@
 from __future__ import annotations
 
 import typing as ty
+import sys
+# sys.path.append("..")
+# __package__ = "aurflux"
 import aurflux
+# from .. import aurflux
 import aurcore as aur
 import TOKENS
 
@@ -9,7 +13,7 @@ import TOKENS
 class TestBot:
    def __init__(self):
       self.event_router = aur.EventRouterHost(name="triviabot")
-      self.aurflux = aurflux.FluxClient("triviabot", admin_id=TOKENS.ADMIN_ID, parent_router=self.event_router, builtins=False)
+      self.aurflux = aurflux.FluxClient("testbot", admin_id=TOKENS.ADMIN_ID, parent_router=self.event_router, builtins=True)
 
       # self.aurflux.router.endpoint(":ready")(lambda ev: print("Ready!"))
 

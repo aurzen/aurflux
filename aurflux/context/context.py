@@ -21,6 +21,11 @@ class CommandCtx(aur.util.AutoRepr):
    author_ctx: AuthorAwareCtx
    auth_ctxs: ty.List[AuthAwareCtx]
 
+# @dtcs.dataclass
+# class GuildCommandCtx(CommandCtx):
+#    msg_ctx: GuildMessageCtx
+#    author_ctx: AuthorAwareCtx
+#    auth_ctxs: ty.List[AuthAwareCtx]
 
 
 class ConfigCtx(aur.util.AutoRepr):
@@ -161,7 +166,7 @@ class MessageCtx(AuthAwareCtx, AuthorAwareCtx, metaclass=ABCMeta):
 
 class GuildTextChannelCtx(GuildAwareCtx, _MessageableCtx):
 
-   def __init__(self, channel: discord.TextChannel, **kwargs):
+   def __init__(self, channel: ty.Union[discord.TextChannel, discord.DMChannel, discord.GroupChannel], **kwargs):
       super().__init__(**kwargs)
       self.channel = channel
 
