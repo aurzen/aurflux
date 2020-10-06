@@ -6,5 +6,6 @@ from .errors import *
 from . import utils
 from . import context
 from . import cog
+from . import command
 
 __all__ = ["FluxClient", "FluxEvent", "CommandEvent", "Config", "utils", "context", "cog"]
