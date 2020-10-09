@@ -301,7 +301,7 @@ class Builtins(FluxCog):
                inline=False
             )
          return Response(embed=embed)
-
+      @self._commandeer(name="serverinfo", )
       @self._commandeer(name="help", parsed=False, default_auths=[Record.allow_all()])
       async def __get_help(ctx: CommandCtx, help_target: ty.Optional[str]):
          """
