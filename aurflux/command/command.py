@@ -97,8 +97,8 @@ class Command(aur.util.AutoRepr, AuthAware):
             else:
                res = self.func(cmd_ctx, ev.cmd_args)
 
-            async for resp in aur.util.AwaitableAiter(res):
-               await resp.execute(cmd_ctx)
+         async for resp in aur.util.AwaitableAiter(res):
+            await resp.execute(cmd_ctx)
       except errors.CommandError as e:
          info_message = f"{e}"
          await Response(content=info_message, errored=True).execute(cmd_ctx)

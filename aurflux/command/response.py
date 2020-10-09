@@ -19,6 +19,7 @@ from loguru import logger
 class Response(aur.util.AutoRepr):
    __iter_done = False
    message: ty.Optional[discord.Message]
+   delete_after: ty.Optional[float]
 
    def __init__(
          self,
@@ -50,11 +51,11 @@ class Response(aur.util.AutoRepr):
       if self.content or self.embed:
          content = self.content if self.content else "" + (f"\n{ctx.author.mention}" if self.ping else "")
          if len(content) > 1900:
-            content = utils.haste(ctx.flux.aiohttp_session, content)
+            content = await utils.haste(ctx.flux.aiohttp_session, content)
          message = await ctx.msg_ctx.channel.send(
             content=content,
             embed=self.embed,
-            delete_after=self.delete_after.seconds if self.delete_after else None
+            delete_after=self.delete_after
          )
          self.message = message
 
