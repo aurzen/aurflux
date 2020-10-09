@@ -192,7 +192,7 @@ class DMChannelCtx(_MessageableCtx, AuthAwareCtx):
       return self.channel.recipient
 
    @property
-   def me(self) -> discord.User:
+   def me(self) -> discord.ClientUser:
       return self.channel.me
 
    @property
@@ -211,8 +211,8 @@ class DMChannelCtx(_MessageableCtx, AuthAwareCtx):
 
 
 class GuildMessageCtx(GuildTextChannelCtx, MessageCtx, GuildMemberCtx):
-   def __init__(self, message: discord.Message, **kwargs):
-      super().__init__(message=message, channel=message.channel, member=message.author, **kwargs)
+   def __init__(self, flux: FluxClient, message: discord.Message, **kwargs):
+      super().__init__(flux=flux, message=message, channel=message.channel, member=message.author, **kwargs)
 
    @property
    def author(self) -> discord.Member:
