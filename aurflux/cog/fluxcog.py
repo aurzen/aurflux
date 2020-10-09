@@ -28,10 +28,9 @@ class FluxCog(AuthAware):
          name: ty.Optional[str] = None,
          parsed: bool = True,
          decompose: bool = False,
-         allow_dm = False,
+         allow_dm=False,
          default_auths: ty.List[Record] = None,
          override_auths: ty.List[Record] = None,
-         provide_auths=False
    ) -> ty.Callable[[CommandFunc], Command]:
       default_auths = default_auths or []
       override_auths = override_auths or []
@@ -44,10 +43,9 @@ class FluxCog(AuthAware):
             name=(name or func.__name__),
             parsed=parsed,
             decompose=decompose,
-            allow_dm = allow_dm,
+            allow_dm=allow_dm,
             default_auths=default_auths,
             override_auths=override_auths,
-            provide_auths=provide_auths
          )
          if cmd.name in [c.name for c in self.commands]:
             raise TypeError(f"Attempting to register command {cmd} when one with the same name already exists")
