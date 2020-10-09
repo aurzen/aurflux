@@ -92,12 +92,12 @@ class Command(aur.util.AutoRepr, AuthAware):
       cmd_ctx = ev.cmd_ctx
 
       if not isinstance(cmd_ctx.msg_ctx, GuildMessageCtx) and not self.allow_dm:
-         return await Response(content="Cannot be used in DMs", errored=True).execute(cmd_ctx.msg_ctx)
+         return await Response(content="Cannot be used in DMs", errored=True).execute(cmd_ctx)
 
       logger.trace(f"Command {self} executing in {cmd_ctx.msg_ctx}")
 
       if not Auth.accepts_all(cmd_ctx.auth_ctxs, self):
-         return await Response(content="Forbidden", errored=True).execute(cmd_ctx.msg_ctx)
+         return await Response(content="Forbidden", errored=True).execute(cmd_ctx)
 
       try:
          with cmd_ctx.msg_ctx.channel.typing():

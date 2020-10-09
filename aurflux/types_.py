@@ -1,7 +1,7 @@
 import typing as ty
 
 if ty.TYPE_CHECKING:
-   from .context import GuildMessageCtx, AuthorAwareCtx
+   from .context import GuildMessageCtx, AuthorAwareCtx, CommandCtx
    from auth import AuthAwareCtx
    from .flux import FluxEvent, FluxClient
 
@@ -13,7 +13,8 @@ if ty.TYPE_CHECKING:
    ExtraCtxs: ty.TypeAlias = ty.Literal["auth"]
 
 
-   class GuildCommandCtx:
+   # noinspection PyUnresolvedReferences
+   class GuildCommandCtx(CommandCtx):
       flux: FluxClient
       msg_ctx: GuildMessageCtx
       author_ctx: AuthorAwareCtx
