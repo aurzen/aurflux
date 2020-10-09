@@ -198,7 +198,7 @@ class Builtins(FluxCog):
          """
          auth name [rule] <id>/{perm} [id_type]
          ==
-         Authorizes some group (member, has a role, or has a permission) to use a command or a cog
+         Authorizes some group (a member, members that have a role, or have some permissions) to use a command or a cog
          ==
          name: Command name or Cog name;
          [rule]: [ALLOW/DENY];

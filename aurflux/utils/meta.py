@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from .. import FluxClient
 import inspect
 import typing as ty
 
