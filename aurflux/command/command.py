@@ -10,6 +10,7 @@ from .response import Response
 from .. import errors
 from ..auth import Auth, AuthAware
 from loguru import logger
+from ..context import GuildMessageCtx
 
 if ty.TYPE_CHECKING:
    from ..types_ import *
@@ -44,9 +45,9 @@ class Command(aur.util.AutoRepr, AuthAware):
          name: str,
          parsed: bool,
          decompose: bool,
+         allow_dm: bool,
          default_auths: ty.List[Record],
          override_auths: ty.List[Record],
-         provide_auths,
    ):
       self.func = func
       self.flux = flux
@@ -55,14 +56,13 @@ class Command(aur.util.AutoRepr, AuthAware):
       self.doc = inspect.getdoc(func)
       self.parsed = False  # todo: argparser
       self.decompose = decompose
-
+      self.allow_dm = allow_dm
       # self.checks: ty.List[ty.Callable[[GuildMessageContext], ty.Union[bool, ty.Awaitable[bool]]]] = []
       self.builtin = False
       # self.argparser: ty.Optional[argh.ArgumentParser] = None
       self.default_auths_: ty.List[Record] = default_auths
       self.override_auths_: ty.List[Record] = override_auths
 
-      self.provide_auths = provide_auths
       func_doc = inspect.getdoc(self.func)
       if not func_doc:
          raise RuntimeError(f"{self.func} lacks a docstring!")
@@ -82,23 +82,23 @@ class Command(aur.util.AutoRepr, AuthAware):
    async def execute(self, ev: CommandEvent) -> None:
       cmd_ctx = ev.cmd_ctx
 
+      if not isinstance(cmd_ctx.msg_ctx, GuildMessageCtx) and not self.allow_dm:
+         return await Response(content="Cannot be used in DMs", errored=True).execute(cmd_ctx.msg_ctx)
 
       logger.trace(f"Command {self} executing in {cmd_ctx.msg_ctx}")
 
       if not Auth.accepts_all(cmd_ctx.auth_ctxs, self):
-         await Response(content="Forbidden", errored=True).execute(cmd_ctx.msg_ctx)
-         return
+         return await Response(content="Forbidden", errored=True).execute(cmd_ctx.msg_ctx)
 
       try:
          with cmd_ctx.msg_ctx.channel.typing():
-
             if self.decompose:
                res = self.func(cmd_ctx, *ev.args, **ev.kwargs)
             else:
                res = self.func(cmd_ctx, ev.cmd_args)
 
-         async for resp in aur.util.AwaitableAiter(res):
-            await resp.execute(cmd_ctx)
+            async for resp in aur.util.AwaitableAiter(res):
+               await resp.execute(cmd_ctx)
       except errors.CommandError as e:
          info_message = f"{e}"
          await Response(content=info_message, errored=True).execute(cmd_ctx)
@@ -117,11 +117,9 @@ class Command(aur.util.AutoRepr, AuthAware):
    def default_auths(self):
       return self.default_auths_
 
-
    @property
    def override_auths(self):
       return self.default_auths_
-
 
    def __str__(self):
       return f"Command {self.name} in {self.cog}: {self.func}"

@@ -28,6 +28,7 @@ class FluxCog(AuthAware):
          name: ty.Optional[str] = None,
          parsed: bool = True,
          decompose: bool = False,
+         allow_dm = False,
          default_auths: ty.List[Record] = None,
          override_auths: ty.List[Record] = None,
          provide_auths=False
@@ -43,6 +44,7 @@ class FluxCog(AuthAware):
             name=(name or func.__name__),
             parsed=parsed,
             decompose=decompose,
+            allow_dm = allow_dm,
             default_auths=default_auths,
             override_auths=override_auths,
             provide_auths=provide_auths
