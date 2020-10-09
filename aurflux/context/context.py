@@ -166,7 +166,7 @@ class MessageCtx(AuthAwareCtx, AuthorAwareCtx, metaclass=ABCMeta):
 
 class GuildTextChannelCtx(GuildAwareCtx, _MessageableCtx):
 
-   def __init__(self, flux: FluxClient, channel: ty.Union[discord.TextChannel, discord.GroupChannel], **kwargs):
+   def __init__(self, flux: FluxClient, channel: discord.TextChannel, **kwargs):
       super().__init__(flux=flux, **kwargs)
       self.channel = channel
 
