@@ -236,6 +236,7 @@ class Builtins(FluxCog):
          await Auth.add_record(ctx.msg_ctx, auth_id=cmd_or_cog.auth_id, record=record)
          return Response(f"Added record {record}")
 
+      # noinspection PyPep8Naming
       @self._commandeer(name="userinfo", parsed=False, default_auths=[Record.allow_perm(discord.Permissions(manage_guild=True))])
       async def __userinfo(ctx: CommandCtx, target_raw):
          """
@@ -322,7 +323,7 @@ class Builtins(FluxCog):
                                                    Auth.accepts_all(ctx.auth_ctxs, command) and command.name != "help"}
 
          if not help_target:
-            help_embed = discord.Embed(title=f"{utils.EMOJIS['question']} Command Help", description=f"{configs['prefix']}help <command> for more info")
+            help_embed = discord.Embed(title=f"{utils.EMOJI.question} Command Help", description=f"{configs['prefix']}help <command> for more info")
             for cmd_name, command in authorized_cmds.items():
                usage = "\n".join([f"{configs['prefix']}{usage}" for usage in command.short_usage.split("\n")])
                help_embed.add_field(name=cmd_name, value=usage, inline=False)
@@ -337,7 +338,7 @@ class Builtins(FluxCog):
             embed.add_field(name="<user>", value="Either an ID or a Mention of something. E.g. a @user", inline=False)
             embed.add_field(name="(optional)", value="Can leave this out", inline=False)
             embed.add_field(name="{json}", value="Json. No spaces please ;w;", inline=False)
-            embed.add_field(name="extra*", value="Spaces OK", inline=False)
+            embed.add_field(name="*extra", value="Can put multiple of these. Spaces okay.", inline=False)
 
             return Response(embed=embed)
 
