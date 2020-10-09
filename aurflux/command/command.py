@@ -71,11 +71,14 @@ class Command(aur.util.AutoRepr, AuthAware):
          short_usage, long_usage, params, *_ = func_doc.split("==")
       except ValueError as e:
          raise ValueError(f"{e} : {self.name}")
+
+
       self.short_usage = short_usage.strip()
       self.description = long_usage.strip()
 
 
       def combine_params(acc: ty.List[ty.Tuple[str, str]], x: str):
+         print(x)
          if acc and acc[-1][1].endswith("\\"):
             name, detail = acc.pop()
             acc.append((name, detail.removesuffix("\\").strip() + "\n" + x))
@@ -83,8 +86,10 @@ class Command(aur.util.AutoRepr, AuthAware):
             name, detail = x.split(":", 1)
             acc.append((name, detail))
          return acc
-
-      self.param_usage: ty.List[ty.Tuple[str, str]] = fnt.reduce(combine_params, params.strip().split("\n"), [])
+      try:
+         self.param_usage: ty.List[ty.Tuple[str, str]] = fnt.reduce(combine_params, params.strip().split("\n"), [])
+      except ValueError as e:
+         raise ValueError(f"Param Parse error {e} in {self.name}")
 
 
    async def execute(self, ev: CommandEvent) -> None:
