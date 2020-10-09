@@ -52,7 +52,7 @@ class Response(aur.util.AutoRepr):
          content = self.content if self.content else "" + (f"\n{ctx.author.mention}" if self.ping else "")
          if len(content) > 1900:
             content = await utils.haste(ctx.flux.aiohttp_session, content)
-         message = await ctx.msg_ctx.channel.send(
+         message = await ctx.msg_ctx.dest.send(
             content=content,
             embed=self.embed,
             delete_after=self.delete_after
