@@ -3,7 +3,7 @@ import typing as ty
 if ty.TYPE_CHECKING:
    from .context import GuildMessageCtx, AuthorAwareCtx
    from auth import AuthAwareCtx
-   from .flux import FluxEvent
+   from .flux import FluxEvent, FluxClient
 
 
    class CommandFunc(ty.Protocol):
@@ -20,6 +20,7 @@ if ty.TYPE_CHECKING:
 
 
    class GuildCommandEvent(FluxEvent):
+      flux: FluxClient
       cmd_name: str
       cmd_ctx: GuildCommandCtx
       cmd_args: ty.Optional[str]

@@ -16,6 +16,7 @@ if ty.TYPE_CHECKING:
 
 @dtcs.dataclass
 class CommandCtx(aur.util.AutoRepr):
+   flux: FluxClient
    msg_ctx: MessageCtx
    author_ctx: AuthorAwareCtx
    auth_ctxs: ty.List[AuthAwareCtx]

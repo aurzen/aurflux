@@ -107,4 +107,4 @@ class FluxClient(discord.Client):
 
          # print(aur.Event(f"flux:command:{cmd}", ctx=ctx))
          print(self.router)
-         await self.router.submit(event=CommandEvent(flux=self, cmd_ctx=CommandCtx(ctx, ctx, [ctx]), cmd_name=cmd_name, cmd_args=args.strip() if args else None))
+         await self.router.submit(event=CommandEvent(flux=self, cmd_ctx=CommandCtx(self, ctx, ctx, [ctx]), cmd_name=cmd_name, cmd_args=args.strip() if args else None))

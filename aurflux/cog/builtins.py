@@ -140,7 +140,7 @@ class Builtins(FluxCog):
             raise CommandError(f"Command {cmd_name} not found")
          if Auth.accepts_all(ctx.auth_ctxs + [mock_auth_ctx], cmd):
             await self.flux.router.submit(
-               event=CommandEvent(flux=self.flux, cmd_ctx=CommandCtx(ctx.msg_ctx, mock_author_ctx, ctx.auth_ctxs + [mock_auth_ctx]), cmd_name=cmd_name, cmd_args=cmd_args))
+               event=CommandEvent(flux=self.flux, cmd_ctx=CommandCtx(self.flux, ctx.msg_ctx, mock_author_ctx, ctx.auth_ctxs + [mock_auth_ctx]), cmd_name=cmd_name, cmd_args=cmd_args))
          else:
             raise CommandError(f"Can only mock commands that you have access to")
 
