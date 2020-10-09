@@ -20,6 +20,7 @@ class CommandCtx(aur.util.AutoRepr):
    author_ctx: AuthorAwareCtx
    auth_ctxs: ty.List[AuthAwareCtx]
 
+
 # @dtcs.dataclass
 # class GuildCommandCtx(CommandCtx):
 #    msg_ctx: GuildMessageCtx
@@ -45,8 +46,8 @@ class ConfigCtx(aur.util.AutoRepr):
 
 
 class GuildAwareCtx(ConfigCtx):
-   def __init__(self, **kwargs):
-      super().__init__(**kwargs)
+   def __init__(self, flux: FluxClient, **kwargs):
+      super().__init__(flux=flux, **kwargs)
 
    @property
    @abc.abstractmethod
@@ -55,6 +56,7 @@ class GuildAwareCtx(ConfigCtx):
    @property
    def config_identifier(self) -> str:
       return str(self.guild.id)
+
 
 # class GuildCommandCtx(CommandCtx, GuildAwareCtx):
 #    def __init__(self, guild: discord.Guild, **kwargs):
@@ -66,11 +68,9 @@ class GuildAwareCtx(ConfigCtx):
 #       return self.guild_
 
 
-
-
 class AuthorAwareCtx(ConfigCtx):
-   def __init__(self, **kwargs):
-      super().__init__(**kwargs)
+   def __init__(self, flux: FluxClient, **kwargs):
+      super().__init__(flux=flux, **kwargs)
 
    @property
    @abc.abstractmethod
@@ -78,8 +78,8 @@ class AuthorAwareCtx(ConfigCtx):
 
 
 class _MessageableCtx(ConfigCtx):
-   def __init__(self, **kwargs):
-      super().__init__(**kwargs)
+   def __init__(self, flux: FluxClient, **kwargs):
+      super().__init__(flux=flux, **kwargs)
 
    @property
    @abc.abstractmethod
@@ -87,8 +87,8 @@ class _MessageableCtx(ConfigCtx):
 
 
 class AuthAwareCtx(ConfigCtx):
-   def __init__(self, **kwargs):
-      super().__init__(**kwargs)
+   def __init__(self, flux: FluxClient, **kwargs):
+      super().__init__(flux=flux, **kwargs)
 
    @property
    @abc.abstractmethod
@@ -97,8 +97,8 @@ class AuthAwareCtx(ConfigCtx):
 
 class ManualAuthCtx(AuthAwareCtx):
 
-   def __init__(self, auth_list: AuthList, config_identifier: str, **kwargs):
-      super().__init__(**kwargs)
+   def __init__(self, flux: FluxClient, auth_list: AuthList, config_identifier: str, **kwargs):
+      super().__init__(flux=flux, **kwargs)
       self.auth_list_ = auth_list
       self.config_identifier_ = config_identifier
 
@@ -112,8 +112,8 @@ class ManualAuthCtx(AuthAwareCtx):
 
 
 class ManualAuthorCtx(AuthorAwareCtx):
-   def __init__(self, author: ty.Union[discord.User, discord.Member], **kwargs):
-      super().__init__(**kwargs)
+   def __init__(self, flux: FluxClient, author: ty.Union[discord.User, discord.Member], **kwargs):
+      super().__init__(flux=flux, **kwargs)
       self.author_ = author
 
    @property
@@ -122,8 +122,8 @@ class ManualAuthorCtx(AuthorAwareCtx):
 
 
 class ManualGuildCtx(GuildAwareCtx):
-   def __init__(self, guild: discord.Guild, **kwargs):
-      super().__init__(**kwargs)
+   def __init__(self, flux: FluxClient, guild: discord.Guild, **kwargs):
+      super().__init__(flux=flux, **kwargs)
       self.guild_ = guild
 
    @property
@@ -133,8 +133,8 @@ class ManualGuildCtx(GuildAwareCtx):
 
 class GuildMemberCtx(AuthAwareCtx, GuildAwareCtx):
 
-   def __init__(self, member: discord.Member, **kwargs):
-      super().__init__(**kwargs)
+   def __init__(self, flux: FluxClient, member: discord.Member, **kwargs):
+      super().__init__(flux=flux, **kwargs)
       self.member = member
 
    @property
@@ -150,8 +150,8 @@ class GuildMemberCtx(AuthAwareCtx, GuildAwareCtx):
 
 
 class MessageCtx(AuthAwareCtx, AuthorAwareCtx, metaclass=ABCMeta):
-   def __init__(self, message: discord.Message, **kwargs):
-      super().__init__(**kwargs)
+   def __init__(self, flux: FluxClient, message: discord.Message, **kwargs):
+      super().__init__(flux=flux, **kwargs)
       self.message = message
 
    @property
@@ -165,8 +165,8 @@ class MessageCtx(AuthAwareCtx, AuthorAwareCtx, metaclass=ABCMeta):
 
 class GuildTextChannelCtx(GuildAwareCtx, _MessageableCtx):
 
-   def __init__(self, channel: ty.Union[discord.TextChannel, discord.DMChannel, discord.GroupChannel], **kwargs):
-      super().__init__(**kwargs)
+   def __init__(self, flux: FluxClient, channel: ty.Union[discord.TextChannel, discord.DMChannel, discord.GroupChannel], **kwargs):
+      super().__init__(flux=flux, **kwargs)
       self.channel = channel
 
    @property
@@ -183,8 +183,8 @@ class GuildTextChannelCtx(GuildAwareCtx, _MessageableCtx):
 
 
 class DMChannelCtx(_MessageableCtx, AuthAwareCtx):
-   def __init__(self, channel: discord.DMChannel, **kwargs):
-      super().__init__(**kwargs)
+   def __init__(self, flux: FluxClient, channel: discord.DMChannel, **kwargs):
+      super().__init__(flux=flux, **kwargs)
       self.channel = channel
 
    @property
@@ -222,4 +222,3 @@ class GuildMessageCtx(GuildTextChannelCtx, MessageCtx, GuildMemberCtx):
 class DMMessageCtx(DMChannelCtx, MessageCtx):
    def __init__(self, **kwargs):
       super().__init__(**kwargs)
-
