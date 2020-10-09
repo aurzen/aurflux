@@ -366,7 +366,7 @@ class Builtins(FluxCog):
             content=tabulate.tabulate(
                [[f"{channel}",
                  f"{channel.id}",
-                 f"{channel.category}"
+                 f"{channel.category}",
                  f"{channel.created_at.strftime(utils.DATETIME_FMT_S)}",
                  f"{channel.permissions_synced}",
                  f"{channel.slowmode_delay}s",
@@ -385,7 +385,7 @@ class Builtins(FluxCog):
                [[f"{channel}",
                  f"{channel.id}",
                  f"{channel.category}",
-                 f"{channel.created_at.strftime(utils.DATETIME_FMT_S)}"
+                 f"{channel.created_at.strftime(utils.DATETIME_FMT_S)}",
                  f"{channel.permissions_synced}",
                  f"{channel.bitrate // 1000} kbps",
                  f"{channel.user_limit}"
