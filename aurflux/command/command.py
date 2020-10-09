@@ -64,7 +64,6 @@ class Command(aur.util.AutoRepr, AuthAware):
       self.override_auths_: ty.List[Record] = override_auths
 
       func_doc = inspect.getdoc(self.func)
-      print(repr(func_doc))
       if not func_doc:
          raise RuntimeError(f"{self.func} lacks a docstring!")
       try:
@@ -116,6 +115,7 @@ class Command(aur.util.AutoRepr, AuthAware):
          info_message = f"{e}"
          await Response(content=info_message).execute(cmd_ctx)
       except Exception as e:
+         print(traceback.format_exc())
          await Response(content=f"```Unexpected Exception:\n{str(e)}\n```", errored=True).execute(cmd_ctx)
          logger.error(traceback.format_exc())
 

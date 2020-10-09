@@ -7,6 +7,10 @@ import sys
 
 # __package__ = "aurflux"
 import aurflux
+
+from loguru import logger
+logger.add("stdout", backtrace=True, diagnose=True)
+
 # from .. import aurflux
 import aurcore as aur
 import TOKENS

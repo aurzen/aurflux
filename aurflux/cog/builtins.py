@@ -14,10 +14,12 @@ from ..auth import Auth, AuthList, Record
 from ..command import Response
 from ..context import GuildMessageCtx, ManualAuthCtx, ManualAuthorCtx
 from ..errors import CommandError
+import tabulate
 
 if ty.TYPE_CHECKING:
    from ..context import CommandCtx, GuildAwareCtx
    from ..command import Command
+   from ..types_ import *
 
 
 class Builtins(FluxCog):
@@ -93,7 +95,7 @@ class Builtins(FluxCog):
       #    return Response()
 
       @self._commandeer(name="asif", parsed=False, default_auths=[Record.allow_all()])
-      async def __asif(ctx: CommandCtx, args: str, ):
+      async def __asif(ctx: GuildCommandCtx, args: str, ):
          """
          asif [type] <target>/{target} command args*
          ==
@@ -145,7 +147,7 @@ class Builtins(FluxCog):
          return Response()
 
       @self._commandeer(name="setprefix", parsed=False, default_auths=[Record.allow_perm(discord.Permissions(manage_guild=True))])
-      async def __set_prefix(ctx: CommandCtx, prefix: str):
+      async def __set_prefix(ctx: GuildCommandCtx, prefix: str):
          """
          setprefix prefix
          ==
@@ -194,7 +196,7 @@ class Builtins(FluxCog):
                           f"```py\n{res}\n```"), trashable=True)
 
       @self._commandeer(name="auth", parsed=False, default_auths=[Record.allow_perm(discord.Permissions(manage_guild=True))])
-      async def __auth(ctx: CommandCtx, auth_str):
+      async def __auth(ctx: GuildCommandCtx, auth_str):
          """
          auth name [rule] <id>/{perm} [id_type]
          ==
@@ -238,7 +240,7 @@ class Builtins(FluxCog):
 
       # noinspection PyPep8Naming
       @self._commandeer(name="userinfo", parsed=False, default_auths=[Record.allow_perm(discord.Permissions(manage_guild=True))])
-      async def __userinfo(ctx: CommandCtx, target_raw):
+      async def __userinfo(ctx: GuildCommandCtx, target_raw):
          """
          userinfo (<user/member>)
          ==
@@ -261,12 +263,12 @@ class Builtins(FluxCog):
             else:
                target = await ctx.msg_ctx.flux.get_user(target)
 
-         embed = discord.Embed(title=f"{target}'s Userinfo",  color=target.color)
+         embed = discord.Embed(title=f"{utils.EMOJI.question}{target}'s Userinfo", color=target.color)
          embed.set_thumbnail(url=str(target.avatar_url))
          embed.add_field(name="Display Name", value=utils.copylink(target.display_name), inline=True)
          embed.add_field(name="ID", value=utils.copylink(str(target.id)), inline=False)
-         embed.add_field(name="Latest Join", value=utils.copylink(target.joined_at.strftime("%I:%M:%S %p on %a, %b %d, %Y")), inline=False)
-         embed.add_field(name="Creation Date", value=utils.copylink(target.created_at.strftime("%I:%M:%S %p on %a, %b %d, %Y")), inline=False)
+         embed.add_field(name="Latest Join", value=utils.copylink(target.joined_at.strftime(utils.DATETIME_FMT_L)), inline=False)
+         embed.add_field(name="Creation Date", value=utils.copylink(target.created_at.strftime(utils.DATETIME_FMT_L)), inline=False)
 
          if isinstance(ctx.msg_ctx, GuildMessageCtx):
             if target.color != discord.Color.default():
@@ -301,9 +303,105 @@ class Builtins(FluxCog):
                inline=False
             )
          return Response(embed=embed)
-      @self._commandeer(name="serverinfo", )
+
+      @self._commandeer(name="serverinfo", parsed=False, default_auths=[Record.allow_perm(discord.Permissions(manage_guild=True))])
+      async def __serverinfo(ctx: GuildCommandCtx, _):
+         """
+         serverinfo
+         ==
+         Gets information about the server
+         ==
+         ==
+         :param ctx:
+         :param _:
+         :return:
+         """
+         g = ctx.msg_ctx.guild
+         embed = discord.Embed(title=f"{utils.EMOJI.question}{g} Server Info")
+         embed.set_thumbnail(url=str(ctx.msg_ctx.guild.icon_url))
+         # Info
+         embed.add_field(name="Owner", value=f"<@!{g.owner_id}>", inline=True)
+         embed.add_field(name="Region", value=f"{g.region}", inline=True)
+         embed.add_field(name="Members", value=f"{g.member_count}")
+
+         # Creation
+         embed.add_field(name="Creation", value=g.created_at.strftime(utils.DATETIME_FMT_L), inline=False)
+
+         # Extra Info
+         embed.add_field(name="MFA Required", value=f"{bool(g.mfa_level)}", inline=True)
+         embed.add_field(name="Verify Level", value=f"{g.verification_level}", inline=True)
+         embed.add_field(name="Filter", value=f"{g.explicit_content_filter}", inline=True)
+
+         # Boosters
+         boosters_haste = await utils.haste(
+            self.flux.aiohttp_session,
+            tabulate.tabulate(
+               headers=["Member", "Mention"],
+               tabular_data=[[str(member), member.mention] for member in g.premium_subscribers])
+         ) if g.premium_subscribers else ""
+         embed.add_field(name="Nitro Boosters", value=f"[{g.premium_subscription_count} boosters]({boosters_haste})", inline=True)
+         embed.add_field(name="Boost Level", value=f"{g.premium_tier}", inline=True)
+
+         # Emoji
+         emoji_haste = await utils.haste(
+            self.flux.aiohttp_session,
+            content=tabulate.tabulate(
+               headers=["Emoji", "Animated", "URL"],
+               tabular_data=[[str(emoji), emoji.animated, emoji.url] for emoji in g.emojis]
+            )
+         )
+         embed.add_field(name="Emoji", value=f"[{len(g.emojis)}/{g.emoji_limit} emojis]({emoji_haste})", inline=False)
+
+         # Features
+         features_haste = await utils.haste(
+            self.flux.aiohttp_session,
+            content="\n".join(feature for feature in g.features)
+         ) if g.features else ""
+         embed.add_field(name="Features", value=f"[{len(g.features)} features enabled]({features_haste})", inline=False)
+
+         # Channels
+         text_channels = [channel for channel in g.text_channels if channel.overwrites_for(g.default_role).read_messages is not False and g.default_role.permissions.read_messages]
+         public_channels_haste = await utils.haste(
+            self.flux.aiohttp_session,
+            content=tabulate.tabulate(
+               [[f"{channel}",
+                 f"{channel.id}",
+                 f"{channel.category}"
+                 f"{channel.created_at.strftime(utils.DATETIME_FMT_S)}",
+                 f"{channel.permissions_synced}",
+                 f"{channel.slowmode_delay}s",
+                 f"{channel.position}",
+                 ]
+                for channel in text_channels],
+               headers=("Name", "ID", "Category", "Creation", "Perm Sync", "Slow", "Position")
+            )
+         ) if text_channels else ""
+         embed.add_field(name="Public Text Channels", value=f"[{len(g.text_channels)} Channels]({public_channels_haste})", inline=True)
+
+         voice_channels = [channel for channel in g.voice_channels if channel.overwrites_for(g.default_role).connect is not False and g.default_role.permissions.connect]
+         public_vc_haste = await utils.haste(
+            self.flux.aiohttp_session,
+            content=tabulate.tabulate(
+               [[f"{channel}",
+                 f"{channel.id}",
+                 f"{channel.category}",
+                 f"{channel.created_at.strftime(utils.DATETIME_FMT_S)}"
+                 f"{channel.permissions_synced}",
+                 f"{channel.bitrate // 1000} kbps",
+                 f"{channel.user_limit}"
+                 ]
+                for channel in voice_channels],
+               headers=("Name", "ID", "Category", "Creation", "Perm Sync", "Bitrate", "User Limit")
+
+            )
+         ) if voice_channels else ""
+
+         embed.add_field(name="Public Voice Channels", value=f"[{len(g.voice_channels)} Channels]({public_vc_haste})", inline=True)
+         return Response(embed=embed)
+         pass
+
       @self._commandeer(name="help", parsed=False, default_auths=[Record.allow_all()])
-      async def __get_help(ctx: CommandCtx, help_target: ty.Optional[str]):
+      async def __get_help(ctx: GuildCommandCtx, help_target: ty.Optional[str]):
          """
          help (command_name)
          ==
