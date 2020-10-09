@@ -53,29 +53,30 @@ class Config(metaclass=aurcore.util.Singleton):
 
    def of(self, identifiable: ConfigCtx) -> ty.Dict[str, ty.Any]:
       identifier = identifiable.config_identifier
-      if identifier in self.cached:
-         self.cached.move_to_end(identifier, last=False)
-         configs = self.cached[identifier]
-      else:
-         local_config = self._load_config_file(identifier)
-         combined_dict = {**self.base_config, **local_config}
-         cleaned_dict = {k: combined_dict[k] for k in self.base_config}
-         if cleaned_dict != local_config:
-            self._write_config_file(identifier, cleaned_dict)
+      async with self.locks[identifier]:
+         if identifier in self.cached:
+            self.cached.move_to_end(identifier, last=False)
+            configs = self.cached[identifier]
+         else:
+            local_config = self._load_config_file(identifier)
+            combined_dict = {**self.base_config, **local_config}
+            cleaned_dict = {k: combined_dict[k] for k in self.base_config}
+            if cleaned_dict != local_config:
+               self._write_config_file(identifier, cleaned_dict)
 
-         self.cached[identifier] = cleaned_dict
-         if len(self.cached) > CACHED_CONFIGS:
-            self.cached.popitem()
+            self.cached[identifier] = cleaned_dict
+            if len(self.cached) > CACHED_CONFIGS:
+               self.cached.popitem()
 
-         configs = cleaned_dict
+            configs = cleaned_dict
 
-      return configs
+         return configs
 
    @contextlib.asynccontextmanager
    async def writeable_conf(self, identifiable: ConfigCtx):
       config_id = identifiable.config_identifier
+      output_dict = self.of(identifiable)
       async with self.locks[config_id]:
-         output_dict = self._load_config_file(config_id)
          try:
             yield output_dict
          finally:
