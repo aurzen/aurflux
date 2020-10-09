@@ -14,6 +14,7 @@ if ty.TYPE_CHECKING:
 
 
    class GuildCommandCtx:
+      flux: FluxClient
       msg_ctx: GuildMessageCtx
       author_ctx: AuthorAwareCtx
       auth_ctxs: ty.List[AuthAwareCtx]
