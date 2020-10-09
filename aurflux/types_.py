@@ -19,7 +19,7 @@ class GuildCommandCtx:
    auth_ctxs: ty.List[AuthAwareCtx]
 
 
-class CommandEvent(FluxEvent):
+class GuildCommandEvent(FluxEvent):
    cmd_name: str
    cmd_ctx: GuildCommandCtx
    cmd_args: ty.Optional[str]
