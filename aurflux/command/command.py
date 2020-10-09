@@ -64,6 +64,7 @@ class Command(aur.util.AutoRepr, AuthAware):
       self.override_auths_: ty.List[Record] = override_auths
 
       func_doc = inspect.getdoc(self.func)
+      print(repr(func_doc))
       if not func_doc:
          raise RuntimeError(f"{self.func} lacks a docstring!")
       try:
@@ -72,12 +73,19 @@ class Command(aur.util.AutoRepr, AuthAware):
          raise ValueError(f"{e} : {self.name}")
       self.short_usage = short_usage.strip()
       self.description = long_usage.strip()
-      self.param_usage: ty.List[ty.List[str]] = [param_line.strip().split(":") for param_line in params.split(";") if param_line.strip()]
-      # else:
-      #    self.short_usage: str = func_doc.split("\n")[0]
-      #    raw_doc = func_doc[func_doc.index("\n"):func_doc.index(":param")].strip()
-      #
-      #    self.long_usage: ty.List[ty.List[str, str]] = [doc_line.split(":") for doc_line in raw_doc.split("\n")]
+
+
+      def combine_params(acc: ty.List[ty.Tuple[str, str]], x: str):
+         if acc and acc[-1][1].endswith("\\"):
+            name, detail = acc.pop()
+            acc.append((name, detail.removesuffix("\\").strip() + "\n" + x))
+         else:
+            name, detail = x.split(":", 1)
+            acc.append((name, detail))
+         return acc
+
+      self.param_usage: ty.List[ty.Tuple[str, str]] = fnt.reduce(combine_params, params.strip().split("\n"), [])
+
 
    async def execute(self, ev: CommandEvent) -> None:
       cmd_ctx = ev.cmd_ctx

@@ -66,12 +66,14 @@ class Response(aur.util.AutoRepr):
          elif self.react:
             await ctx.msg_ctx.message.add_reaction(utils.EMOJI.check)
 
-         if self.trashable:
+         if self.message and self.trashable:
             await self.message.add_reaction(utils.EMOJI.trashcan)
             try:
-               await ctx.msg_ctx.flux.router.wait_for(":reaction_add",
-                                                      check=lambda ev: ev.args[0].message.id == self.message.id and ev.args[1] == ctx.msg_ctx.message.author,
-                                                      timeout=15)
+               await ctx.msg_ctx.flux.router.wait_for(
+                  ":reaction_add",
+                  check=lambda ev: ev.args[0].message.id == self.message.id and ev.args[1] == ctx.msg_ctx.message.author,
+                  timeout=15
+               )
                await self.message.delete()
             except aio.exceptions.TimeoutError:
                await self.message.remove_reaction(emoji=utils.EMOJI.trashcan, member=ctx.msg_ctx.guild.me)

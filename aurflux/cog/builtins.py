@@ -99,11 +99,11 @@ class Builtins(FluxCog):
          ==
          Runs `command` as if it was being run by a `target` user, member, role, or permission-haver
          ==
-         [type]: [user/role/member/permissions/u/r/m/p] the type of `target`;
-         <target>: <user/member/role>. Simulates usage by a given user, member,
-         member with a role, or member that has a set of permissions. See s.ze.ax/perm for {perms} structure;
+         [type]: [user/role/member/permissions/u/r/m/p] the type of `target`
+         <target>: <user/member/role>. Simulates usage by a given user, member, \
+         member with a role, or member that has a set of permissions. See s.ze.ax/perm for {perms} structure
          {target}: JSON Array of permissions to simulate having
-         command: Name of the Command to run as `target`;
+         command: Name of the Command to run as `target`
          args: command arguments to pass to the Command
          ==
          :param ctx:
@@ -202,8 +202,8 @@ class Builtins(FluxCog):
          ==
          name: Command name or Cog name;
          [rule]: [ALLOW/DENY];
-         <id>: <member/role> The target member or role to allow;
-         {perm:} A permission JSON array representing a set of permissions that a user must have ALL of.
+         <id>: <member/role> The target member or role to allow
+         {perm}: A permission JSON array representing a set of permissions that a user must have ALL of. \\
          ex. ["manage_server","kick_members"]
          id_type: [MEMBER/ROLE/PERMISSION] Whatever `id` corresponds to
          ==
@@ -351,7 +351,7 @@ class Builtins(FluxCog):
             description=cmd.description)
 
          embed.add_field(name="Usage", value=cmd.short_usage, inline=False)
-
+         print(cmd.param_usage)
          for arg, detail in cmd.param_usage:
             embed.add_field(name=arg.strip(), value=detail.strip(), inline=False)
             # embed.add_field(name=detail,value="", inline=False)

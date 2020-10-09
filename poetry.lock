@@ -44,7 +44,7 @@ description = "Aurcore!"
 name = "aurcore"
 optional = false
 python-versions = ">3.8"
-version = "1.1.21"
+version = "1.1.25"
 
 [[package]]
 category = "main"
@@ -176,7 +176,7 @@ marker = "sys_platform == \"win32\""
 name = "win32-setctime"
 optional = false
 python-versions = ">=3.5"
-version = "1.0.2"
+version = "1.0.3"
 
 [package.extras]
 dev = ["pytest (>=4.6.2)", "black (>=19.3b0)"]
@@ -221,8 +221,8 @@ attrs = [
     {file = "attrs-20.2.0.tar.gz", hash = "sha256:26b54ddbbb9ee1d34d5d3668dd37d6cf74990ab23c828c2888dccdceee395594"},
 ]
 aurcore = [
-    {file = "aurcore-1.1.21-py3-none-any.whl", hash = "sha256:1a30f929018e0fd1c74b40a7c70b120e92dc5be4db72ba6a99899875d6cd5a0d"},
-    {file = "aurcore-1.1.21.tar.gz", hash = "sha256:3cdf3e0bf8734f0dc5f1f7a780a1beff08f531db8d0f052dbb8270e8a4dfa5b2"},
+    {file = "aurcore-1.1.25-py3-none-any.whl", hash = "sha256:28d1119faade809128f7b7385d6354d87a0c718338c48336590c8819d0501459"},
+    {file = "aurcore-1.1.25.tar.gz", hash = "sha256:bf0a698b084d3365aef456a1bbb76c6f617d2b47e9f3cc251c05d0ec3def469c"},
 ]
 chardet = [
     {file = "chardet-3.0.4-py2.py3-none-any.whl", hash = "sha256:fc323ffcaeaed0e0a02bf4d117757b98aed530d9ed4531e3e15460124c106691"},
@@ -329,8 +329,8 @@ typing-extensions = [
     {file = "typing_extensions-3.7.4.3.tar.gz", hash = "sha256:99d4073b617d30288f569d3f13d2bd7548c3a7e4c8de87db09a9d29bb3a4a60c"},
 ]
 win32-setctime = [
-    {file = "win32_setctime-1.0.2-py3-none-any.whl", hash = "sha256:02b4c5959ca0b195f45c98115826c6e8a630b7cf648e724feaab1a5aa6250640"},
-    {file = "win32_setctime-1.0.2.tar.gz", hash = "sha256:47aa7c43548c1fc0a4f026d1944b748b37036df116c7c4cf908e82638d854313"},
+    {file = "win32_setctime-1.0.3-py3-none-any.whl", hash = "sha256:dc925662de0a6eb987f0b01f599c01a8236cb8c62831c22d9cada09ad958243e"},
+    {file = "win32_setctime-1.0.3.tar.gz", hash = "sha256:4e88556c32fdf47f64165a2180ba4552f8bb32c1103a2fafd05723a0bd42bd4b"},
 ]
 yarl = [
     {file = "yarl-1.6.0-cp35-cp35m-macosx_10_14_x86_64.whl", hash = "sha256:db9eb8307219d7e09b33bcb43287222ef35cbcf1586ba9472b0a4b833666ada1"},

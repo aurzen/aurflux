@@ -1,5 +1,5 @@
 class EMOJI:
    check = "✅"
-   x = " ❌"
+   x = "❌"
    trashcan = "🗑"
    question = "❔"
