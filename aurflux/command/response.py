@@ -37,8 +37,9 @@ class Response(aur.util.AutoRepr):
 
       if isinstance(delete_after, datetime.timedelta):
          self.delete_after = delete_after.total_seconds()
-      if isinstance(delete_after, (int, float)):
+      else:
          self.delete_after = delete_after
+
       self.errored = errored
       self.react = react
       self.ping = ping
