@@ -1,6 +1,6 @@
 __package__ = "aurflux"
 
-import types_ as ty
+from . import types_ as ty
 from . import cog, command, context, errors, utils
 from .config import Config
 from .flux import CommandEvent, FluxClient, FluxEvent
