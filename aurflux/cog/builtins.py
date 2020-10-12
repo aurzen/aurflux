@@ -7,7 +7,7 @@ import traceback
 import typing as ty
 
 import discord
-
+from loguru import logger
 from . import FluxCog
 from .. import CommandEvent, utils
 from ..auth import Auth, AuthList, Record
@@ -117,7 +117,8 @@ class Builtins(FluxCog):
             mock_type, mock_target, command, command_args = utils.regex_parse(re.compile(r"(\S+)\s+(\S+)\s+((\[[^\]]*\])|([^\s\[]+))\s+(\S+)\s*(.*)"),
                                                                               args,
                                                                               [x - 1 for x in [1, 2, 3, 6, 7]])
-         except (ValueError, AttributeError):
+         except (ValueError, AttributeError) as e:
+            logger.info(e)
             raise CommandError(f"See `help asif` for usage")
 
          MOCK_TYPES = {
