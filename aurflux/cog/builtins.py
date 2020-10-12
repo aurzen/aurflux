@@ -146,7 +146,7 @@ class Builtins(FluxCog):
 
          return Response()
 
-      @self._commandeer(name="setprefix", parsed=False, default_auths=[Record.allow_perm(discord.Permissions(manage_guild=True))])
+      @self._commandeer(name="setprefix", parsed=False, default_auths=[Record.allow_server_manager()])
       async def __set_prefix(ctx: GuildCommandCtx, prefix: str):
          """
          setprefix prefix
@@ -195,7 +195,7 @@ class Builtins(FluxCog):
                           f"**OUT**:\n"
                           f"```py\n{res}\n```"), trashable=True)
 
-      @self._commandeer(name="auth", parsed=False, default_auths=[Record.allow_perm(discord.Permissions(manage_guild=True))])
+      @self._commandeer(name="auth", parsed=False, default_auths=[Record.allow_server_manager()])
       async def __auth(ctx: GuildCommandCtx, auth_str):
          """
          auth name [rule] <id>/{perm} [id_type]
@@ -239,7 +239,7 @@ class Builtins(FluxCog):
          return Response(f"Added record {record}")
 
       # noinspection PyPep8Naming
-      @self._commandeer(name="userinfo", parsed=False, default_auths=[Record.allow_perm(discord.Permissions(manage_guild=True))])
+      @self._commandeer(name="userinfo", parsed=False, default_auths=[Record.allow_server_manager()])
       async def __userinfo(ctx: GuildCommandCtx, target_raw):
          """
          userinfo (<user/member>)
@@ -304,7 +304,7 @@ class Builtins(FluxCog):
             )
          return Response(embed=embed)
 
-      @self._commandeer(name="serverinfo", parsed=False, default_auths=[Record.allow_perm(discord.Permissions(manage_guild=True))])
+      @self._commandeer(name="serverinfo", parsed=False, default_auths=[Record.allow_server_manager()])
       async def __serverinfo(ctx: GuildCommandCtx, _):
          """
          serverinfo
