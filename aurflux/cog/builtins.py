@@ -133,7 +133,7 @@ class Builtins(FluxCog):
 
          cmd_name, cmd_args, *_ = [*command.split(" ", 1), None]
          mock_auth_ctx = parse_auth_context(ctx=ctx.msg_ctx, type_=mock_type, target_=mock_target)
-         mock_author_ctx = ManualAuthorCtx(ctx.msg_ctx.message.guild.get_member(mock_target)) if ctx.msg_ctx.message.guild else ctx.author_ctx
+         mock_author_ctx = ManualAuthorCtx(flux=self.flux, author=ctx.msg_ctx.message.guild.get_member(mock_target)) if ctx.msg_ctx.message.guild else ctx.author_ctx
 
          cmd = utils.find_cmd_or_cog(self.flux, cmd_name, only="command")
 
