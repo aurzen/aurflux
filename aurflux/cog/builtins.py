@@ -116,7 +116,7 @@ class Builtins(FluxCog):
          try:
             mock_type, mock_target, command, command_args = utils.regex_parse(re.compile(r"(\S+)\s+((\[[^\]]*\])|([^\s\[]+))\s+(\S+)\s*(.*)"),
                                                                               args,
-                                                                              [x - 1 for x in [1, 2, 3, 6, 7]])
+                                                                              [x - 1 for x in [1, 2, 5, 6]])
          except (ValueError, AttributeError) as e:
             logger.info(e)
             raise CommandError(f"See `help asif` for usage")
