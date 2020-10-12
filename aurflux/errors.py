@@ -1,5 +1,7 @@
 from __future__ import annotations
-
+import typing as ty
+if ty.TYPE_CHECKING:
+   import discord
 class CommandException(BaseException):
    def __init__(self, message=None, *args):
       if message is not None:
@@ -18,11 +20,8 @@ class CommandError(CommandException):
    pass
 
 
-class CheckFailure(CommandError):
-   pass
 
-
-class UserMissingPermissions(CheckFailure):
+class UserMissingPermissions(CommandError):
    def __init__(self, missing_perms, *args):
       self.missing_perms = missing_perms
 
@@ -36,11 +35,11 @@ class UserMissingPermissions(CheckFailure):
       super().__init__(message, *args)
 
 
-class BotMissingPermissions(CheckFailure):
-   def __init__(self, missing_perms, *args):
-      self.missing_perms = missing_perms
+class BotMissingPermissions(CommandError):
+   def __init__(self, need: discord.Permissions, have: discord.Permissions, *args):
+      missing_perms = discord.Permissions(permissions=(need.value ^ have.value) & need.value)
 
-      missing = [perm.replace('_', ' ').replace('guild', 'server').title() for perm in missing_perms]
+      missing = [perm.replace('_', ' ').replace('guild', 'server').title() for perm,v in missing_perms if v]
 
       if len(missing) > 2:
          fmt = '{}, and {}'.format(", ".join(missing[:-1]), missing[-1])
@@ -50,7 +49,3 @@ class BotMissingPermissions(CheckFailure):
       super().__init__(message, *args)
 
 
-class NotWhitelisted(CheckFailure):
-   def __init__(self, *args):
-      message = 'You are not whitelisted for this command.'
-      super().__init__(message, *args)
