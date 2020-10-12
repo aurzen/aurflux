@@ -12,12 +12,12 @@ from . import FluxCog
 from .. import CommandEvent, utils
 from ..auth import Auth, AuthList, Record
 from ..command import Response
-from ..context import GuildMessageCtx, ManualAuthCtx, ManualAuthorCtx
+from ..context import GuildMessageCtx, ManualAuthCtx, ManualAuthorCtx, CommandCtx
 from ..errors import CommandError
 import tabulate
 
 if ty.TYPE_CHECKING:
-   from ..context import CommandCtx, GuildAwareCtx
+   from ..context import GuildAwareCtx
    from ..command import Command
    from ..types_ import *
 
