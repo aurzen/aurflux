@@ -48,6 +48,7 @@ class Response(aur.util.AutoRepr):
       self.trashable = trashable
 
    async def execute(self, ctx: CommandCtx):
+      message = None
       if self.content or self.embed:
          content = self.content if self.content else "" + (f"\n{ctx.author.mention}" if self.ping else "")
          if len(content) > 1900:
@@ -57,7 +58,7 @@ class Response(aur.util.AutoRepr):
             embed=self.embed,
             delete_after=self.delete_after
          )
-         self.message = message
+         # self.message = message
 
          await self.post_process(ctx.msg_ctx, message)
       try:
@@ -66,19 +67,19 @@ class Response(aur.util.AutoRepr):
          elif self.react:
             await ctx.msg_ctx.message.add_reaction(utils.EMOJI.check)
 
-         if self.message and self.trashable:
-            await self.message.add_reaction(utils.EMOJI.trashcan)
+         if message and self.trashable:
+            await message.add_reaction(utils.EMOJI.trashcan)
             try:
                await ctx.msg_ctx.flux.router.wait_for(
                   ":reaction_add",
-                  check=lambda ev: ev.args[0].message.id == self.message.id and ev.args[1] == ctx.msg_ctx.message.author,
+                  check=lambda ev: ev.args[0].message.id == message.id and ev.args[1] == ctx.msg_ctx.message.author,
                   timeout=3
                )
                print("Delete!")
-               await self.message.delete()
+               await message.delete()
             except aio.exceptions.TimeoutError:
                print("exceptionS!")
-               await self.message.remove_reaction(emoji=utils.EMOJI.trashcan, member=ctx.msg_ctx.guild.me)
+               await message.remove_reaction(emoji=utils.EMOJI.trashcan, member=ctx.msg_ctx.guild.me)
 
       except (discord.errors.NotFound, discord.errors.Forbidden) as e:
          logger.error(e)
