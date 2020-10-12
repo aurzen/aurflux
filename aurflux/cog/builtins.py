@@ -376,7 +376,7 @@ class Builtins(FluxCog):
                headers=("Name", "ID", "Category", "Creation", "Perm Sync", "Slow", "Position")
             )
          ) if text_channels else ""
-         embed.add_field(name="Public Text Channels", value=f"[{len(g.text_channels)} Channels]({public_channels_haste})", inline=True)
+         embed.add_field(name="Public Text Channels", value=f"[{len(text_channels)} Channels]({public_channels_haste})", inline=True)
 
          voice_channels = [channel for channel in g.voice_channels if channel.overwrites_for(g.default_role).connect is not False and g.default_role.permissions.connect]
          public_vc_haste = await utils.haste(
@@ -396,7 +396,7 @@ class Builtins(FluxCog):
             )
          ) if voice_channels else ""
 
-         embed.add_field(name="Public Voice Channels", value=f"[{len(g.voice_channels)} Channels]({public_vc_haste})", inline=True)
+         embed.add_field(name="Public Voice Channels", value=f"[{len(voice_channels)} Channels]({public_vc_haste})", inline=True)
          return Response(embed=embed)
          pass
 

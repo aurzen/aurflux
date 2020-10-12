@@ -116,7 +116,7 @@ class Command(aur.util.AutoRepr, AuthAware):
          await Response(content=info_message).execute(cmd_ctx)
       except Exception as e:
          print(traceback.format_exc())
-         await Response(content=f"```Unexpected Exception:\n{str(e)}\n```", errored=True).execute(cmd_ctx)
+         await Response(content=f"```Unexpected Exception:\n{str(e)}\n```", errored=True, trashable=True).execute(cmd_ctx)
          logger.error(traceback.format_exc())
 
    @property
