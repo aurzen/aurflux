@@ -38,12 +38,16 @@ class Record:
       return dtcs.asdict(self)
 
    @classmethod
-   def admin_record(cls, admin_id: id):
+   def admin_record(cls, admin_id: int):
       return cls(rule="ALLOW", target_id=admin_id, target_type="MEMBER")
 
    @classmethod
    def allow_perm(cls, perm: discord.Permissions):
       return cls(rule="ALLOW", target_id=perm.value, target_type="PERMISSION")
+
+   @classmethod
+   def allow_server_manager(cls):
+      return cls(rule="ALLOW", target_id=discord.Permissions(manage_guild=True).value, target_type="PERMISSION")
 
    @classmethod
    def deny_all(cls):
