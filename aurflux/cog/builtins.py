@@ -114,7 +114,7 @@ class Builtins(FluxCog):
          """
 
          try:
-            mock_type, mock_target, command, command_args = utils.regex_parse(re.compile(r"(\S+)\s+(\S+)\s+((\[[^\]]*\])|([^\s\[]+))\s+(\S+)\s*(.*)"),
+            mock_type, mock_target, command, command_args = utils.regex_parse(re.compile(r"(\S+)\s+((\[[^\]]*\])|([^\s\[]+))\s+(\S+)\s*(.*)"),
                                                                               args,
                                                                               [x - 1 for x in [1, 2, 3, 6, 7]])
          except (ValueError, AttributeError) as e:
@@ -199,7 +199,7 @@ class Builtins(FluxCog):
       @self._commandeer(name="auth", parsed=False, default_auths=[Record.allow_server_manager()])
       async def __auth(ctx: GuildCommandCtx, auth_str):
          """
-         auth name [rule] <id>/{perm} [id_type]
+         auth name [rule] [id_type] <id>/{perm}
          ==
          Authorizes some group (a member, members that have a role, or have some permissions) to use a command or a cog
          ==
@@ -215,9 +215,9 @@ class Builtins(FluxCog):
          :return:
          """
          try:
-            rule_subject, rule, rule_target_id_raw, rule_type = utils.regex_parse(re.compile(r"(\S+)\s+(\S+)\s+((\[[^\]]*\])|([^\s\[]+))\s+(\S+)"),
+            rule_subject, rule, rule_type, rule_target_id_raw,  = utils.regex_parse(re.compile(r"(\S+)\s+(\S+)\s+(\S+)\s+((\[[^\]]*\])|([^\s\[]+))"),
                                                                                   auth_str,
-                                                                                  [x - 1 for x in [1, 2, 3, 6]])
+                                                                                  [x - 1 for x in [1, 2, 3, 4]])
          except (ValueError, AttributeError):
             raise CommandError(f"See `help auth` for usage")
 
