@@ -283,7 +283,7 @@ class Builtins(FluxCog):
          if not target_raw:
             target = ctx.author_ctx.author
          else:
-            if not (target := utils.find_mentions(target_raw)):
+            if not (target := utils.find_mentions(target_raw)[0]):
                raise CommandError(f"Cannot find a user/member in `{target_raw}`. It should either be an ID or a mention")
 
             if isinstance(ctx.msg_ctx, GuildMessageCtx):
