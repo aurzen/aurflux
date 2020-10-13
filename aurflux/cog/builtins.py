@@ -378,7 +378,7 @@ class Builtins(FluxCog):
                tabular_data=[[str(emoji), emoji.animated, emoji.url] for emoji in g.emojis]
             )
          )
-         embed.add_field(name="Emoji", value=f"[{len(g.emojis)}/{g.emoji_limit} emojis]({emoji_haste})", inline=False)
+         embed.add_field(name="Emoji", value=f"[{len(g.emojis)}/{g.emoji_limit*2} emojis]({emoji_haste})", inline=False)
 
          # Features
          features_haste = await utils.haste(
