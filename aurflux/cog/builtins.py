@@ -14,6 +14,7 @@ from . import FluxCog
 from .. import CommandEvent, utils
 from ..auth import Auth, AuthList, Record
 from ..command import Response
+# noinspection PyUnresolvedReferences
 from ..context import ManualAuthCtx, ManualAuthorCtx, CommandCtx
 from ..errors import CommandError
 
@@ -34,13 +35,13 @@ class Builtins(FluxCog):
    }
 
    def load(self):
-      def parse_auth_id(ctx: GuildAwareCtx, type_: str, target_: str) -> int:
+      async def parse_auth_id(ctx: GuildAwareCtx, type_: str, target_: str) -> int:
          if type_ == "member":
             ids_ = utils.find_mentions(target_)
 
             if not ids_:
                raise CommandError(f"No member ID found in {target_}")
-            if not ctx.guild.get_member(ids_[0]):
+            if not await utils.get_or_fetch_member(ctx.guild, ids_[0]):
                raise CommandError(f"No member found with ID {ids_[0]}")
             return ids_[0]
          if type_ == "role":
@@ -54,29 +55,38 @@ class Builtins(FluxCog):
             p_dict: ty.List[str] = json.loads(target_)
             return discord.Permissions(**{p: True for p in p_dict}).value
 
-      def parse_auth_context(ctx: GuildAwareCtx, type_: str, target_: str) -> ManualAuthCtx:
+      async def parse_auth_context(ctx: GuildAwareCtx, type_: str, target_: str) -> ManualAuthCtx:
          if type_ == "user":
             ids_ = utils.find_mentions(target_)
             if not ids_:
                raise CommandError(f"No user ID found in {target_}")
 
             return ManualAuthCtx(flux=self.flux, auth_list=AuthList(user=self.flux.get_user(ids_[0]).id), config_identifier=ids_[0])
-         auth_id = parse_auth_id(ctx, type_=type_, target_=target_)
+         auth_id = await parse_auth_id(ctx, type_=type_, target_=target_)
          if type_ == "member":
-            member = ctx.guild.get_member(auth_id)
+            member = await utils.get_or_fetch_member(ctx.guild, auth_id)
             if not member:
                raise CommandError(f"No member found with id `{auth_id}`")
-            return ManualAuthCtx(flux=self.flux, auth_list=AuthList(user=member.id, roles=[r.id for r in member.roles], permissions=member.guild_permissions),
+            return ManualAuthCtx(flux=self.flux,
+                                 auth_list=AuthList(
+                                    user=member.id, roles=[r.id for r in member.roles],
+                                    permissions=member.guild_permissions),
                                  config_identifier=str(ctx.guild.id))
          if type_ == "role":
             role = ctx.guild.get_role(auth_id)
             if not role:
                raise CommandError(f"No role found with id `{auth_id}`")
-            return ManualAuthCtx(flux=self.flux, auth_list=AuthList(roles=[auth_id], permissions=role.permissions), config_identifier=str(ctx.guild.id))
+            return ManualAuthCtx(
+               flux=self.flux,
+               auth_list=AuthList(roles=[auth_id], permissions=role.permissions),
+               config_identifier=str(ctx.guild.id))
 
          if type_ == "permissions":
             try:
-               return ManualAuthCtx(flux=self.flux, auth_list=AuthList(permissions=discord.Permissions(permissions=auth_id)), config_identifier=str(ctx.guild.id))
+               return ManualAuthCtx(
+                  flux=self.flux,
+                  auth_list=AuthList(permissions=discord.Permissions(permissions=auth_id)),
+                  config_identifier=str(ctx.guild.id))
             except TypeError as e:
                raise CommandError(f"Permissions `{auth_id}` could not be parsed. See:\n{e}")
 
@@ -135,8 +145,11 @@ class Builtins(FluxCog):
             raise CommandError(f"`{mock_type}` must be in [{', '.join(MOCK_TYPES.keys())}]")
 
          cmd_name, cmd_args, *_ = [*command.split(" ", 1), None]
-         mock_auth_ctx = parse_auth_context(ctx=ctx.msg_ctx, type_=mock_type, target_=mock_target)
-         mock_author_ctx = ManualAuthorCtx(author=ctx.msg_ctx.message.guild.get_member(mock_target)) if ctx.msg_ctx.message.guild else ctx.author_ctx
+         mock_auth_ctx = await parse_auth_context(ctx=ctx.msg_ctx, type_=mock_type, target_=mock_target)
+         if ctx.msg_ctx.message.guild:
+            mock_author_ctx = ManualAuthorCtx(author=await utils.get_or_fetch_member(ctx.msg_ctx.guild, mock_target))
+         else:
+            mock_author_ctx = ctx.author_ctx
 
          cmd = utils.find_cmd_or_cog(self.flux, cmd_name, only="command")
 
@@ -144,7 +157,14 @@ class Builtins(FluxCog):
             raise CommandError(f"Command {cmd_name} not found")
          if Auth.accepts_all(ctx.auth_ctxs + [mock_auth_ctx], cmd):
             await self.flux.router.submit(
-               event=CommandEvent(flux=self.flux, cmd_ctx=CommandCtx(self.flux, ctx.msg_ctx, mock_author_ctx, ctx.auth_ctxs + [mock_auth_ctx]), cmd_name=cmd_name,
+               event=CommandEvent(flux=self.flux,
+                                  cmd_ctx=CommandCtx(
+                                     self.flux,
+                                     ctx.msg_ctx,
+                                     mock_author_ctx,
+                                     ctx.auth_ctxs + [mock_auth_ctx]
+                                  ),
+                                  cmd_name=cmd_name,
                                   cmd_args=cmd_args))
          else:
             raise CommandError(f"Can only mock commands that you have access to")
@@ -239,7 +259,7 @@ class Builtins(FluxCog):
          if rule not in ["ALLOW", "DENY"]:
             raise CommandError(f'rule {rule} not in ["ALLOW","DENY"]')
          try:
-            target_id = parse_auth_id(ctx.msg_ctx, type_=self.RULETYPES[id_type], target_=rule_target_id_raw)
+            target_id = await parse_auth_id(ctx.msg_ctx, type_=self.RULETYPES[id_type], target_=rule_target_id_raw)
          except KeyError:
             raise CommandError(f"Rule type {id_type} not in {self.RULETYPES.keys()}")
 
@@ -268,7 +288,7 @@ class Builtins(FluxCog):
                raise CommandError(f"Cannot find a user/member in `{target_raw}`. It should either be an ID or a mention")
 
             if isinstance(ctx.msg_ctx, GuildMessageCtx):
-               target = ctx.msg_ctx.guild.get_member(target)
+               target = utils.get_or_fetch_member(ctx.msg_ctx.guild, target)
             else:
                target = await ctx.msg_ctx.flux.get_user(target)
 
