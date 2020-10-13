@@ -110,8 +110,8 @@ class ManualAuthCtx(AuthAwareCtx):
 
 
 class ManualAuthorCtx(AuthorAwareCtx):
-   def __init__(self, flux: FluxClient, author: ty.Union[discord.User, discord.Member], **kwargs):
-      super().__init__(flux=flux, **kwargs)
+   def __init__(self, author: ty.Union[discord.User, discord.Member]):
+      super().__init__()
       self.author_ = author
 
    @property
