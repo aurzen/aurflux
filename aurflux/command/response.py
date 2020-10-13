@@ -51,12 +51,13 @@ class Response(aur.util.AutoRepr):
       self.trashable = trashable
 
    async def execute(self, ctx: CommandCtx):
-
-      if self.status == "ok":
-         await ctx.msg_ctx.message.add_reaction(utils.EMOJI.check)
-      if self.status == "error":
-         await ctx.msg_ctx.message.add_reaction(utils.EMOJI.x)
-
+      try:
+         if self.status == "ok":
+            await ctx.msg_ctx.message.add_reaction(utils.EMOJI.check)
+         if self.status == "error":
+            await ctx.msg_ctx.message.add_reaction(utils.EMOJI.x)
+      except discord.errors.NotFound:
+         pass
       if not self.content and not self.embed:
          return
 
