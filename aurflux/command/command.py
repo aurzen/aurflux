@@ -5,34 +5,20 @@ import traceback
 import typing as ty
 
 import aurcore as aur
+from loguru import logger
 
 from .response import Response
 from .. import errors
 from ..auth import Auth, AuthAware
-from loguru import logger
-from ..context import GuildMessageCtx
 
 if ty.TYPE_CHECKING:
    from ..types_ import *
-   from . import argh
    from .. import FluxClient
    from ..cog import FluxCog
    from ..auth import Record
    from ..flux import CommandEvent
 import typing as ty
-import asyncio as aio
 import inspect
-
-
-def _coroify(func):  # todo: move to aurcore
-   if aio.iscoroutinefunction(func):
-      return func
-   fnt.wraps(func)
-
-   async def __async_wrapper(*args, **kwargs):
-      func(*args, **kwargs)
-
-   return __async_wrapper
 
 
 class Command(aur.util.AutoRepr, AuthAware):
@@ -43,7 +29,6 @@ class Command(aur.util.AutoRepr, AuthAware):
          cog: FluxCog,
          func: CommandFunc,
          name: str,
-         parsed: bool,
          decompose: bool,
          allow_dm: bool,
          default_auths: ty.List[Record],
@@ -54,12 +39,9 @@ class Command(aur.util.AutoRepr, AuthAware):
       self.cog = cog
       self.name = name
       self.doc = inspect.getdoc(func)
-      self.parsed = False  # todo: argparser
       self.decompose = decompose
       self.allow_dm = allow_dm
-      # self.checks: ty.List[ty.Callable[[GuildMessageContext], ty.Union[bool, ty.Awaitable[bool]]]] = []
       self.builtin = False
-      # self.argparser: ty.Optional[argh.ArgumentParser] = None
       self.default_auths_: ty.List[Record] = default_auths
       self.override_auths_: ty.List[Record] = override_auths
 
@@ -76,11 +58,12 @@ class Command(aur.util.AutoRepr, AuthAware):
 
       def combine_params(acc: ty.List[ty.Tuple[str, str]], x: str):
          if acc and acc[-1][1].endswith("\\"):
-            name, detail = acc.pop()
-            acc.append((name, detail.removesuffix("\\").strip() + "\n" + x))
+            param_name, detail = acc.pop()
+            # noinspection PyUnresolvedReferences
+            acc.append((param_name, detail.removesuffix("\\").strip() + "\n" + x))
          else:
-            name, detail = x.split(":", 1)
-            acc.append((name, detail))
+            param_name, detail = x.split(":", 1)
+            acc.append((param_name, detail))
          return acc
 
       try:
@@ -92,12 +75,12 @@ class Command(aur.util.AutoRepr, AuthAware):
       cmd_ctx = ev.cmd_ctx
 
       if not isinstance(cmd_ctx.msg_ctx, GuildMessageCtx) and not self.allow_dm:
-         return await Response(content="Cannot be used in DMs", errored=True).execute(cmd_ctx)
+         return await Response(content="Cannot be used in DMs", status="error").execute(cmd_ctx)
 
       logger.trace(f"Command {self} executing in {cmd_ctx.msg_ctx}")
 
       if not Auth.accepts_all(cmd_ctx.auth_ctxs, self):
-         return await Response(content="Forbidden", errored=True).execute(cmd_ctx)
+         return await Response(content="Forbidden", status="error").execute(cmd_ctx)
 
       try:
          with cmd_ctx.msg_ctx.channel.typing():
@@ -110,13 +93,13 @@ class Command(aur.util.AutoRepr, AuthAware):
             await resp.execute(cmd_ctx)
       except errors.CommandError as e:
          info_message = f"{e}"
-         await Response(content=info_message, errored=True).execute(cmd_ctx)
+         await Response(content=info_message, status="error").execute(cmd_ctx)
       except errors.CommandInfo as e:
          info_message = f"{e}"
          await Response(content=info_message).execute(cmd_ctx)
       except Exception as e:
          print(traceback.format_exc())
-         await Response(content=f"```Unexpected Exception:\n{str(e)}\n```", errored=True, trashable=True).execute(cmd_ctx)
+         await Response(content=f"```Unexpected Exception:\n{str(e)}\n```", status="error", trashable=True).execute(cmd_ctx)
          logger.error(traceback.format_exc())
 
    @property

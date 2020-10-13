@@ -69,7 +69,7 @@ class GuildAwareCtx(ConfigCtx):
 #       return self.guild_
 
 
-class AuthorAwareCtx(ConfigCtx):
+class AuthorAwareCtx:
    def __init__(self, flux: FluxClient, **kwargs):
       super().__init__(flux=flux, **kwargs)
 
