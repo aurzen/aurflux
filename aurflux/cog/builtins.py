@@ -14,7 +14,7 @@ from . import FluxCog
 from .. import CommandEvent, utils
 from ..auth import Auth, AuthList, Record
 from ..command import Response
-from ..context import ManualAuthCtx, ManualAuthorCtx
+from ..context import ManualAuthCtx, ManualAuthorCtx, CommandCtx
 from ..errors import CommandError
 
 if ty.TYPE_CHECKING:
