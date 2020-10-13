@@ -70,9 +70,6 @@ class GuildAwareCtx(ConfigCtx):
 
 
 class AuthorAwareCtx:
-   def __init__(self, flux: FluxClient, **kwargs):
-      super().__init__(flux=flux, **kwargs)
-
    @property
    @abc.abstractmethod
    def author(self) -> ty.Union[discord.User, discord.Member]: ...
