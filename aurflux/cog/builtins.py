@@ -81,7 +81,7 @@ class Builtins(FluxCog):
                raise CommandError(f"Permissions `{auth_id}` could not be parsed. See:\n{e}")
 
       # @CommandCheck.check(lambda ctx: ctx.author.id == self.flux.admin_id)
-      # @self._commandeer(name="reload", parsed=False, private=True)
+      # @self._commandeer(name="reload", private=True)
       # async def reload(ctx: MessageContext, cog_name: str):
       #    reloaded_cogs = []
       #    for cog in s.cogs:
@@ -95,7 +95,7 @@ class Builtins(FluxCog):
       #    ctx.flux.cogs = reloaded_cogs
       #    return Response()
 
-      @self._commandeer(name="asif", parsed=False, default_auths=[Record.allow_all()])
+      @self._commandeer(name="asif", default_auths=[Record.allow_all()])
       async def __asif(ctx: GuildCommandCtx, args: str, ):
          """
          asif [type] <target>/{target} command args*
@@ -151,7 +151,7 @@ class Builtins(FluxCog):
 
          return Response()
 
-      @self._commandeer(name="setprefix", parsed=False, default_auths=[Record.allow_server_manager()])
+      @self._commandeer(name="setprefix", default_auths=[Record.allow_server_manager()])
       async def __set_prefix(ctx: GuildCommandCtx, prefix: str):
          """
          setprefix prefix
@@ -169,7 +169,7 @@ class Builtins(FluxCog):
             cfg["prefix"] = prefix.strip()
          return Response()
 
-      @self._commandeer(name="exec", parsed=False, override_auths=[Record.deny_all()])
+      @self._commandeer(name="exec", override_auths=[Record.deny_all()])
       async def __exec(ctx: CommandCtx, script: str):
          """
          exec ute order 66
@@ -200,7 +200,7 @@ class Builtins(FluxCog):
                           f"**OUT**:\n"
                           f"```py\n{res}\n```"), trashable=True)
 
-      @self._commandeer(name="auth", parsed=False, default_auths=[Record.allow_server_manager()])
+      @self._commandeer(name="auth", default_auths=[Record.allow_server_manager()])
       async def __auth(ctx: GuildCommandCtx, auth_str):
          """
          auth name [rule] [id_type] <id>/{perm}
@@ -246,7 +246,7 @@ class Builtins(FluxCog):
          return Response(f"Added record {record}")
 
       # noinspection PyPep8Naming
-      @self._commandeer(name="userinfo", parsed=False, default_auths=[Record.allow_server_manager()])
+      @self._commandeer(name="userinfo", default_auths=[Record.allow_server_manager()])
       async def __userinfo(ctx: GuildCommandCtx, target_raw):
          """
          userinfo (<user/member>)
@@ -311,7 +311,7 @@ class Builtins(FluxCog):
             )
          return Response(embed=embed)
 
-      @self._commandeer(name="serverinfo", parsed=False, default_auths=[Record.allow_server_manager()])
+      @self._commandeer(name="serverinfo", default_auths=[Record.allow_server_manager()])
       async def __serverinfo(ctx: GuildCommandCtx, _):
          """
          serverinfo
@@ -407,7 +407,7 @@ class Builtins(FluxCog):
          return Response(embed=embed)
          pass
 
-      @self._commandeer(name="help", parsed=False, default_auths=[Record.allow_all()])
+      @self._commandeer(name="help", default_auths=[Record.allow_all()])
       async def __get_help(ctx: GuildCommandCtx, help_target: ty.Optional[str]):
          """
          help (command_name)

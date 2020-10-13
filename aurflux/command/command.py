@@ -59,7 +59,7 @@ class Command(aur.util.AutoRepr, AuthAware):
       def combine_params(acc: ty.List[ty.Tuple[str, str]], x: str):
          if acc and acc[-1][1].endswith("\\"):
             param_name, detail = acc.pop()
-            # noinspection PyUnresolvedReferences
+            # noinspection PyUnresolvedReferences,Mypy
             acc.append((param_name, detail.removesuffix("\\").strip() + "\n" + x))
          else:
             param_name, detail = x.split(":", 1)
@@ -88,9 +88,9 @@ class Command(aur.util.AutoRepr, AuthAware):
                res = self.func(cmd_ctx, *ev.args, **ev.kwargs)
             else:
                res = self.func(cmd_ctx, ev.cmd_args)
-
-         async for resp in aur.util.AwaitableAiter(res):
-            await resp.execute(cmd_ctx)
+         if res:
+            async for resp in aur.util.AwaitableAiter(res):
+               await resp.execute(cmd_ctx)
       except errors.CommandError as e:
          info_message = f"{e}"
          await Response(content=info_message, status="error").execute(cmd_ctx)

@@ -26,7 +26,6 @@ class FluxCog(AuthAware):
    def _commandeer(
          self,
          name: ty.Optional[str] = None,
-         parsed: bool = True,
          decompose: bool = False,
          allow_dm=False,
          default_auths: ty.List[Record] = None,
@@ -41,7 +40,6 @@ class FluxCog(AuthAware):
             cog=self,
             func=func,
             name=(name or func.__name__),
-            parsed=parsed,
             decompose=decompose,
             allow_dm=allow_dm,
             default_auths=default_auths,
