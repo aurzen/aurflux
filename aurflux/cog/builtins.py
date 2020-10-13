@@ -287,7 +287,7 @@ class Builtins(FluxCog):
                raise CommandError(f"Cannot find a user/member in `{target_raw}`. It should either be an ID or a mention")
 
             if isinstance(ctx.msg_ctx, GuildMessageCtx):
-               target = utils.get_or_fetch_member(ctx.msg_ctx.guild, target)
+               target = await utils.get_or_fetch_member(ctx.msg_ctx.guild, target)
             else:
                target = await ctx.msg_ctx.flux.get_user(target)
 
@@ -300,7 +300,7 @@ class Builtins(FluxCog):
 
          if isinstance(ctx.msg_ctx, GuildMessageCtx):
             if target.color != discord.Color.default():
-               embed.add_field(name="Color", value=utils.copylink(str(target.color.value)), inline=False)
+               embed.add_field(name="Color", value=utils.copylink(hex(target.color.value)), inline=False)
             if target.premium_since:
                delta = (datetime.datetime.utcnow() - target.premium_since).days
                D_IN_M = 29.53
