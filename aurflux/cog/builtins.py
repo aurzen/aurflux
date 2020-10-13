@@ -15,7 +15,7 @@ from .. import CommandEvent, utils
 from ..auth import Auth, AuthList, Record
 from ..command import Response
 # noinspection PyUnresolvedReferences
-from ..context import ManualAuthCtx, ManualAuthorCtx, CommandCtx
+from ..context import ManualAuthCtx, ManualAuthorCtx, CommandCtx, GuildMessageCtx
 from ..errors import CommandError
 
 if ty.TYPE_CHECKING:
