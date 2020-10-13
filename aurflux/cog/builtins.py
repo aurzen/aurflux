@@ -103,8 +103,8 @@ class Builtins(FluxCog):
          Runs `command` as if it was being run by a `target` user, member, role, or permission-haver
          ==
          [type]: [user/role/member/permissions/u/r/m/p] the type of `target`
-         <target>: <user/member/role>. Simulates usage by a given user, member, \
-         member with a role, or member that has a set of permissions. See s.ze.ax/perm for {perms} structure
+         <target>: <user/member/role>. Simulates usage by a given caller, \\
+         with a role, or a set of permissions. See [here](s.ze.ax/perm) for {perms} names
          {target}: JSON Array of permissions to simulate having
          command: Name of the Command to run as `target`
          args: command arguments to pass to the Command
@@ -209,17 +209,19 @@ class Builtins(FluxCog):
          ==
          name: Command name or Cog name;
          [rule]: [ALLOW/DENY];
+         id_type: [member/role/permission/m/r/p] The type that `id` is
          <id>: <member/role> The target member or role to allow
          {perm}: A permission JSON array representing a set of permissions that a user must have ALL of. \\
          ex. ["manage_server","kick_members"]
-         id_type: [MEMBER/ROLE/PERMISSION] Whatever `id` corresponds to
+         EXAMPLE: Want to allow the role @moderator to use `auth` (Note: This effectively gives full bot access): \\
+         `auth auth ALLOW role @moderators`
          ==
          :param ctx:
          :param auth_str:
          :return:
          """
          try:
-            rule_subject, rule, rule_type, rule_target_id_raw, = utils.regex_parse(
+            rule_subject, rule, id_type, rule_target_id_raw, = utils.regex_parse(
                re.compile(r"(\S+)\s+(\S+)\s+(\S+)\s+((\[[^\]]*\])|([^\s\[]+))"),
                auth_str,
                [x - 1 for x in [1, 2, 3, 4]]
@@ -229,7 +231,7 @@ class Builtins(FluxCog):
 
          rule_subject = rule_subject.lower()
          rule = rule.upper()
-         rule_type = rule_type.lower()
+         id_type = id_type.lower()
 
          cmd_or_cog = utils.find_cmd_or_cog(self.flux, rule_subject)
          if not cmd_or_cog:
@@ -237,11 +239,11 @@ class Builtins(FluxCog):
          if rule not in ["ALLOW", "DENY"]:
             raise CommandError(f'rule {rule} not in ["ALLOW","DENY"]')
          try:
-            target_id = parse_auth_id(ctx.msg_ctx, type_=self.RULETYPES[rule_type], target_=rule_target_id_raw)
+            target_id = parse_auth_id(ctx.msg_ctx, type_=self.RULETYPES[id_type], target_=rule_target_id_raw)
          except KeyError:
-            raise CommandError(f"Rule type {rule_type} not in {self.RULETYPES.keys()}")
+            raise CommandError(f"Rule type {id_type} not in {self.RULETYPES.keys()}")
 
-         record = Record(rule=rule, target_id=target_id, target_type=rule_type.upper())
+         record = Record(rule=rule, target_id=target_id, target_type=id_type.upper())
          await Auth.add_record(ctx.msg_ctx, auth_id=cmd_or_cog.auth_id, record=record)
          return Response(f"Added record {record}")
 
