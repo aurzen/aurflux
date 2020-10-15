@@ -46,7 +46,7 @@ class Response(aur.util.AutoRepr):
          self.delete_after = delete_after.total_seconds()
       else:
          self.delete_after = delete_after
-
+      self.message : ty.Optional[discord.Message] = None
       self.status = status
       self.ping = ping
       self.post_process = post_process or (lambda *_: aio.sleep(0))
@@ -66,25 +66,25 @@ class Response(aur.util.AutoRepr):
       content = self.content if self.content else "" + (f"\n{ctx.author.mention}" if self.ping else "")
       if len(content) > 1900:
          content = f"Output too long, see:\n{await utils.haste(ctx.flux.aiohttp_session, content)}"
-
-      message = await ctx.msg_ctx.dest.send(
-         content=content,
-         embed=self.embed,
-         delete_after=self.delete_after
-      )
+      if content:
+         self.message = await ctx.msg_ctx.dest.send(
+            content=content,
+            embed=self.embed,
+            delete_after=self.delete_after
+         )
 
       async def handle_trash():
          try:
-            await message.add_reaction(utils.EMOJI.trashcan)
+            await self.message.add_reaction(utils.EMOJI.trashcan)
             try:
                await ctx.msg_ctx.flux.router.wait_for(
                   ":reaction_add",
-                  check=lambda ev: ev.args[0].message.id == message.id and ev.args[1] == ctx.msg_ctx.message.author and ev.args[0].emoji == utils.EMOJI.trashcan,
+                  check=lambda ev: ev.args[0].message.id == self.message.id and ev.args[1] == ctx.msg_ctx.message.author and ev.args[0].emoji == utils.EMOJI.trashcan,
                   timeout=20
                )
-               await message.delete()
+               await self.message.delete()
             except aio.exceptions.TimeoutError:
-               await message.remove_reaction(emoji=utils.EMOJI.trashcan, member=ctx.msg_ctx.guild.me)
+               await self.message.remove_reaction(emoji=utils.EMOJI.trashcan, member=ctx.msg_ctx.guild.me)
 
          except (discord.errors.NotFound, discord.errors.Forbidden) as e:
             logger.error(e)
@@ -92,4 +92,4 @@ class Response(aur.util.AutoRepr):
       if self.trashable:
          aio.create_task(handle_trash())
 
-      await self.post_process(ctx.msg_ctx, message)
+      await self.post_process(ctx.msg_ctx, self.message)
