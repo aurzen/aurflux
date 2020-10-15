@@ -36,7 +36,7 @@ class Response(aur.util.AutoRepr):
          delete_after: ty.Union[float, datetime.timedelta] = None,
          status: ty.Literal["ok", "error"] = "ok",
          ping: bool = False,
-         post_process: ty.Callable[[MessageCtx, ty.Optional[discord.Message]], ty.Coroutine] = None,
+         post_process: ty.Callable[[MessageCtx, ty.Optional[discord.Message], Status], ty.Coroutine] = None,
          trashable: bool = True,
    ):
       self.content = content
@@ -92,4 +92,4 @@ class Response(aur.util.AutoRepr):
       if self.trashable:
          aio.create_task(handle_trash())
 
-      await self.post_process(ctx.msg_ctx, self.message)
+      await self.post_process(ctx.msg_ctx, self.message, self.status)
