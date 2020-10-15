@@ -66,14 +66,16 @@ class Response(aur.util.AutoRepr):
       content = self.content if self.content else "" + (f"\n{ctx.author.mention}" if self.ping else "")
       if len(content) > 1900:
          content = f"Output too long, see:\n{await utils.haste(ctx.flux.aiohttp_session, content)}"
-      if content:
-         self.message = await ctx.msg_ctx.dest.send(
-            content=content,
-            embed=self.embed,
-            delete_after=self.delete_after
-         )
+
+      self.message = await ctx.msg_ctx.dest.send(
+         content=content,
+         embed=self.embed,
+         delete_after=self.delete_after
+      )
 
       async def handle_trash():
+         if not self.message:
+            return
          try:
             await self.message.add_reaction(utils.EMOJI.trashcan)
             try:

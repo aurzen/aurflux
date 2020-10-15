@@ -5,7 +5,8 @@ import json
 import re
 import traceback
 import typing as ty
-
+import itertools as itt
+import collections.abc
 import discord
 import tabulate
 from loguru import logger
@@ -15,7 +16,7 @@ from .. import CommandEvent, utils
 from ..auth import Auth, AuthList, Record
 from ..command import Response
 from ..context import ManualAuthCtx, ManualAuthorCtx, CommandCtx, GuildMessageCtx
-from ..errors import CommandError, BotMissingPermissions
+from ..errors import CommandError
 
 if ty.TYPE_CHECKING:
    from ..context import GuildAwareCtx
@@ -88,21 +89,6 @@ class Builtins(FluxCog):
                   config_identifier=str(ctx.guild.id))
             except TypeError as e:
                raise CommandError(f"Permissions `{auth_id}` could not be parsed. See:\n{e}")
-
-      # @CommandCheck.check(lambda ctx: ctx.author.id == self.flux.admin_id)
-      # @self._commandeer(name="reload", private=True)
-      # async def reload(ctx: MessageContext, cog_name: str):
-      #    reloaded_cogs = []
-      #    for cog in s.cogs:
-      #       new_cog = cog
-      #       if cog.__class__.__name__.lower() == cog_name:
-      #          cog.teardown()
-      #          module = importlib.reload(inspect.getmodule(cog))
-      #          new_cog = getattr(module, cog.__class__.__name__)(ctx.flux)
-      #          await new_cog.startup()
-      #       reloaded_cogs.append(new_cog)
-      #    ctx.flux.cogs = reloaded_cogs
-      #    return Response()
 
       @self._commandeer(name="asif", default_auths=[Record.allow_all()])
       async def __asif(ctx: GuildCommandCtx, args: str, ):
@@ -382,7 +368,7 @@ class Builtins(FluxCog):
                tabular_data=[[str(emoji), emoji.animated, emoji.url] for emoji in g.emojis]
             )
          )
-         embed.add_field(name="Emoji", value=f"[{len(g.emojis)}/{g.emoji_limit*2} emojis]({emoji_haste})", inline=False)
+         embed.add_field(name="Emoji", value=f"[{len(g.emojis)}/{g.emoji_limit * 2} emojis]({emoji_haste})", inline=False)
 
          # Features
          features_haste = await utils.haste(
@@ -447,14 +433,20 @@ class Builtins(FluxCog):
          """
          utils.perm_check(ctx.msg_ctx.channel, discord.Permissions(embed_links=True))
          configs = self.flux.CONFIG.of(ctx.msg_ctx)
-         authorized_cmds: ty.Dict[str, Command] = {command.name: command for cog in self.flux.cogs for command in cog.commands if
-                                                   Auth.accepts_all(ctx.auth_ctxs, command) and command.name != "help"}
+         authorized_cmds: ty.Dict[str, ty.Tuple[FluxCog, Command]] = {command.name: (cog, command) for cog in self.flux.cogs for command in cog.commands if
+                                                                      Auth.accepts_all(ctx.auth_ctxs, command) and command.name != "help"}
 
          if not help_target:
             help_embed = discord.Embed(title=f"{utils.EMOJI.question} Command Help", description=f"{configs['prefix']}help <command> for more info")
-            for cmd_name, command in authorized_cmds.items():
-               usage = "\n".join([f"{configs['prefix']}{usage}" for usage in command.short_usage.split("\n")])
-               help_embed.add_field(name=cmd_name, value=usage, inline=False)
+            cog_groups = itt.groupby(authorized_cmds.items(), lambda x: x[1][0])
+            for cog, group in cog_groups:
+               cog: FluxCog  # https://youtrack.jetbrains.com/issue/PY-43664
+               group: ty.Iterable[ty.Tuple[str, ty.Tuple[FluxCog, Command]]]
+               usages = "\n".join(["\n".join([f"{configs['prefix']}{usage}" for usage in cmd_item[1][1].short_usage.split("\n")]) for cmd_item in group])
+               help_embed.add_field(name=cog.name, value=usages, inline=False)
+            # for cmd_name, command in authorized_cmds.items():
+            #    usage = "\n".join([f"{configs['prefix']}{usage}" for usage in command.short_usage.split("\n")])
+            #    help_embed.add_field(name=cmd_name, value=usage, inline=False)
 
             return Response(embed=help_embed)
 
@@ -473,7 +465,7 @@ class Builtins(FluxCog):
          if help_target not in authorized_cmds:
             return Response(f"No command `{help_target}` to show help for", status="error")
 
-         cmd = authorized_cmds[help_target]
+         cog, cmd = authorized_cmds[help_target]
          embed = discord.Embed(
             title=f"\U00002754 Command Help for {help_target}",
             description=cmd.description)
