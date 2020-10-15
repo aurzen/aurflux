@@ -36,7 +36,7 @@ class Response(aur.util.AutoRepr):
          delete_after: ty.Union[float, datetime.timedelta] = None,
          status: ty.Literal["ok", "error"] = "ok",
          ping: bool = False,
-         post_process: ty.Callable[[MessageCtx, discord.Message], ty.Coroutine] = None,
+         post_process: ty.Callable[[MessageCtx, ty.Optional[discord.Message]], ty.Coroutine] = None,
          trashable: bool = True,
    ):
       self.content = content
