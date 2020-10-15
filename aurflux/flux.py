@@ -56,7 +56,8 @@ class FluxClient(discord.Client):
       if status:
          # noinspection PyArgumentList
          self._activity = discord.Game(name=status)
-      super(FluxClient, self).__init__(activity=self._activity, *args, **kwargs)
+         kwargs |= {"activity": self._activity}
+      super(FluxClient, self).__init__(*args, **kwargs)
 
       self.router = EventRouter(name="flux", host=parent_router)
       self.CONFIG: Config = Config(admin_id=admin_id, name=name)
@@ -92,8 +93,6 @@ class FluxClient(discord.Client):
 
    async def shutdown(self, *args, **kwargs):
       await self.logout()
-
-
 
    def register_listeners(self):
       @self.router.listen_for(":message")
