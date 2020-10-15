@@ -15,7 +15,7 @@ from .. import CommandEvent, utils
 from ..auth import Auth, AuthList, Record
 from ..command import Response
 from ..context import ManualAuthCtx, ManualAuthorCtx, CommandCtx, GuildMessageCtx
-from ..errors import CommandError
+from ..errors import CommandError, BotMissingPermissions
 
 if ty.TYPE_CHECKING:
    from ..context import GuildAwareCtx
@@ -280,6 +280,8 @@ class Builtins(FluxCog):
          :param target_raw:
          :return:
          """
+         utils.perm_check(ctx.msg_ctx.channel, discord.Permissions(embed_links=True))
+
          if not target_raw:
             target = ctx.author_ctx.author
          else:
@@ -344,6 +346,8 @@ class Builtins(FluxCog):
          :param _:
          :return:
          """
+         utils.perm_check(ctx.msg_ctx.channel, discord.Permissions(embed_links=True))
+
          g = ctx.msg_ctx.guild
          embed = discord.Embed(title=f"{utils.EMOJI.question}{g} Server Info")
          embed.set_thumbnail(url=str(ctx.msg_ctx.guild.icon_url))
@@ -441,6 +445,7 @@ class Builtins(FluxCog):
          :param help_target: what to get help about
          :return:
          """
+         utils.perm_check(ctx.msg_ctx.channel, discord.Permissions(embed_links=True))
          configs = self.flux.CONFIG.of(ctx.msg_ctx)
          authorized_cmds: ty.Dict[str, Command] = {command.name: command for cog in self.flux.cogs for command in cog.commands if
                                                    Auth.accepts_all(ctx.auth_ctxs, command) and command.name != "help"}
