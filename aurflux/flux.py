@@ -16,6 +16,7 @@ from .command import Command
 from .config import Config
 from .context import GuildMessageCtx, AuthAwareCtx, CommandCtx, MessageCtx
 from loguru import logger
+
 # __logging.getLogger("discord.client").addFilter(lambda r: r.getMessage() != "PyNaCl is not installed, voice will NOT be supported")
 
 if ty.TYPE_CHECKING:
@@ -34,7 +35,7 @@ class FluxEvent(aur.Event):
 
 
 class CommandEvent(FluxEvent):
-   def __init__(self, flux: FluxClient, cmd_ctx : CommandCtx, cmd_args: ty.Optional[str], cmd_name: str):
+   def __init__(self, flux: FluxClient, cmd_ctx: CommandCtx, cmd_args: ty.Optional[str], cmd_name: str):
       super().__init__(flux, f"flux:command:{cmd_name}")
       self.cmd_name = cmd_name
       self.cmd_ctx = cmd_ctx
@@ -49,9 +50,14 @@ class FluxClient(discord.Client):
          admin_id: int,
          parent_router: EventRouterHost = None,
          builtins=True,
+         status: str = None,
          *args, **kwargs
    ):
-      super(FluxClient, self).__init__(*args, **kwargs)
+      if status:
+         # noinspection PyArgumentList
+         self._activity = discord.Game(name=status)
+      super(FluxClient, self).__init__(activity=self._activity, *args, **kwargs)
+
       self.router = EventRouter(name="flux", host=parent_router)
       self.CONFIG: Config = Config(admin_id=admin_id, name=name)
 
@@ -61,7 +67,8 @@ class FluxClient(discord.Client):
 
       self.aiohttp_session = aiohttp.ClientSession()
 
-      self.register_command_listener()
+      self.register_listeners()
+
       if builtins:
          from .cog.builtins import Builtins
          self.register_cog(Builtins)
@@ -86,7 +93,9 @@ class FluxClient(discord.Client):
    async def shutdown(self, *args, **kwargs):
       await self.logout()
 
-   def register_command_listener(self):
+
+
+   def register_listeners(self):
       @self.router.listen_for(":message")
       @aur.Eventful.decompose
       async def _(message: discord.Message):
@@ -108,3 +117,7 @@ class FluxClient(discord.Client):
          # print(aur.Event(f"flux:command:{cmd}", ctx=ctx))
          print(self.router)
          await self.router.submit(event=CommandEvent(flux=self, cmd_ctx=CommandCtx(self, ctx, ctx, [ctx]), cmd_name=cmd_name, cmd_args=args.strip() if args else None))
+
+      @self.router.listen_for(":resume")
+      async def _(ev: FluxEvent):
+         await self.change_presence(activity=self._activity)

@@ -300,7 +300,7 @@ class Builtins(FluxCog):
 
          if isinstance(ctx.msg_ctx, GuildMessageCtx):
             if target.color != discord.Color.default():
-               embed.add_field(name="Color", value=utils.copylink(hex(target.color.value)), inline=False)
+               embed.add_field(name="Color", value=utils.copylink(hex(target.color.value).upper()), inline=False)
             if target.premium_since:
                delta = (datetime.datetime.utcnow() - target.premium_since).days
                D_IN_M = 29.53
