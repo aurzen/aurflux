@@ -6,6 +6,8 @@ import typing as ty
 
 if ty.TYPE_CHECKING:
    from ..context import MessageCtx, CommandCtx
+   from ..flux import FluxEvent
+import time
 import aurcore as aur
 import typing as ty
 import asyncio as aio
@@ -71,20 +73,23 @@ class Response(aur.util.AutoRepr):
          delete_after=self.delete_after
       )
 
-      try:
-         if self.trashable:
+      async def handle_trash():
+         try:
             await message.add_reaction(utils.EMOJI.trashcan)
             try:
                await ctx.msg_ctx.flux.router.wait_for(
                   ":reaction_add",
-                  check=lambda ev: ev.args[0].message.id == message.id and ev.args[1] == ctx.msg_ctx.message.author,
+                  check=lambda ev: ev.args[0].message.id == message.id and ev.args[1] == ctx.msg_ctx.message.author and ev.args[0].emoji == utils.EMOJI.trashcan,
                   timeout=20
                )
                await message.delete()
             except aio.exceptions.TimeoutError:
                await message.remove_reaction(emoji=utils.EMOJI.trashcan, member=ctx.msg_ctx.guild.me)
 
-      except (discord.errors.NotFound, discord.errors.Forbidden) as e:
-         logger.error(e)
+         except (discord.errors.NotFound, discord.errors.Forbidden) as e:
+            logger.error(e)
+
+      if self.trashable:
+         aio.create_task(handle_trash())
 
       await self.post_process(ctx.msg_ctx, message)

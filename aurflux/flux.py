@@ -57,6 +57,7 @@ class FluxClient(discord.Client):
          # noinspection PyArgumentList
          self._activity = discord.Game(name=status)
          kwargs |= {"activity": self._activity}
+
       super(FluxClient, self).__init__(*args, **kwargs)
 
       self.router = EventRouter(name="flux", host=parent_router)
