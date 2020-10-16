@@ -6,7 +6,6 @@ import re
 import traceback
 import typing as ty
 import itertools as itt
-import collections.abc
 import discord
 import tabulate
 from loguru import logger
@@ -54,6 +53,8 @@ class Builtins(FluxCog):
          if type_ == "permissions":
             p_dict: ty.List[str] = json.loads(target_)
             return discord.Permissions(**{p: True for p in p_dict}).value
+         else:
+            raise ValueError
 
       async def parse_auth_context(ctx: GuildAwareCtx, type_: str, target_: str) -> ManualAuthCtx:
          if type_ == "user":
@@ -89,6 +90,7 @@ class Builtins(FluxCog):
                   config_identifier=str(ctx.guild.id))
             except TypeError as e:
                raise CommandError(f"Permissions `{auth_id}` could not be parsed. See:\n{e}")
+         raise ValueError
 
       @self._commandeer(name="asif", default_auths=[Record.allow_all()])
       async def __asif(ctx: GuildCommandCtx, args: str, ):
