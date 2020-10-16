@@ -443,7 +443,7 @@ class Builtins(FluxCog):
                                                                       Auth.accepts_all(ctx.auth_ctxs, command) and command.name != "help"}
          # Help
          if not help_target:
-            help_embed = discord.Embed(title=f"{utils.EMOJI.question} Command Help", description=f"{configs['prefix']}help <command> for more info")
+            help_embed = discord.Embed(title=f"{utils.EMOJI.question} Command Help", description=f"{configs['prefix']}help <command/section> for more info")
             cog_groups = itt.groupby(authorized_cmds.items(), lambda x: x[1][0])
             for cog, group in cog_groups:
                # noinspection Mypy
@@ -457,7 +457,8 @@ class Builtins(FluxCog):
             return Response(embed=help_embed)
 
          # Help for Cog
-         if (cog := next(c for c in self.flux.cogs if c.name == help_target)):
+
+         if (cog := next((c for c in self.flux.cogs if c.name.lower() == help_target.lower()), None)):
             embed = discord.Embed(title=f"{utils.EMOJI.question} Command Help: {cog.name}")
             for cmd in cog.commands:
                if cmd.name in authorized_cmds:
@@ -478,7 +479,7 @@ class Builtins(FluxCog):
             return Response(embed=embed)
 
          if help_target not in authorized_cmds:
-            return Response(f"No command `{help_target}` to show help for", status="error")
+            return Response(f"No command or section `{help_target}` to show help for", status="error")
 
          # Help for Command
          cog, cmd = authorized_cmds[help_target]
