@@ -44,7 +44,7 @@ description = "Aurcore!"
 name = "aurcore"
 optional = false
 python-versions = ">3.8"
-version = "1.1.32"
+version = "1.1.33"
 
 [[package]]
 category = "main"
@@ -205,7 +205,7 @@ idna = ">=2.0"
 multidict = ">=4.0"
 
 [metadata]
-content-hash = "7e63900df5623392763bbd7c2a53dc8b0ccea0b47d4ccc8e823f6bc4f5669967"
+content-hash = "75ef2e828b0c61b51cc419cf01714db95f7405bcc2c80c509961d6ceb3c5322e"
 python-versions = "^3.9"
 
 [metadata.files]
@@ -233,8 +233,8 @@ attrs = [
     {file = "attrs-20.2.0.tar.gz", hash = "sha256:26b54ddbbb9ee1d34d5d3668dd37d6cf74990ab23c828c2888dccdceee395594"},
 ]
 aurcore = [
-    {file = "aurcore-1.1.32-py3-none-any.whl", hash = "sha256:9dc7fcde6419cde2190b256a46d67cd36214a412fb4077d54e4bab03e568cd01"},
-    {file = "aurcore-1.1.32.tar.gz", hash = "sha256:1455b9c25240ed3260a64ea6b450acf4bfed61d56ecde3e2d9eab7c18c2d4332"},
+    {file = "aurcore-1.1.33-py3-none-any.whl", hash = "sha256:10afbfb80881ba723db85a89f912864bc59c9932f7f4c07f8c1a65e668259189"},
+    {file = "aurcore-1.1.33.tar.gz", hash = "sha256:d41b433d3f80dc9f97e6e38fbf3c040a2400c9c8b41f2366aa438f67467c20e7"},
 ]
 chardet = [
     {file = "chardet-3.0.4-py2.py3-none-any.whl", hash = "sha256:fc323ffcaeaed0e0a02bf4d117757b98aed530d9ed4531e3e15460124c106691"},
