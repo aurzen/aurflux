@@ -38,6 +38,8 @@ class UserMissingPermissions(CommandError):
 class BotMissingPermissions(CommandError):
    def __init__(self, need: discord.Permissions, have: discord.Permissions, *args):
       missing_perms = discord.Permissions(permissions=(need.value ^ have.value) & need.value)
+      print(need.value ^ have.value)
+      print(missing_perms)
 
       missing = [perm.replace('_', ' ').replace('guild', 'server').title() for perm, v in missing_perms if v]
 
