@@ -40,7 +40,7 @@ class Builtins(FluxCog):
 
             if not ids_:
                raise CommandError(f"No member ID found in {target_}")
-            if not await utils.get_or_fetch_member(ctx.guild, ids_[0]):
+            if not await self.flux.get_member_s(ctx.guild, ids_[0]):
                raise CommandError(f"No member found with ID {ids_[0]}")
             return ids_[0]
          if type_ == "role":
@@ -61,11 +61,13 @@ class Builtins(FluxCog):
             ids_ = utils.find_mentions(target_)
             if not ids_:
                raise CommandError(f"No user ID found in {target_}")
-
-            return ManualAuthCtx(flux=self.flux, auth_list=AuthList(user=self.flux.get_user(ids_[0]).id), config_identifier=ids_[0])
+            user = await self.flux.get_user_s(ids_[0])
+            if not user:
+               raise CommandError(f"No user found with ID: {ids_[0]}")
+            return ManualAuthCtx(flux=self.flux, auth_list=AuthList(user=user.id), config_identifier=ids_[0])
          auth_id = await parse_auth_id(ctx, type_=type_, target_=target_)
          if type_ == "member":
-            member = await utils.get_or_fetch_member(ctx.guild, auth_id)
+            member = await self.flux.get_member_s(ctx.guild, auth_id)
             if not member:
                raise CommandError(f"No member found with id `{auth_id}`")
             return ManualAuthCtx(flux=self.flux,
@@ -133,8 +135,10 @@ class Builtins(FluxCog):
 
          cmd_name, cmd_args, *_ = [*command.split(" ", 1), None]
          mock_auth_ctx = await parse_auth_context(ctx=ctx.msg_ctx, type_=mock_type, target_=mock_target)
-         if ctx.msg_ctx.message.guild:
-            mock_author_ctx = ManualAuthorCtx(author=await utils.get_or_fetch_member(ctx.msg_ctx.guild, mock_target))
+         if mock_type == "user":
+            mock_author_ctx = ManualAuthorCtx(author=await self.flux.fetch_user(int(mock_target)))
+         elif mock_type == "member" and ctx.msg_ctx.message.guild:
+            mock_author_ctx = ManualAuthorCtx(author=await self.flux.get_member_s(ctx.msg_ctx.guild, int(mock_target)))
          else:
             mock_author_ctx = ctx.author_ctx
 
@@ -277,7 +281,7 @@ class Builtins(FluxCog):
                raise CommandError(f"Cannot find a user/member in `{target_raw}`. It should either be an ID or a mention")
 
             if isinstance(ctx.msg_ctx, GuildMessageCtx):
-               target = await utils.get_or_fetch_member(ctx.msg_ctx.guild, target)
+               target = await self.flux.get_member_s(ctx.msg_ctx.guild, target)
             else:
                target = await ctx.msg_ctx.flux.get_user(target)
 

@@ -121,3 +121,9 @@ class FluxClient(discord.Client):
       @self.router.listen_for(":resume")
       async def _(ev: FluxEvent):
          await self.change_presence(activity=self._activity)
+
+   async def get_user_s(self, user_id: int):
+      return self.get_user(user_id) or await self.fetch_user(user_id)
+
+   async def get_member_s(self, g: discord.Guild, member_id:int):
+      return g.get_member(member_id) or await g.fetch_member(member_id)
