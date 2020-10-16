@@ -42,7 +42,7 @@ class BotMissingPermissions(CommandError):
       print(missing_perms)
 
       missing = [perm.replace('_', ' ').replace('guild', 'server').title() for perm, v in missing_perms if v]
-
+      print(missing)
       if len(missing) > 2:
          fmt = '{}, and {}'.format(", ".join(missing[:-1]), missing[-1])
       else:
