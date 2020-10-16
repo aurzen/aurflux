@@ -8,3 +8,4 @@ class EMOJI:
 class UNICODE:
    nbsp = u"\u00A0"
    bpb = u"\u2800"
+   vbar = "❚"
