@@ -443,7 +443,7 @@ class Builtins(FluxCog):
                                                                       Auth.accepts_all(ctx.auth_ctxs, command) and command.name != "help"}
          # Help
          if not help_target:
-            help_embed = discord.Embed(title=f"{utils.EMOJI.question} Command Help", description=f"{configs['prefix']}help <command/section> for more info")
+            help_embed = discord.Embed(title=f"{utils.EMOJI.question} Help", description=f"{configs['prefix']}help <command/section> for more info")
             cog_groups = itt.groupby(authorized_cmds.items(), lambda x: x[1][0])
             for cog, group in cog_groups:
                # noinspection Mypy
@@ -459,7 +459,7 @@ class Builtins(FluxCog):
          # Help for Cog
 
          if (cog := next((c for c in self.flux.cogs if c.name.lower() == help_target.lower()), None)):
-            embed = discord.Embed(title=f"{utils.EMOJI.question} Command Help: {cog.name}")
+            embed = discord.Embed(title=f"{utils.EMOJI.question} Section Help: {cog.name}")
             for cmd in cog.commands:
                if cmd.name in authorized_cmds:
                   embed.add_field(name=cmd.name, value=cmd.description, inline=False)
@@ -484,7 +484,7 @@ class Builtins(FluxCog):
          # Help for Command
          cog, cmd = authorized_cmds[help_target]
          embed = discord.Embed(
-            title=f"\U00002754 Command Help for {help_target}",
+            title=f"\U00002754 Command Help: {help_target}",
             description=cmd.description)
 
          embed.add_field(name="Usage", value=cmd.usage, inline=False)
