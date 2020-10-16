@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "aurflux"
-version = "3.2.79"
+version = "3.2.80"
 description = "Aurflux!"
 authors = ["Zenith <inbox@zenith.dev>"]
 
