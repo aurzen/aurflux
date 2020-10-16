@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "aurflux"
-version = "3.2.87"
+version = "3.2.88"
 description = "Aurflux!"
 authors = ["Zenith <inbox@zenith.dev>"]
 include = ["aurflux/py.typed"]
@@ -8,7 +8,7 @@ include = ["aurflux/py.typed"]
 [tool.poetry.dependencies]
 python = ">3.9"
 "discord.py" = "*"
-aurcore = "*"
+aurcore = ">1"
 pyyaml = "*"
 loguru = "^0.5.2"
 tabulate = "^0.8.7"
