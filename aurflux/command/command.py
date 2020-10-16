@@ -51,12 +51,12 @@ class Command(aur.util.AutoRepr, AuthAware):
       if not func_doc:
          raise RuntimeError(f"{self.func} lacks a docstring!")
       try:
-         short_usage, long_usage, params, *_ = func_doc.split("==")
+         usage, description, params, *_ = func_doc.split("==")
       except ValueError as e:
          raise ValueError(f"{e} : {self.name}")
 
-      self.short_usage = short_usage.strip()
-      self.description = long_usage.strip()
+      self.usage = usage.strip()
+      self.description = description.strip()
 
       def combine_params(acc: ty.List[ty.Tuple[str, str]], x: str):
          if acc and acc[-1][1].endswith("\\"):
@@ -92,7 +92,7 @@ class Command(aur.util.AutoRepr, AuthAware):
                res = self.func(cmd_ctx, ev.cmd_args)
          if res:
             async for resp in aur.util.AwaitableAiter(res):
-               await resp.execute(cmd_ctx)
+               await resp.execute(cmd_ctx) if resp else None
       except errors.CommandError as e:
          info_message = f"{e}"
          await Response(content=info_message, status="error").execute(cmd_ctx)

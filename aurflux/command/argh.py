@@ -93,7 +93,7 @@ def arghify(command: Command, skip=1, globals_=None) -> Command:
             param.name,
             **arg_dict
          )
-   command.short_usage = argparser.format_help().split("\n")[0].removeprefix("usage: ")
+   command.usage = argparser.format_help().split("\n")[0].removeprefix("usage: ")
    command.long_usage = argparser.format_help().split("\n", 1)[1].removeprefix("usage: ")
 
    command.argparser = argparser

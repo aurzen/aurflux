@@ -36,18 +36,14 @@ class UserMissingPermissions(CommandError):
 
 
 class BotMissingPermissions(CommandError):
-   def __init__(self, need: discord.Permissions, have: discord.Permissions, *args):
-      print(need.value)
-      print(have.value)
+   def __init__(self, need: discord.Permissions, have: discord.Permissions, channel: discord.TextChannel=None, *args):
       missing_perms = discord.Permissions(permissions=(need.value ^ have.value) & need.value)
-      print(need.value ^ have.value)
-      print(missing_perms)
 
       missing = [perm.replace('_', ' ').replace('guild', 'server').title() for perm, v in missing_perms if v]
-      print(missing)
+
       if len(missing) > 2:
          fmt = '{}, and {}'.format(", ".join(missing[:-1]), missing[-1])
       else:
          fmt = ' and '.join(missing)
-      message = 'I am missing {} permission{} to run this command.'.format(fmt, "s" if len(missing) > 2 else "")
+      message = f"I am missing {fmt} permission{'s' if len(missing) > 2 else ''} {f' in {channel.mention} ' if channel else ''}to run this command."
       super().__init__(message, *args)

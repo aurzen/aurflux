@@ -427,7 +427,7 @@ class Builtins(FluxCog):
       @self._commandeer(name="help", default_auths=[Record.allow_all()])
       async def __get_help(ctx: GuildCommandCtx, help_target: ty.Optional[str]):
          """
-         help (command_name)
+         help (command_name/section)
          ==
          My brother is dying! Get Help!
          ==
@@ -441,21 +441,30 @@ class Builtins(FluxCog):
          configs = self.flux.CONFIG.of(ctx.msg_ctx)
          authorized_cmds: ty.Dict[str, ty.Tuple[FluxCog, Command]] = {command.name: (cog, command) for cog in self.flux.cogs for command in cog.commands if
                                                                       Auth.accepts_all(ctx.auth_ctxs, command) and command.name != "help"}
-
+         # Help
          if not help_target:
             help_embed = discord.Embed(title=f"{utils.EMOJI.question} Command Help", description=f"{configs['prefix']}help <command> for more info")
             cog_groups = itt.groupby(authorized_cmds.items(), lambda x: x[1][0])
             for cog, group in cog_groups:
+               # noinspection Mypy
                cog: FluxCog  # https://youtrack.jetbrains.com/issue/PY-43664
                group: ty.Iterable[ty.Tuple[str, ty.Tuple[FluxCog, Command]]]
-               usages = "\n".join(["\n".join([f"{configs['prefix']}{usage}" for usage in cmd_item[1][1].short_usage.split("\n")]) for cmd_item in group])
+               usages = "\n".join(
+                  ["\n".join([f"{configs['prefix']}{usage}" for usage in cmd_item[1][1].usage.split("\n")])
+                   for cmd_item in group]
+               )
                help_embed.add_field(name=cog.name, value=usages, inline=False)
-            # for cmd_name, command in authorized_cmds.items():
-            #    usage = "\n".join([f"{configs['prefix']}{usage}" for usage in command.short_usage.split("\n")])
-            #    help_embed.add_field(name=cmd_name, value=usage, inline=False)
-
             return Response(embed=help_embed)
 
+         # Help for Cog
+         if (cog := next(c for c in self.flux.cogs if c.name == help_target)):
+            embed = discord.Embed(title=f"{utils.EMOJI.question} Command Help: {cog.name}")
+            for cmd in cog.commands:
+               if cmd.name in authorized_cmds:
+                  embed.add_field(name=cmd.name, value=cmd.description, inline=False)
+            return Response(embed=embed)
+
+         # Help for Help
          if help_target == "help":
             embed = discord.Embed(title="\U00002754 Command Help", description="How to read help")
             embed.add_field(name="Usage", value='..commandname [lit] <user> {json} (optional) extra*', inline=False)
@@ -471,22 +480,16 @@ class Builtins(FluxCog):
          if help_target not in authorized_cmds:
             return Response(f"No command `{help_target}` to show help for", status="error")
 
+         # Help for Command
          cog, cmd = authorized_cmds[help_target]
          embed = discord.Embed(
             title=f"\U00002754 Command Help for {help_target}",
             description=cmd.description)
 
-         embed.add_field(name="Usage", value=cmd.short_usage, inline=False)
-         print(cmd.param_usage)
+         embed.add_field(name="Usage", value=cmd.usage, inline=False)
          for arg, detail in cmd.param_usage:
             embed.add_field(name=arg.strip(), value=detail.strip(), inline=False)
-            # embed.add_field(name=detail,value="", inline=False)
 
-         # args, details = list(zip(*cmd.long_usage))
-         # embed.add_field(name="Param", value="\n".join(args), inline=True)
-         # embed.add_field(name="Details", value="\n".join(details), inline=True)
-
-         # embed.add_field(name="usage", value=f"{configs['prefix']}{cmd.long_usage}", inline=False)
          return Response(embed=embed)
 
    @property
