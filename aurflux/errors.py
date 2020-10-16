@@ -1,7 +1,8 @@
 from __future__ import annotations
 import typing as ty
-if ty.TYPE_CHECKING:
-   import discord
+import discord
+
+
 class CommandException(BaseException):
    def __init__(self, message=None, *args):
       if message is not None:
@@ -18,7 +19,6 @@ class CommandInfo(CommandException):
 
 class CommandError(CommandException):
    pass
-
 
 
 class UserMissingPermissions(CommandError):
@@ -39,7 +39,7 @@ class BotMissingPermissions(CommandError):
    def __init__(self, need: discord.Permissions, have: discord.Permissions, *args):
       missing_perms = discord.Permissions(permissions=(need.value ^ have.value) & need.value)
 
-      missing = [perm.replace('_', ' ').replace('guild', 'server').title() for perm,v in missing_perms if v]
+      missing = [perm.replace('_', ' ').replace('guild', 'server').title() for perm, v in missing_perms if v]
 
       if len(missing) > 2:
          fmt = '{}, and {}'.format(", ".join(missing[:-1]), missing[-1])
@@ -47,5 +47,3 @@ class BotMissingPermissions(CommandError):
          fmt = ' and '.join(missing)
       message = 'I am missing {} permission{} to run this command.'.format(fmt, "s" if len(missing) > 2 else "")
       super().__init__(message, *args)
-
-
