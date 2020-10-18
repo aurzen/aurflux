@@ -77,15 +77,11 @@ class FluxClient(discord.Client):
 
    def register_cog(self, cog: ty.Type[FluxCog], name: str = None):
       c = cog(flux=self, name=name)
-      logger.success(f"Initialized Cog {c}")
+      logger.success(f"Registered {c}")
       self.cogs.append(c)
 
    async def startup(self, token, *args, **kwargs):
-      async def r():
-         await self.router.wait_for(":ready", check=lambda x: True)
-         logger.success("Discord.py ready!")
 
-      aio.create_task(r())
 
       await aio.gather(*[cog.startup() for cog in self.cogs])
       await self.start(token, *args, **kwargs)
@@ -114,9 +110,21 @@ class FluxClient(discord.Client):
          await self.router.submit(event=CommandEvent(flux=self, cmd_ctx=CommandCtx(self, ctx, ctx, [ctx]), cmd_name=cmd_name, cmd_args=args.strip() if args else None))
 
       @self.router.listen_for(":resume")
-      async def _(ev: FluxEvent):
+      async def _(_):
          logger.info("Resuming...")
          await self.change_presence(activity=self._activity)
+
+      @self.router.listen_for(":ready")
+      async def _(_):
+         logger.success("Discord.py is ready")
+
+      @self.router.listen_for(":guild_join")
+      async def _(g: discord.Guild):
+         logger.info(f"Joined guild: {g}")
+
+      @self.router.listen_for(":guild_remove")
+      async def _(g: discord.Guild):
+         logger.info(f"Removed from guild: {g}")
 
    async def get_user_s(self, user_id: int):
       return self.get_user(user_id) or await self.fetch_user(user_id)

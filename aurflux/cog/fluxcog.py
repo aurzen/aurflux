@@ -20,7 +20,7 @@ class FluxCog(AuthAware, metaclass=abc.ABCMeta):
       self.flux = flux
       self.router = aur.EventRouter(self.name, host=self.flux.router.host)
       self.commands: ty.List[Command] = []
-      logger.info(f"{self} registered under {self.router}")
+      logger.success(f"{self} registered under {self.router}")
       self.load()
 
    def _commandeer(
