@@ -80,7 +80,7 @@ class FluxClient(discord.Client):
       await self.start(token, *args, **kwargs)
 
    async def shutdown(self, *args, **kwargs):
-      await self.logout()
+      await self.close()
 
    def register_listeners(self):
       @self.router.listen_for(":message")
