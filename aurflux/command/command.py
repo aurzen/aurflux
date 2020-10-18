@@ -117,4 +117,4 @@ class Command(aur.util.AutoRepr, AuthAware):
       return self.override_auths_
 
    def __str__(self):
-      return f"Command {self.name} in {self.cog}: {self.func}"
+      return f"<Command {self.name} in {self.cog}: {self.func.__name__}>"

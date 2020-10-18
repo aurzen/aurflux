@@ -47,7 +47,7 @@ class FluxCog(AuthAware, metaclass=abc.ABCMeta):
          self.commands.append(cmd)
          self.router.listen_for(f"flux:command:{cmd.name}")(cmd.execute)
 
-         logger.success(f"Command {self.name}:{cmd} registered under flux:command:{cmd.name}")
+         logger.success(f"{cmd} registered under flux:command:{cmd.name}")
          return cmd
 
       return command_deco
