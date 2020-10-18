@@ -77,7 +77,7 @@ class FluxClient(discord.Client):
 
    def register_cog(self, cog: ty.Type[FluxCog], name: str = None):
       c = cog(flux=self, name=name)
-      logger.success(f"Initialized Cog {name}")
+      logger.success(f"Initialized Cog {c}")
       self.cogs.append(c)
 
    async def startup(self, token, *args, **kwargs):
