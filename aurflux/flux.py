@@ -41,7 +41,7 @@ class FluxClient(discord.Client):
          self,
          name: str,
          admin_id: int,
-         parent_router: EventRouterHost = None,
+         parent_router: EventRouterHost,
          builtins=True,
          status: str = None,
          *args, **kwargs
