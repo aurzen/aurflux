@@ -1,22 +1,17 @@
 from __future__ import annotations
-import os
 
 import asyncio as aio
-import logging as __logging
-
 import typing as ty
 
 import aiohttp
 import aurcore as aur
-
 import discord.errors
 import discord.ext
-
 from aurcore import EventRouter
+from loguru import logger
 
 from .config import Config
-from .context import GuildMessageCtx, AuthAwareCtx, CommandCtx, MessageCtx
-from loguru import logger
+from .context import CommandCtx, GuildMessageCtx, MessageCtx
 
 if ty.TYPE_CHECKING:
    import discord
@@ -81,8 +76,6 @@ class FluxClient(discord.Client):
       self.cogs.append(c)
 
    async def startup(self, token, *args, **kwargs):
-
-
       await aio.gather(*[cog.startup() for cog in self.cogs])
       await self.start(token, *args, **kwargs)
 
