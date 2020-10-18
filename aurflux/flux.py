@@ -1,31 +1,29 @@
 from __future__ import annotations
+import os
 
 import asyncio as aio
 import logging as __logging
-from loguru import logger
+
 import typing as ty
 
 import aiohttp
 import aurcore as aur
+
 import discord.errors
 import discord.ext
 
 from aurcore import EventRouter
 
-from .command import Command
 from .config import Config
 from .context import GuildMessageCtx, AuthAwareCtx, CommandCtx, MessageCtx
 from loguru import logger
 
-# __logging.getLogger("discord.client").addFilter(lambda r: r.getMessage() != "PyNaCl is not installed, voice will NOT be supported")
-
 if ty.TYPE_CHECKING:
    import discord
-
-   discord.Permissions()
    from .cog import FluxCog
    from aurcore import EventRouterHost
-   from .context import CommandCtx, AuthAwareCtx, MessageCtx, AuthorAwareCtx
+
+aur.log.setup()
 
 
 class FluxEvent(aur.Event):
@@ -63,8 +61,6 @@ class FluxClient(discord.Client):
       self.router = EventRouter(name="flux", host=parent_router)
       self.CONFIG: Config = Config(admin_id=admin_id, name=name)
 
-      # self.commands: ty.Dict[str, Command] = {}
-      # self.admin_id = admin_id
       self.cogs: ty.List[FluxCog] = []
 
       self.aiohttp_session = aiohttp.ClientSession()
@@ -80,12 +76,14 @@ class FluxClient(discord.Client):
       aio.create_task(self.router.submit(FluxEvent(self, f":{event}", *args, **kwargs)))
 
    def register_cog(self, cog: ty.Type[FluxCog], name: str = None):
-      self.cogs.append(cog(flux=self, name=name))
+      c = cog(flux=self, name=name)
+      logger.success(f"Initialized Cog {name}")
+      self.cogs.append(c)
 
    async def startup(self, token, *args, **kwargs):
       async def r():
          await self.router.wait_for(":ready", check=lambda x: True)
-         logger.info("Discord.py ready!")
+         logger.success("Discord.py ready!")
 
       aio.create_task(r())
 
@@ -112,18 +110,16 @@ class FluxClient(discord.Client):
             return
          raw_cmd_name, args, *_ = [*message.content.split(" ", 1), None]
          cmd_name = raw_cmd_name[len(prefix):]
-         logger.info(f"Command recognized! flux:command:{cmd_name}")
 
-         # print(aur.Event(f"flux:command:{cmd}", ctx=ctx))
-         print(self.router)
          await self.router.submit(event=CommandEvent(flux=self, cmd_ctx=CommandCtx(self, ctx, ctx, [ctx]), cmd_name=cmd_name, cmd_args=args.strip() if args else None))
 
       @self.router.listen_for(":resume")
       async def _(ev: FluxEvent):
+         logger.info("Resuming...")
          await self.change_presence(activity=self._activity)
 
    async def get_user_s(self, user_id: int):
       return self.get_user(user_id) or await self.fetch_user(user_id)
 
-   async def get_member_s(self, g: discord.Guild, member_id:int):
+   async def get_member_s(self, g: discord.Guild, member_id: int):
       return g.get_member(member_id) or await g.fetch_member(member_id)

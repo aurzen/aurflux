@@ -43,7 +43,7 @@ class Command(aur.util.AutoRepr, AuthAware):
       self.doc = inspect.getdoc(func)
       self.decompose = decompose
       self.allow_dm = allow_dm
-      self.builtin = False
+
       self.default_auths_: ty.List[Record] = default_auths
       self.override_auths_: ty.List[Record] = override_auths
 
@@ -102,7 +102,7 @@ class Command(aur.util.AutoRepr, AuthAware):
       except Exception as e:
          print(traceback.format_exc())
          await Response(content=f"```Unexpected Exception:\n{str(e)}\n```", status="error", trashable=True).execute(cmd_ctx)
-         logger.error(traceback.format_exc())
+         logger.exception(f"Unexpected Command Exception from {self}:")
 
    @property
    def auth_id(self):
@@ -114,76 +114,7 @@ class Command(aur.util.AutoRepr, AuthAware):
 
    @property
    def override_auths(self):
-      return self.default_auths_
+      return self.override_auths_
 
    def __str__(self):
       return f"Command {self.name} in {self.cog}: {self.func}"
-# class CommandCheck:
-#    CheckPredicate: ty.TypeAlias = ty.Callable[[GuildMessageContext], ty.Awaitable[bool]]
-#    CommandTransformDeco: ty.TypeAlias = ty.Callable[[Command], Command]
-#
-#    @staticmethod
-#    def check(*predicates: CheckPredicate) -> CommandTransformDeco:
-#       def add_checks_deco(command: Command) -> Command:
-#          command.checks.extend(predicates)
-#          return command
-#
-#       return add_checks_deco
-#
-#    @staticmethod
-#    def or_(*predicates: CheckPredicate) -> CheckPredicate:
-#       async def orred_predicate(ctx: GuildMessageContext) -> bool:
-#          return any(await predicate(ctx) for predicate in predicates)
-#
-#       return orred_predicate
-#
-#    @staticmethod
-#    def and_(*predicates: CheckPredicate) -> CheckPredicate:
-#       async def anded_predicate(ctx: GuildMessageContext) -> bool:
-#          return all(await predicate(ctx) for predicate in predicates)
-#
-#       return anded_predicate
-#
-#    @staticmethod
-#    def whitelist() -> CheckPredicate:
-#       async def whitelist_predicate(ctx: GuildMessageContext) -> bool:
-#          if ctx.config is None:
-#             raise RuntimeError(f"Config has not been initialized for ctx {ctx} in cmd {Command}")
-#          if not any(identifier in ctx.config["whitelist"] for identifier in ctx.auth_identifiers):
-#             raise errors.NotWhitelisted()
-#          return True
-#
-#       return whitelist_predicate
-#
-#    @staticmethod
-#    def has_permissions(
-#          required_perms: discord.Permissions
-#    ) -> CheckPredicate:
-#       async def perm_predicate(ctx):
-#          ctx_perms: discord.Permissions = ctx.channel.permissions_for(ctx.author)
-#
-#          missing = [perm for perm, value in required_perms if getattr(ctx_perms, perm) != value]
-#
-#          if not missing:
-#             return True
-#
-#          raise errors.UserMissingPermissions(missing)
-#
-#       return perm_predicate
-#
-#    @staticmethod
-#    def bot_has_permissions(
-#          required_perms: discord.Permissions
-#    ) -> CheckPredicate:
-#
-#       async def perm_predicate(ctx: GuildMessageContext):
-#          ctx_perms: discord.Permissions = ctx.channel.permissions_for(ctx.guild.me)
-#
-#          missing = [perm for perm, value in required_perms if getattr(ctx_perms, perm) != value]
-#
-#          if not missing:
-#             return True
-#
-#          raise errors.BotMissingPermissions(missing)
-#
-#       return perm_predicate

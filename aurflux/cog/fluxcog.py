@@ -14,13 +14,13 @@ if ty.TYPE_CHECKING:
    from ..auth import Record
 
 
-class FluxCog(AuthAware):
+class FluxCog(AuthAware, metaclass=abc.ABCMeta):
    def __init__(self, flux: FluxClient, name: ty.Optional[str] = None):
       self.name = name or self.__class__.__name__
       self.flux = flux
       self.router = aur.EventRouter(self.name, host=self.flux.router.host)
       self.commands: ty.List[Command] = []
-      logger.info(f"Cog {self.name} registered! Under {self.router}")
+      logger.info(f"{self} registered under {self.router}")
       self.load()
 
    def _commandeer(
@@ -28,12 +28,9 @@ class FluxCog(AuthAware):
          name: ty.Optional[str] = None,
          decompose: bool = False,
          allow_dm=False,
-         default_auths: ty.List[Record] = None,
-         override_auths: ty.List[Record] = None,
+         default_auths: ty.List[Record] = (),
+         override_auths: ty.List[Record] = (),
    ) -> ty.Callable[[CommandFunc], Command]:
-      default_auths = default_auths or []
-      override_auths = override_auths or []
-
       def command_deco(func: CommandFunc) -> Command:
          cmd = Command(
             flux=self.flux,
@@ -50,26 +47,17 @@ class FluxCog(AuthAware):
          self.commands.append(cmd)
          self.router.listen_for(f"flux:command:{cmd.name}")(cmd.execute)
 
-         logger.info(f"Command {cmd} registered under flux:command:{cmd.name}")
+         logger.success(f"Command {self.name}:{cmd} registered under flux:command:{cmd.name}")
          return cmd
 
       return command_deco
 
    async def startup(self):
-      # self.router.listen_for("flux")
       pass
 
    @property
    def auth_id(self):
       return f"{self.name}"
-
-   # def register(self, cog_member: ty.Union[Command, EventMuxer]):
-   #    print(f"Cog registering!")
-   #    print(cog_member)
-   # if isinstance(cog_member, Command):
-   #     self.commands.add(cog_member)
-   # else:
-   #     self.listeners[cog_member.name] = cog_member
 
    def teardown(self):
       logger.info(f"Cog {self.name} detaching from {self.router}")
@@ -86,3 +74,6 @@ class FluxCog(AuthAware):
 
    @abc.abstractmethod
    def load(self): ...
+
+   def __str__(self):
+      return f"<Cog {self.name}>"

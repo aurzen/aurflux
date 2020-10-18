@@ -43,8 +43,8 @@ category = "main"
 description = "Aurcore!"
 name = "aurcore"
 optional = false
-python-versions = ">3.8"
-version = "1.1.33"
+python-versions = ">=3.9,<4.0"
+version = "1.1.37"
 
 [[package]]
 category = "main"
@@ -84,7 +84,7 @@ description = "discord.py stubs"
 name = "discord.py-stubs"
 optional = false
 python-versions = ">=3.6.1,<4.0.0"
-version = "1.5.0.1"
+version = "1.5.0.2"
 
 [package.dependencies]
 mypy = ">=0.782"
@@ -205,7 +205,7 @@ idna = ">=2.0"
 multidict = ">=4.0"
 
 [metadata]
-content-hash = "75ef2e828b0c61b51cc419cf01714db95f7405bcc2c80c509961d6ceb3c5322e"
+content-hash = "7edde7e5d6b23ac6206ed20408795c9c15c0b07d7502e835a8bc0b8cd32373d5"
 python-versions = "^3.9"
 
 [metadata.files]
@@ -233,8 +233,8 @@ attrs = [
     {file = "attrs-20.2.0.tar.gz", hash = "sha256:26b54ddbbb9ee1d34d5d3668dd37d6cf74990ab23c828c2888dccdceee395594"},
 ]
 aurcore = [
-    {file = "aurcore-1.1.33-py3-none-any.whl", hash = "sha256:10afbfb80881ba723db85a89f912864bc59c9932f7f4c07f8c1a65e668259189"},
-    {file = "aurcore-1.1.33.tar.gz", hash = "sha256:d41b433d3f80dc9f97e6e38fbf3c040a2400c9c8b41f2366aa438f67467c20e7"},
+    {file = "aurcore-1.1.37-py3-none-any.whl", hash = "sha256:ebcd062b97820e43daa02125530725f380479162f9a0e5a9324bcfae266d3f03"},
+    {file = "aurcore-1.1.37.tar.gz", hash = "sha256:183e6133f8785ce23285d5067e14b6730fd1740659e8c563c57f845c25eec54c"},
 ]
 chardet = [
     {file = "chardet-3.0.4-py2.py3-none-any.whl", hash = "sha256:fc323ffcaeaed0e0a02bf4d117757b98aed530d9ed4531e3e15460124c106691"},
@@ -249,8 +249,8 @@ colorama = [
     {file = "discord.py-1.5.0.tar.gz", hash = "sha256:e71089886aa157341644bdecad63a72ff56b44406b1a6467b66db31c8e5a5a15"},
 ]
 "discord.py-stubs" = [
-    {file = "discord.py-stubs-1.5.0.1.tar.gz", hash = "sha256:c0ab074a1a865012e74b13ee96d7a3fd0ff9033b0ae96f40fcd37f7de29a9c90"},
-    {file = "discord.py_stubs-1.5.0.1-py3-none-any.whl", hash = "sha256:622309362184c086d0aa27a0700f0205ecee581f1ebde3d4e5bb17ad29964e8d"},
+    {file = "discord.py-stubs-1.5.0.2.tar.gz", hash = "sha256:b03cedb9f73501c1ef1ed6988641ece76370c9127af67c05dc67a0ea58ea8c13"},
+    {file = "discord.py_stubs-1.5.0.2-py3-none-any.whl", hash = "sha256:584158775e7d9ddcd58cc63d4fea640c85ac6a8d6d21ac1621edd9f99154a52e"},
 ]
 idna = [
     {file = "idna-2.10-py2.py3-none-any.whl", hash = "sha256:b97d804b1e9b523befed77c48dacec60e6dcb0b5391d57af6a65a312a90648c0"},

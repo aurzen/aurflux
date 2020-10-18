@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 import datetime
+import itertools as itt
 import json
 import re
 import traceback
 import typing as ty
-import itertools as itt
+
 import discord
 import tabulate
 from loguru import logger
@@ -14,7 +15,7 @@ from . import FluxCog
 from .. import CommandEvent, utils
 from ..auth import Auth, AuthList, Record
 from ..command import Response
-from ..context import ManualAuthCtx, ManualAuthorCtx, CommandCtx, GuildMessageCtx
+from ..context import CommandCtx, GuildMessageCtx, ManualAuthCtx, ManualAuthorCtx
 from ..errors import CommandError
 
 if ty.TYPE_CHECKING:

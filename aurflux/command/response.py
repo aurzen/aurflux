@@ -46,7 +46,8 @@ class Response(aur.util.AutoRepr):
          self.delete_after = delete_after.total_seconds()
       else:
          self.delete_after = delete_after
-      self.message : ty.Optional[discord.Message] = None
+
+      self.message: ty.Optional[discord.Message] = None
       self.status = status
       self.ping = ping
       self.post_process = post_process or (lambda *_: aio.sleep(0))
@@ -58,12 +59,12 @@ class Response(aur.util.AutoRepr):
             await ctx.msg_ctx.message.add_reaction(utils.EMOJI.check)
          if self.status == "error":
             await ctx.msg_ctx.message.add_reaction(utils.EMOJI.x)
-      except discord.errors.NotFound:
+      except (discord.errors.NotFound, discord.errors.Forbidden):
          pass
       if not self.content and not self.embed:
          return
 
-      content = self.content if self.content else "" + (f"\n{ctx.author.mention}" if self.ping else "")
+      content = self.content if self.content else "" + (f"\n{ctx.author_ctx.author.mention}" if self.ping else "")
       if len(content) > 1900:
          content = f"Output too long, see:\n{await utils.haste(ctx.flux.aiohttp_session, content)}"
 
@@ -73,9 +74,7 @@ class Response(aur.util.AutoRepr):
          delete_after=self.delete_after
       )
 
-      async def handle_trash():
-         if not self.message:
-            return
+      async def handle_trash() -> None:
          try:
             await self.message.add_reaction(utils.EMOJI.trashcan)
             try:
@@ -86,12 +85,12 @@ class Response(aur.util.AutoRepr):
                )
                await self.message.delete()
             except aio.exceptions.TimeoutError:
-               await self.message.remove_reaction(emoji=utils.EMOJI.trashcan, member=ctx.msg_ctx.guild.me)
+               await self.message.remove_reaction(emoji=utils.EMOJI.trashcan, member=ctx.flux.user)
 
-         except (discord.errors.NotFound, discord.errors.Forbidden) as e:
-            logger.error(e)
+         except (discord.errors.NotFound, discord.errors.Forbidden):
+            pass
 
-      if self.trashable:
+      if self.trashable and self.message:
          aio.create_task(handle_trash())
 
       await self.post_process(ctx.msg_ctx, self.message, self.status)
