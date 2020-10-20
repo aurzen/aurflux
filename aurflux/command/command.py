@@ -10,7 +10,6 @@ from loguru import logger
 from .response import Response
 from .. import errors
 from ..auth import Auth, AuthAware
-# noinspection PyUnresolvedReferences
 from ..context import GuildMessageCtx
 
 if ty.TYPE_CHECKING:

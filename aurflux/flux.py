@@ -22,7 +22,7 @@ aur.log.setup()
 
 
 class FluxEvent(aur.Event):
-   def __init__(self, flux, __event_name, *args, **kwargs):
+   def __init__(self, flux: FluxClient, __event_name: str, *args, **kwargs):
       super().__init__(__event_name, *args, **kwargs)
       self.flux: FluxClient = flux
 
@@ -42,8 +42,8 @@ class FluxClient(discord.Client):
          name: str,
          admin_id: int,
          parent_router: EventRouterHost,
-         builtins=True,
-         status: str = None,
+         builtins: bool = True,
+         status: ty.Optional[str] = None,
          *args, **kwargs
    ):
       if status:
@@ -66,26 +66,27 @@ class FluxClient(discord.Client):
          from .cog.builtins import Builtins
          self.register_cog(Builtins)
 
-   def dispatch(self, event, *args, **kwargs):
+   def dispatch(self, event, *args, **kwargs) -> None:
       super(FluxClient, self).dispatch(event, *args, **kwargs)
-      aio.create_task(self.router.submit(FluxEvent(self, f":{event}", *args, **kwargs)))
+      aio.create_task(self.router.submit(
+         FluxEvent(self, f":{event}", *args, **kwargs)))
 
-   def register_cog(self, cog: ty.Type[FluxCog], name: str = None):
+   def register_cog(self, cog: ty.Type[FluxCog], name: str = None) -> None:
       c = cog(flux=self, name=name)
       logger.success(f"Registered {c}")
       self.cogs.append(c)
 
-   async def startup(self, token, *args, **kwargs):
+   async def startup(self, token, *args, **kwargs) -> None :
       await aio.gather(*[cog.startup() for cog in self.cogs])
       await self.start(token, *args, **kwargs)
 
-   async def shutdown(self, *args, **kwargs):
+   async def shutdown(self, *args, **kwargs) -> None:
       await self.close()
 
-   def register_listeners(self):
+   def register_listeners(self) -> None:
       @self.router.listen_for(":message")
       @aur.Eventful.decompose
-      async def _(message: discord.Message):
+      async def _(message: discord.Message) -> None:
          if not message.content or message.author is self.user:
             return
          if message.guild:

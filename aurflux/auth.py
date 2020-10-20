@@ -8,9 +8,7 @@ import discord
 from loguru import logger
 
 if ty.TYPE_CHECKING:
-   from cog import FluxCog
-   # from command import
-   from .context import ConfigAware, GuildMessageCtx, AuthAwareCtx
+   from .context import AuthAwareCtx
    from .command import Command
 
 
@@ -30,9 +28,11 @@ class Record:
 
    def __post_init__(self):
       if self.rule not in ["ALLOW", "DENY"]:
-         raise TypeError(f"Attempted to create a record with a RULE not in ['ALLOW','DENY']: {self}")
+         raise TypeError(
+            f"Attempted to create a record with a RULE not in ['ALLOW','DENY']: {self}")
       if self.target_type not in ["MEMBER", "ROLE", "PERMISSION", "ALL"]:
-         raise TypeError(f"Attempted to create a record with a TARGET_TYPE not in ['MEMBER', 'ROLE', 'PERMISSION', 'ALL']")
+         raise TypeError(
+            f"Attempted to create a record with a TARGET_TYPE not in ['MEMBER', 'ROLE', 'PERMISSION', 'ALL']")
 
    def to_dict(self):
       return dtcs.asdict(self)
@@ -103,8 +103,10 @@ class Auth:
       cog_defaults = Auth.order_records(cmd.cog.default_auths)
       cmd_defaults = Auth.order_records(cmd.default_auths)
 
-      cog_specifics = Auth.order_records([Record(**record) for record in (auths.get(cmd.cog.auth_id, []))])
-      cmd_specifics = Auth.order_records([Record(**record) for record in (auths.get(cmd.auth_id, []))])
+      cog_specifics = Auth.order_records(
+         [Record(**record) for record in (auths.get(cmd.cog.auth_id, []))])
+      cmd_specifics = Auth.order_records(
+         [Record(**record) for record in (auths.get(cmd.auth_id, []))])
 
       cog_overrides = Auth.order_records(cmd.cog.override_auths)
       cmd_overrides = Auth.order_records(cmd.override_auths)
@@ -127,7 +129,8 @@ class Auth:
    async def add_record(ctx: AuthAwareCtx, auth_id: str, record: Record):
       async with ctx.flux.CONFIG.writeable_conf(ctx) as cfg_w:
          if auth_id in cfg_w["auths"]:
-            cfg_w["auths"][auth_id] = [auth_rec for auth_rec in cfg_w["auths"][auth_id] if auth_rec["target_id"] != record.target_id]
+            cfg_w["auths"][auth_id] = [auth_rec for auth_rec in cfg_w["auths"]
+            [auth_id] if auth_rec["target_id"] != record.target_id]
             cfg_w["auths"][auth_id].append(record.to_dict())
          else:
             cfg_w["auths"][auth_id] = [record.to_dict()]

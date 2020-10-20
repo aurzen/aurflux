@@ -21,7 +21,7 @@ CACHED_CONFIGS = 100
 # @ext.AutoRepr
 class Config(metaclass=aurcore.util.Singleton):
 
-   def __init__(self, admin_id, name=""):
+   def __init__(self, admin_id: int, name=""):
       self.config_dir = CONFIG_DIR / name
       self.config_dir.mkdir(exist_ok=True)
       if not (self.config_dir / "base.yaml").exists():
@@ -37,12 +37,12 @@ class Config(metaclass=aurcore.util.Singleton):
       self.cached: clc.OrderedDict = clc.OrderedDict()
       self.locks: ty.Dict[str, asyncio.locks.Lock] = clc.defaultdict(asyncio.locks.Lock)
 
-   def _write_config_file(self, config_id: str, data):
+   def _write_config_file(self, config_id: str, data) -> None:
       local_config_path: pl.Path = self.config_dir / f"{config_id}.yaml"
       with local_config_path.open("w") as f:
          yaml.safe_dump(data, f)
 
-   def _load_config_file(self, config_id: str):
+   def _load_config_file(self, config_id: str) -> ty.Dict:
       local_config_path: pl.Path = self.config_dir / f"{config_id}.yaml"
       try:
          with local_config_path.open("r") as f:
@@ -70,7 +70,6 @@ class Config(metaclass=aurcore.util.Singleton):
          configs = cleaned_dict
 
       return configs
-
 
    @contextlib.asynccontextmanager
    async def writeable_conf(self, identifiable: ConfigCtx):

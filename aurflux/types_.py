@@ -24,4 +24,6 @@ if ty.TYPE_CHECKING:
 
 
    class CommandFunc(ty.Protocol):
+      __name__: str
+
       def __call__(self, ctx: CommandCtx, cmd_args: str = None, **kwargs): ...

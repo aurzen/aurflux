@@ -53,7 +53,7 @@ class Response(aur.util.AutoRepr):
       self.post_process = post_process or (lambda *_: aio.sleep(0))
       self.trashable = trashable
 
-   async def execute(self, ctx: CommandCtx):
+   async def execute(self, ctx: CommandCtx) -> None:
       try:
          if self.status == "ok":
             await ctx.msg_ctx.message.add_reaction(utils.EMOJI.check)

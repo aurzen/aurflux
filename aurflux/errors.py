@@ -45,5 +45,5 @@ class BotMissingPermissions(CommandError):
          fmt = '{}, and {}'.format(", ".join(missing[:-1]), missing[-1])
       else:
          fmt = ' and '.join(missing)
-      message = f"I am missing {fmt} permission{'s' if len(missing) > 2 else ''} {f' in {channel.mention} ' if channel else ''}to run this command."
+      message = f"I am missing {fmt} permission{'s' if len(missing) > 2 else ''} {f' in {channel.mention} ' if channel else ''}."
       super().__init__(message, *args)

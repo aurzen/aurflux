@@ -9,9 +9,7 @@ from ..command import Command
 if ty.TYPE_CHECKING:
    from .. import FluxClient
    from ..context import GuildMessageCtx
-   from ..command import Response
    from ..types_ import *
-   from ..auth import Record
 
 
 class FluxCog(AuthAware, metaclass=abc.ABCMeta):
@@ -73,7 +71,7 @@ class FluxCog(AuthAware, metaclass=abc.ABCMeta):
       return []
 
    @abc.abstractmethod
-   def load(self): ...
+   def load(self) -> None: ...
 
-   def __str__(self):
+   def __str__(self) -> str:
       return f"<Cog {self.name}>"

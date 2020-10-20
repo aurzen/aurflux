@@ -148,7 +148,7 @@ class GuildMemberCtx(AuthAwareCtx, GuildAwareCtx):
 
 
 class MessageCtx(AuthAwareCtx, AuthorAwareCtx, metaclass=ABCMeta):
-   def __init__(self, flux: FluxClient, message: discord.Message, **kwargs):
+   def __init__(self, flux: FluxClient, message: discord.Message, **kwargs: ty.Any):
       super().__init__(flux=flux, **kwargs)
       self.message = message
 

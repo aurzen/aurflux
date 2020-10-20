@@ -46,11 +46,10 @@ class Builtins(FluxCog):
             return ids_[0]
          if type_ == "role":
             ids_ = utils.find_mentions(target_)
-            try:
-               role_id = ctx.guild.get_role(int(ids_[0])).id
-            except AttributeError:
+            role = ctx.guild.get_role(ids_[0])
+            if role is None:
                raise CommandError(f"No role found with ID {target_}")
-            return role_id
+            return role.id
          if type_ == "permissions":
             p_dict: ty.List[str] = json.loads(target_)
             return discord.Permissions(**{p: True for p in p_dict}).value
@@ -124,6 +123,7 @@ class Builtins(FluxCog):
             logger.info(e)
             raise CommandError(f"See `help asif` for usage")
 
+         # noinspection PyPep8Naming
          MOCK_TYPES = {
             "u"   : "user",
             "user": "user",
@@ -238,7 +238,7 @@ class Builtins(FluxCog):
                auth_str,
                [x - 1 for x in [1, 2, 3, 4]]
             )
-         except (ValueError, AttributeError):
+         except (ValueError, AttributeError, TypeError):
             raise CommandError(f"See `help auth` for usage")
 
          rule_subject = rule_subject.lower()
@@ -459,7 +459,7 @@ class Builtins(FluxCog):
 
          # Help for Cog
 
-         if (cog := next((c for c in self.flux.cogs if c.name.lower() == help_target.lower()), None)):
+         if cog := next((c for c in self.flux.cogs if c.name.lower() == help_target.lower()), None):
             embed = discord.Embed(title=f"{utils.EMOJI.question} Section Help: {cog.name}")
             for cmd in cog.commands:
                if cmd.name in authorized_cmds:
