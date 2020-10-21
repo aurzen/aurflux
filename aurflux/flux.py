@@ -76,7 +76,7 @@ class FluxClient(discord.Client):
       logger.success(f"Registered {c}")
       self.cogs.append(c)
 
-   async def startup(self, token, *args, **kwargs) -> None :
+   async def startup(self, token, *args, **kwargs) -> None:
       await aio.gather(*[cog.startup() for cog in self.cogs])
       await self.start(token, *args, **kwargs)
 
@@ -120,8 +120,14 @@ class FluxClient(discord.Client):
       async def _(g: discord.Guild):
          logger.info(f"Removed from guild: {g}")
 
-   async def get_user_s(self, user_id: int):
-      return self.get_user(user_id) or await self.fetch_user(user_id)
+   async def get_user_s(self, user_id: int) -> ty.Optional[discord.User]:
+      try:
+         return self.get_user(user_id) or await self.fetch_user(user_id)
+      except discord.errors.NotFound:
+         return None
 
-   async def get_member_s(self, g: discord.Guild, member_id: int):
-      return g.get_member(member_id) or await g.fetch_member(member_id)
+   async def get_member_s(self, g: discord.Guild, member_id: int) -> ty.Optional[discord.Member]:
+      try:
+         return g.get_member(member_id) or await g.fetch_member(member_id)
+      except discord.errors.NotFound:
+         return None
