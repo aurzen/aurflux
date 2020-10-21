@@ -18,7 +18,7 @@ from ..command import Response
 from ..context import CommandCtx, GuildMessageCtx, ManualAuthCtx, ManualAuthorCtx
 from ..errors import CommandError
 # noinspection PyUnresolvedReferences,Mypy
-import context
+from .. import context
 
 if ty.TYPE_CHECKING:
    from ..context import GuildAwareCtx
