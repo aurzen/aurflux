@@ -113,12 +113,12 @@ class FluxClient(discord.Client):
          logger.success("Discord.py is ready")
 
       @self.router.listen_for(":guild_join")
-      async def _(g: discord.Guild):
-         logger.info(f"Joined guild: {g}")
+      async def _(ev: FluxEvent):
+         logger.info(f"Joined guild: {ev.args[0]}")
 
       @self.router.listen_for(":guild_remove")
-      async def _(g: discord.Guild):
-         logger.info(f"Removed from guild: {g}")
+      async def _(ev: FluxEvent):
+         logger.info(f"Removed from guild: {ev.args[0]}")
 
    async def get_user_s(self, user_id: int) -> ty.Optional[discord.User]:
       try:

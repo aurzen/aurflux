@@ -211,6 +211,7 @@ class Builtins(FluxCog):
                res = await exec_func(script, globals(), locals())
             except Exception as e:
                res = re.sub(r'File ".*[\\/]([^\\/]+.py)"', r'File "\1"', traceback.format_exc(limit=1))
+            res = res.replace(r"/home/zenith/.cache/pypoetry/virtualenvs/pinbot-AoGbOYTv-py3.9/lib/python3.9/site-packages", "...")
 
          return Response((f"Ran in {t.elapsed * 1000:.2f} ms\n"
                           f"**IN**:\n"
