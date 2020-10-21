@@ -131,3 +131,11 @@ class FluxClient(discord.Client):
          return g.get_member(member_id) or await g.fetch_member(member_id)
       except discord.errors.NotFound:
          return None
+
+   async def get_channel_s(
+         self, id_: int
+   ) -> ty.Optional[ty.Union[discord.abc.GuildChannel, discord.abc.PrivateChannel]]:
+      try:
+         return self.get_channel(id_) or await self.fetch_channel(id_)
+      except discord.NotFound, discord.Forbidden, discord.HTTPException:
+         return None
