@@ -17,8 +17,6 @@ from ..auth import Auth, AuthList, Record
 from ..command import Response
 from ..context import CommandCtx, GuildMessageCtx, ManualAuthCtx, ManualAuthorCtx
 from ..errors import CommandError
-# noinspection PyUnresolvedReferences,Mypy
-from .. import context
 
 if ty.TYPE_CHECKING:
    from ..context import GuildAwareCtx
@@ -183,6 +181,7 @@ class Builtins(FluxCog):
             cfg["prefix"] = prefix.strip()
          return Response()
 
+      # noinspection PyUnresolvedReferences
       @self._commandeer(name="exec", override_auths=[Record.deny_all()])
       async def __exec(ctx: CommandCtx, script: str):
          """
@@ -196,9 +195,15 @@ class Builtins(FluxCog):
          :param script:
          :return:
          """
+         from pprint import pformat
+
          exec_func = utils.sexec
          if "await " in script:
             exec_func = utils.aexec
+
+         # Utils for exec
+         from .. import context
+         # ==
 
          with utils.Timer() as t:
             # noinspection PyBroadException
@@ -207,12 +212,11 @@ class Builtins(FluxCog):
             except Exception as e:
                res = re.sub(r'File ".*[\\/]([^\\/]+.py)"', r'File "\1"', traceback.format_exc(limit=1))
 
-         return Response((f""
-                          f"Ran in {t.elapsed * 1000:.2f} ms\n"
+         return Response((f"Ran in {t.elapsed * 1000:.2f} ms\n"
                           f"**IN**:\n"
-                          f"```py\n{script}\n```\n"
+                          f"```py\n{script}\n```"
                           f"**OUT**:\n"
-                          f"```py\n{res}\n```"), trashable=True)
+                          f"```py\n{pformat(res)}\n```"), trashable=True)
 
       @self._commandeer(name="auth", default_auths=[Record.allow_server_manager()])
       async def __auth(ctx: GuildCommandCtx, auth_str):
