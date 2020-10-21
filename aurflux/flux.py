@@ -137,5 +137,5 @@ class FluxClient(discord.Client):
    ) -> ty.Optional[ty.Union[discord.abc.GuildChannel, discord.abc.PrivateChannel]]:
       try:
          return self.get_channel(id_) or await self.fetch_channel(id_)
-      except discord.NotFound, discord.Forbidden, discord.HTTPException:
+      except (discord.NotFound, discord.Forbidden, discord.HTTPException):
          return None
