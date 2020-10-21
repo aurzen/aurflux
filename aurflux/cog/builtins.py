@@ -17,6 +17,7 @@ from ..auth import Auth, AuthList, Record
 from ..command import Response
 from ..context import CommandCtx, GuildMessageCtx, ManualAuthCtx, ManualAuthorCtx
 from ..errors import CommandError
+import context
 
 if ty.TYPE_CHECKING:
    from ..context import GuildAwareCtx
@@ -169,7 +170,7 @@ class Builtins(FluxCog):
          setprefix prefix
          ==
          Sets the bot prefix to `prefix`
-         Ignores surrounding whitespace. Please don't.
+         Ignores surrounding whitespace.
          ==
          prefix: The string to put before a command name. Strips leading and trailing spaces.
          ==
