@@ -36,7 +36,7 @@ class Builtins(FluxCog):
       "member"     : "member",
    }
 
-   def load(self):
+   def load(self) -> None:
       async def parse_auth_id(ctx: GuildAwareCtx, type_: str, target_: str) -> int:
          if type_ == "member":
             ids_ = utils.find_mentions(target_)
