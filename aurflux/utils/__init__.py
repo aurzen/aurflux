@@ -4,6 +4,6 @@ from .emoji import EMOJI, UNICODE
 from .webutils import haste, copylink
 from .misc import Timer
 from .meta import find_cmd_or_cog, ms
-from .date import DATETIME_FMT_L, DATETIME_FMT_S
+from .date import DATETIME_FMT_L, DATETIME_FMT_S, human_time
 from .discord import perm_check
 from .text import plural
