@@ -139,3 +139,16 @@ class FluxClient(discord.Client):
          return self.get_channel(id_) or await self.fetch_channel(id_)
       except (discord.NotFound, discord.Forbidden, discord.HTTPException):
          return None
+
+
+class FluxCore(aur.AurCore):
+   def __init__(self, name: str, admin_id: int, status: str = None):
+      super(FluxCore, self).__init__(name)
+      self.flux = FluxClient(name=name, admin_id=admin_id, parent_router=self.router, status=status)
+
+   async def startup(self, token: str):
+      await self.flux.start(token=token)
+
+   async def shutdown(self):
+      await self.flux.logout()
+      await self.flux.aiohttp_session.close()

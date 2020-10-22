@@ -28,6 +28,7 @@ class TestBot:
 
    async def shutdown(self):
       await self.aurflux.shutdown()
+      await self.aurflux.aiohttp_session.close()
 
 
 triviabot = TestBot()
