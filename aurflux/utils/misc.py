@@ -11,3 +11,4 @@ class Timer:
    def __exit__(self, exc_type, exc_val, exc_tb):
       self.elapsed = time.perf_counter() - self.elapsed
 
+
