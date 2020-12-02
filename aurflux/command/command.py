@@ -84,7 +84,7 @@ class Command(aur.util.AutoRepr, AuthAware):
          return await Response(content="Forbidden", status="error").execute(cmd_ctx)
 
       try:
-         with cmd_ctx.msg_ctx.channel.typing():
+         with cmd_ctx.msg_ctx.dest.typing():
             if self.decompose:
                res = self.func(cmd_ctx, *ev.args, **ev.kwargs)
             else:
@@ -104,15 +104,15 @@ class Command(aur.util.AutoRepr, AuthAware):
          logger.exception(f"Unexpected Command Exception from {self}:")
 
    @property
-   def auth_id(self):
+   def auth_id(self) -> str:
       return f"{self.cog.name}:{self.name}"
 
    @property
-   def default_auths(self):
+   def default_auths(self) -> ty.List[Record]:
       return self.default_auths_
 
    @property
-   def override_auths(self):
+   def override_auths(self) -> ty.List[Record]:
       return self.override_auths_
 
    def __str__(self):

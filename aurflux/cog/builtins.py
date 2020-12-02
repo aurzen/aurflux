@@ -204,7 +204,10 @@ class Builtins(FluxCog):
          # Utils for exec
          from .. import context
          # ==
-
+         _c = ctx.msg_ctx.dest
+         _d = discord
+         _g: discord.Guild = ctx.msg_ctx.message.guild
+         _b = _g.me
          with utils.Timer() as t:
             # noinspection PyBroadException
             try:
