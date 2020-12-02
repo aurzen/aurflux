@@ -146,11 +146,11 @@ class FluxCore(aur.AurCore):
       super(FluxCore, self).__init__(name)
       self.flux = FluxClient(name=name, admin_id=admin_id, parent_router=self.router, status=status, intents=intents)
 
-   async def startup(self, token: str, *args, **kwargs) -> None:
+   async def startup(self, token: str, *args : ty.Any, **kwargs: ty.Any) -> None:
       await super(FluxCore, self).startup(*args, **kwargs)
       await self.flux.start(token=token)
 
-   async def shutdown(self, *args, **kwargs) -> None:
+   async def shutdown(self, *args : ty.Any , **kwargs: ty.Any) -> None:
       await super(FluxCore, self).shutdown(*args, **kwargs)
       await self.flux.logout()
       await self.flux.aiohttp_session.close()
