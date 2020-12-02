@@ -21,6 +21,12 @@ class CommandError(CommandException):
    pass
 
 
+class CommandSyntaxError(CommandError):
+   def __init__(self, command_name: str, prefix: str, *args):
+      message = f"Syntax not recognized... see {prefix}{command_name}"
+      super().__init__(message, *args)
+
+
 class UserMissingPermissions(CommandError):
    def __init__(self, missing_perms, *args):
       self.missing_perms = missing_perms
@@ -36,7 +42,7 @@ class UserMissingPermissions(CommandError):
 
 
 class BotMissingPermissions(CommandError):
-   def __init__(self, need: discord.Permissions, have: discord.Permissions, channel: discord.TextChannel=None, *args):
+   def __init__(self, need: discord.Permissions, have: discord.Permissions, channel: discord.TextChannel = None, *args):
       missing_perms = discord.Permissions(permissions=(need.value ^ have.value) & need.value)
 
       missing = [perm.replace('_', ' ').replace('guild', 'server').title() for perm, v in missing_perms if v]
