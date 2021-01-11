@@ -211,7 +211,7 @@ class Builtins(FluxCog):
          with utils.Timer() as t:
             # noinspection PyBroadException
             try:
-               res = await exec_func(script, globals(), locals())
+               res = str(await exec_func(script, globals(), locals()))
             except Exception as e:
                res = re.sub(r'File ".*[\\/]([^\\/]+.py)"', r'File "\1"', traceback.format_exc(limit=1))
             res = res.replace(r"/home/zenith/.cache/pypoetry/virtualenvs/pinbot-AoGbOYTv-py3.9/lib/python3.9/site-packages", "...")
