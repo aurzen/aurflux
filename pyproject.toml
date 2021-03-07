@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "aurflux"
-version = "3.3.11"
+version = "3.3.12"
 description = "Aurflux!"
 authors = ["Zenith <inbox@zenith.dev>"]
 include = ["aurflux/py.typed"]

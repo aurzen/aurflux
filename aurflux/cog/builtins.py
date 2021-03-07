@@ -413,6 +413,7 @@ class Builtins(FluxCog):
          ) if text_channels else ""
          embed.add_field(name="Public Text Channels", value=f"[{len(text_channels)} Channels]({public_channels_haste})", inline=True)
 
+
          voice_channels = [channel for channel in g.voice_channels if channel.overwrites_for(g.default_role).connect is not False and g.default_role.permissions.connect]
          public_vc_haste = await utils.haste(
             self.flux.aiohttp_session,
@@ -432,6 +433,29 @@ class Builtins(FluxCog):
          ) if voice_channels else ""
 
          embed.add_field(name="Public Voice Channels", value=f"[{len(voice_channels)} Channels]({public_vc_haste})", inline=True)
+
+         # Roles
+         roles = [role for role in g.roles]
+         public_roles_haste = await utils.haste(
+            self.flux.aiohttp_session,
+            content=tabulate.tabulate(
+               [[f"{role}",
+                 f"{role.id}",
+                 f"{role.position}",
+                 f"{role.color}",
+                 f"{role.created_at.strftime(utils.DATETIME_FMT_S)}",
+                 f"{len(role.members)}",
+                 f"{role.mentionable}",
+                 f"{role.hoist}",
+                 f"{role.managed}",
+                 ]
+                for role in roles],
+               headers=("Name", "ID", "Position", "Color Hex", "Creation Date", "# of visible members", "Mentionable","Hoist","Managed")
+
+            )
+         )
+         embed.add_field(name="Roles", value=f"[{len(roles)} Roles]({public_roles_haste})", inline=True)
+
          return Response(embed=embed)
          pass
 
