@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio as aio
+import importlib
 import typing as ty
 
 import aiohttp
@@ -10,9 +11,12 @@ import discord.ext
 from aurcore import EventRouter
 from loguru import logger
 
+import sys
+import inspect
+
 from .config import Config
 from .context import CommandCtx, GuildMessageCtx, MessageCtx
-
+from .errors import CommandError
 if ty.TYPE_CHECKING:
    import discord
    from .cog import FluxCog
@@ -71,10 +75,29 @@ class FluxClient(discord.Client):
       aio.create_task(self.router.submit(
          FluxEvent(self, f":{event}", *args, **kwargs)))
 
-   def register_cog(self, cog: ty.Type[FluxCog], name: str = None) -> None:
-      c = cog(flux=self, name=name)
+   def register_cog(self, cog: ty.Type[FluxCog]) -> None:
+      c = cog(flux=self)
       logger.success(f"Registered {c}")
       self.cogs.append(c)
+
+   def reload_cog(self, cog_name:str):
+
+      cog = next((cog for cog in self.cogs if cog.name == cog_name), None)
+      if not cog:
+         raise CommandError(f"`{cog_name} not recognized in list of cogs")
+      cog.teardown()
+      self.cogs.remove(cog)
+
+      cog_module = importlib.reload(sys.modules[cog.__module__])
+
+      # logger.info(str(cog_module))
+      # logger.info(str(cog.__class__.__name__))
+      # logger.info(str(inspect.getmembers(cog_module)))
+      #
+      self.register_cog(getattr(cog_module, cog.__class__.__name__))
+
+
+
 
    async def startup(self, token, *args, **kwargs) -> None:
       await aio.gather(*[cog.startup() for cog in self.cogs])

@@ -13,8 +13,8 @@ if ty.TYPE_CHECKING:
 
 
 class FluxCog(AuthAware, metaclass=abc.ABCMeta):
-   def __init__(self, flux: FluxClient, name: ty.Optional[str] = None):
-      self.name = name or self.__class__.__name__
+   name: str
+   def __init__(self, flux: FluxClient):
       self.flux = flux
       self.router = aur.EventRouter(self.name, host=self.flux.router.host)
       self.commands: ty.List[Command] = []
@@ -59,7 +59,8 @@ class FluxCog(AuthAware, metaclass=abc.ABCMeta):
 
    def teardown(self):
       logger.info(f"Cog {self.name} detaching from {self.router}")
-
+      # logger.info(list(zip(r.name, r.__hash__() for r in self.router.host.routers)))
+      print(self.router in self.router.host.routers)
       self.router.detach()
 
    @property

@@ -33,6 +33,7 @@ class Builtins(FluxCog):
       "role"       : "role",
       "member"     : "member",
    }
+   name = "builtins"
 
    def load(self) -> None:
       async def parse_auth_id(ctx: GuildAwareCtx, type_: str, target_: str) -> int:
@@ -206,7 +207,8 @@ class Builtins(FluxCog):
          # ==
          _c = ctx.msg_ctx.dest
          _d = discord
-         _g: discord.Guild = ctx.msg_ctx.message.guild
+         # noinspection PyTypeChecker
+         _g: ty.Optional[discord.Guild] = ctx.msg_ctx.message.guild
          _b = _g.me
          with utils.Timer() as t:
             # noinspection PyBroadException
@@ -413,7 +415,6 @@ class Builtins(FluxCog):
          ) if text_channels else ""
          embed.add_field(name="Public Text Channels", value=f"[{len(text_channels)} Channels]({public_channels_haste})", inline=True)
 
-
          voice_channels = [channel for channel in g.voice_channels if channel.overwrites_for(g.default_role).connect is not False and g.default_role.permissions.connect]
          public_vc_haste = await utils.haste(
             self.flux.aiohttp_session,
@@ -450,7 +451,7 @@ class Builtins(FluxCog):
                  f"{role.managed}",
                  ]
                 for role in roles],
-               headers=("Name", "ID", "Position", "Color Hex", "Creation Date", "# of visible members", "Mentionable","Hoist","Managed")
+               headers=("Name", "ID", "Position", "Color Hex", "Creation Date", "# of visible members", "Mentionable", "Hoist", "Managed")
 
             )
          )
@@ -527,6 +528,19 @@ class Builtins(FluxCog):
             embed.add_field(name=arg.strip(), value=detail.strip(), inline=False)
 
          return Response(embed=embed)
+
+      @self._commandeer(name="reload", default_auths=[Record.deny_all()])
+      async def __reload(ctx: CommandCtx, cog_name: str):
+         """
+         reload cogname
+         ==
+         ==
+         ==
+         :param ctx:
+         :param cog_name:
+         :return:
+         """
+         return Response(self.flux.reload_cog(cog_name))
 
    @property
    def default_auths(self) -> ty.List[Record]:
