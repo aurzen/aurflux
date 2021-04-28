@@ -103,7 +103,9 @@ class FluxClient(discord.Client):
 
 
    async def startup(self, token, *args, **kwargs) -> None:
-      aio.create_task(aio.gather(*[cog.startup() for cog in self.cogs]))
+      async def x():
+         await aio.gather(*[cog.startup() for cog in self.cogs])
+      asyncio.create_task(x())
       await self.start(token, *args, **kwargs)
 
    async def shutdown(self, *args, **kwargs) -> None:
