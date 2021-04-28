@@ -84,7 +84,7 @@ class FluxClient(discord.Client):
 
       cog = next((cog for cog in self.cogs if cog.name == cog_name), None)
       if not cog:
-         raise CommandError(f"`{cog_name} not recognized in list of cogs")
+         raise CommandError(f"`{cog_name}` not recognized in list of cogs")
       cog.teardown()
       self.cogs.remove(cog)
 
