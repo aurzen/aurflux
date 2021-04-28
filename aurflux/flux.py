@@ -5,6 +5,7 @@ import importlib
 import typing as ty
 
 import aiohttp
+import aurcore
 import aurcore as aur
 import discord.errors
 import discord.ext
@@ -48,6 +49,7 @@ class FluxClient(discord.Client):
          parent_router: EventRouterHost,
          builtins: bool = True,
          status: ty.Optional[str] = None,
+         host: aurcore.AurCore  = None,
          *args, **kwargs
    ):
       if status:
