@@ -77,12 +77,13 @@ class FluxClient(discord.Client):
       aio.create_task(self.router.submit(
          FluxEvent(self, f":{event}", *args, **kwargs)))
 
-   def register_cog(self, cog: ty.Type[FluxCog]) -> None:
+   def register_cog(self, cog: ty.Type[FluxCog]) -> FluxCog:
       c = cog(flux=self)
       logger.success(f"Registered {c}")
       self.cogs.append(c)
+      return c
 
-   def reload_cog(self, cog_name:str):
+   async def reload_cog(self, cog_name:str):
 
       cog = next((cog for cog in self.cogs if cog.name == cog_name), None)
       if not cog:
@@ -95,15 +96,15 @@ class FluxClient(discord.Client):
       # logger.info(str(cog_module))
       # logger.info(str(cog.__class__.__name__))
       # logger.info(str(inspect.getmembers(cog_module)))
-      #
-      self.register_cog(getattr(cog_module, cog.__class__.__name__))
 
+      cog = self.register_cog(getattr(cog_module, cog.__class__.__name__))
+      await cog.startup()
 
 
 
    async def startup(self, token, *args, **kwargs) -> None:
-      await aio.gather(*[cog.startup() for cog in self.cogs])
       await self.start(token, *args, **kwargs)
+      aio.create_task(aio.gather(*[cog.startup() for cog in self.cogs]))
 
    async def shutdown(self, *args, **kwargs) -> None:
       await self.close()

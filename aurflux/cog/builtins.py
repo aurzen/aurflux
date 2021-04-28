@@ -540,7 +540,7 @@ class Builtins(FluxCog):
          :param cog_name:
          :return:
          """
-         return Response(self.flux.reload_cog(cog_name))
+         return Response(await self.flux.reload_cog(cog_name))
 
    @property
    def default_auths(self) -> ty.List[Record]:
