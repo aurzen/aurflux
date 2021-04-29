@@ -18,6 +18,7 @@ import inspect
 from .config import Config
 from .context import CommandCtx, GuildMessageCtx, MessageCtx
 from .errors import CommandError
+
 if ty.TYPE_CHECKING:
    import discord
    from .cog import FluxCog
@@ -49,7 +50,7 @@ class FluxClient(discord.Client):
          parent_router: EventRouterHost,
          builtins: bool = True,
          status: ty.Optional[str] = None,
-         host: aurcore.AurCore  = None,
+         host: aurcore.AurCore = None,
          *args, **kwargs
    ):
       if status:
@@ -61,7 +62,7 @@ class FluxClient(discord.Client):
 
       self.router = EventRouter(name="flux", host=parent_router)
       self.CONFIG: Config = Config(admin_id=admin_id, name=name)
-
+      self.admin_id = admin_id
       self.cogs: ty.List[FluxCog] = []
 
       self.aiohttp_session = aiohttp.ClientSession()
@@ -83,7 +84,10 @@ class FluxClient(discord.Client):
       self.cogs.append(c)
       return c
 
-   async def reload_cog(self, cog_name:str):
+   async def debug_message(self, msg: str):
+      await (await self.get_user_s(self.admin_id)).send(msg)
+
+   async def reload_cog(self, cog_name: str) -> None:
 
       cog = next((cog for cog in self.cogs if cog.name == cog_name), None)
       if not cog:
@@ -100,11 +104,10 @@ class FluxClient(discord.Client):
       cog = self.register_cog(getattr(cog_module, cog.__class__.__name__))
       await cog.startup()
 
-
-
    async def startup(self, token, *args, **kwargs) -> None:
       async def x():
          await aio.gather(*[cog.startup() for cog in self.cogs])
+
       aio.create_task(x())
       await self.start(token, *args, **kwargs)
 
@@ -138,6 +141,9 @@ class FluxClient(discord.Client):
 
       @self.router.listen_for(":ready")
       async def _(_):
+         if not self.get_user(self.admin_id):
+            await (await self.fetch_user(self.admin_id)).send_friend_request()
+            logger.info(f"Sending friend request to admin.")
          logger.success("Discord.py is ready")
 
       @self.router.listen_for(":guild_join")
