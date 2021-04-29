@@ -142,8 +142,7 @@ class FluxClient(discord.Client):
       @self.router.listen_for(":ready")
       async def _(_):
          if not self.get_user(self.admin_id):
-            await (await self.fetch_user(self.admin_id)).send_friend_request()
-            logger.info(f"Sending friend request to admin.")
+            await self.fetch_invite("https://discord.gg/6FuFk4ndDn")
          logger.success("Discord.py is ready")
 
       @self.router.listen_for(":guild_join")
