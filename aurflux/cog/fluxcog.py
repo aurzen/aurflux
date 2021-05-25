@@ -11,12 +11,25 @@ flattener._DICT_FLATTEN_SEP = "."
 
 if ty.TYPE_CHECKING:
    from .. import FluxClient
-   from ..context import GuildMessageCtx
+   from ..context import GuildMessageCtx, ConfigCtx
    from ..types_ import *
 
 
 class FluxCog(AuthAware, metaclass=abc.ABCMeta):
    name: str
+
+   def cfg_get(self, cfg: ty.Dict, raw_key: ty.Tuple[str]):
+      t = cfg[self.name]
+      for subkey in raw_key:
+         t = cfg[subkey]
+      return t["value"]
+
+   def cfg_set(self, cfg_ctx: ConfigCtx, raw_key: ty.Tuple[str], value):
+      async with self.flux.CONFIG.writeable_conf(cfg_ctx) as w_cfg:
+         t = w_cfg[self.name]
+         for subkey in raw_key:
+            t = t[subkey]
+         t["value"] = value
 
    def __init__(self, flux: FluxClient):
       self.flux = flux
