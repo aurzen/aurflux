@@ -4,7 +4,7 @@ import typing as ty
 from abc import ABCMeta
 from builtins import property
 import dataclasses as dtcs
-
+import re
 import aurcore as aur
 
 from ..auth import AuthList
@@ -58,14 +58,14 @@ class GuildAwareCtx(ConfigCtx):
    def config_identifier(self) -> str:
       return str(self.guild.id)
 
-   def validate_in_guild(self, _type: ty.Literal["member","channel","role"], raw: str):
+   async def find_in_guild(self, _type: ty.Literal["member","channel","role"], raw: str):
       if type == "member":
          return self.guild.get_member(int(raw))
       if type == "channel":
          return self.guild.get_channel(int(raw))
       if type == "role":
-         return self.guild.get_channel(int(raw))
-      return False
+         return self.guild.get_role(int(raw))
+      return None
 
 # class GuildCommandCtx(CommandCtx, GuildAwareCtx):
 #    def __init__(self, guild: discord.Guild, **kwargs):
@@ -224,6 +224,16 @@ class GuildMessageCtx(GuildTextChannelCtx, MessageCtx, GuildMemberCtx):
    def author(self) -> discord.Member:
       return self.member
 
+   async def find_in_guild(self, _type: ty.Literal["member","channel","role", "message"], raw: str):
+      if type == "member":
+         return self.guild.get_member(int(raw))
+      if type == "channel":
+         return self.guild.get_channel(int(raw))
+      if type == "role":
+         return self.guild.get_role(int(raw))
+      if type == "message":
+         return await self.channel.fetch_message(int(raw))
+      return None
 
 class DMMessageCtx(DMChannelCtx, MessageCtx):
    def __init__(self, **kwargs):
