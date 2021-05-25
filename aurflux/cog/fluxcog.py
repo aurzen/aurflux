@@ -18,13 +18,13 @@ if ty.TYPE_CHECKING:
 class FluxCog(AuthAware, metaclass=abc.ABCMeta):
    name: str
 
-   def cfg_get(self, cfg: ty.Dict, raw_key: ty.Tuple[str]):
+   async def cfg_get(self, cfg: ty.Dict, raw_key: ty.Tuple[str]):
       t = cfg[self.name]
       for subkey in raw_key:
          t = cfg[subkey]
       return t["value"]
 
-   def cfg_set(self, cfg_ctx: ConfigCtx, raw_key: ty.Tuple[str], value):
+   async def cfg_set(self, cfg_ctx: ConfigCtx, raw_key: ty.Tuple[str], value):
       async with self.flux.CONFIG.writeable_conf(cfg_ctx) as w_cfg:
          t = w_cfg[self.name]
          for subkey in raw_key:
