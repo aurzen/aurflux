@@ -532,7 +532,7 @@ class Builtins(FluxCog):
          return Response(embed=embed)
 
       @self._commandeer(name="config", default_auths=[Record.allow_server_manager()])
-      async def __config(ctx: CommandCtx, args: str):
+      async def __config(ctx: GuildCommandCtx, args: str):
          """
          config configpath (value)
          ==
@@ -548,7 +548,7 @@ class Builtins(FluxCog):
          if not args:
             raise CommandError(f"Need to provide a config path. Available cogs: {','.join([cog.name for cog in self.flux.cogs])}")
          config, value, *_ = [*args.split(" ", 1), None]
-         if (cfgroot := config.split(".",1)[0]) not in [cog.name for cog in self.flux.cogs]:
+         if (cfgroot := config.split(".", 1)[0]) not in [cog.name for cog in self.flux.cogs]:
             raise CommandError(f"Cog name `{cfgroot or ' '}` not found in cogs: {','.join([cog.name for cog in self.flux.cogs])}")
 
          if value is not None:
@@ -557,24 +557,23 @@ class Builtins(FluxCog):
                for part in config.split("."):
                   t = t[part]
                if value in t:
-
+                  if not ctx.msg_ctx.validate_in_guild(t["type"], value):
+                     return f"{value} not recognizable as a {t['type']}"
                   t["value"] = value
                   return Response(f"Set {config} to `{value}`")
                else:
                   raise CommandError(f"`{config}` is a category, not a setting!")
          else:
-            cfg =self.flux.CONFIG.of(ctx.msg_ctx)
+            cfg = self.flux.CONFIG.of(ctx.msg_ctx)
             t = cfg
             for part in config.split("."):
                t = t[part]
-            cfg_msg = [[f"{config}",f"{'(Category) ' if 'value' not in t.keys() else ''}{t['__meta']}"]]
+            cfg_msg = [[f"{config}", f"{'(Category) ' if 'value' not in t.keys() else ''}{t['__meta']}"]]
             for key in [k for k in t.keys() if k not in ('__meta', 'value')]:
-               print(key)
-               print(t[key])
-               cfg_msg.append( [f"\n{config}.{key}",f"{'(Category) ' if 'value' not in t[key].keys() else ''}{t[key]['__meta']}"])
-            return Response(f"```{tabulate.tabulate(cfg_msg, headers=('Config Key','Info'))}```")
+               cfg_msg.append([f"\n{config}.{key}", f"{'(Category) ' if 'value' not in t[key].keys() else ''}{t[key]['__meta']}"])
+            return Response(f"```{tabulate.tabulate(cfg_msg, headers=('Config Key', 'Info'))}```")
 
-      @self._commandeer(name="reload", default_auths=[Record.deny_all()])
+      @self._commandeer(name="reload", allow_dm=True, default_auths=[Record.deny_all()])
       async def __reload(ctx: CommandCtx, cog_name: str):
          """
          reload cogname

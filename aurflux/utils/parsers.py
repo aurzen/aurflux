@@ -15,3 +15,4 @@ def regex_parse(regex: re.Pattern, content: str, groups: ty.List[int]):
       raise ValueError()
    group_tuple = match.groups()
    return [group_tuple[i] for i in groups]
+

@@ -58,6 +58,14 @@ class GuildAwareCtx(ConfigCtx):
    def config_identifier(self) -> str:
       return str(self.guild.id)
 
+   def validate_in_guild(self, _type: ty.Literal["member","channel","role"], raw: str):
+      if type == "member":
+         return self.guild.get_member(int(raw))
+      if type == "channel":
+         return self.guild.get_channel(int(raw))
+      if type == "role":
+         return self.guild.get_channel(int(raw))
+      return False
 
 # class GuildCommandCtx(CommandCtx, GuildAwareCtx):
 #    def __init__(self, guild: discord.Guild, **kwargs):
