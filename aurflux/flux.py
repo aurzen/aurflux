@@ -139,12 +139,6 @@ class FluxClient(discord.Client):
          logger.info("Resuming...")
          await self.change_presence(activity=self._activity)
 
-      @self.router.listen_for(":ready")
-      async def _(_):
-         if not self.get_user(self.admin_id):
-            await self.fetch_invite("https://discord.gg/6FuFk4ndDn")
-         logger.success("Discord.py is ready")
-
       @self.router.listen_for(":guild_join")
       async def _(ev: FluxEvent):
          logger.info(f"Joined guild: {ev.args[0]}")

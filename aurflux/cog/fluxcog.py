@@ -5,6 +5,9 @@ import aurcore as aur
 from loguru import logger
 from ..auth import AuthAware, Record
 from ..command import Command
+from aurcore.util import flattener
+
+flattener._DICT_FLATTEN_SEP = "."
 
 if ty.TYPE_CHECKING:
    from .. import FluxClient
@@ -14,6 +17,7 @@ if ty.TYPE_CHECKING:
 
 class FluxCog(AuthAware, metaclass=abc.ABCMeta):
    name: str
+
    def __init__(self, flux: FluxClient):
       self.flux = flux
       self.router = aur.EventRouter(self.name, host=self.flux.router.host)
@@ -72,7 +76,8 @@ class FluxCog(AuthAware, metaclass=abc.ABCMeta):
       return []
 
    @abc.abstractmethod
-   def load(self) -> None: ...
+   def load(self) -> None:
+      ...
 
    def __str__(self) -> str:
       return f"<Cog {self.name}>"
