@@ -21,7 +21,7 @@ class FluxCog(AuthAware, metaclass=abc.ABCMeta):
    async def cfg_get(self, cfg: ty.Dict, raw_key: ty.List[str]) -> ty.Union[list, str, int, float]:
       t = cfg[self.name]
       for subkey in raw_key:
-         t = cfg[subkey]
+         t = t[subkey]
       return t["value"]
 
    async def cfg_set(self, cfg_ctx: ConfigCtx, raw_key: ty.List[str], value:  ty.Union[list, str, int, float]):
