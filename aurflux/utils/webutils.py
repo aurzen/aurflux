@@ -19,3 +19,10 @@ def copylink(to_copy: str, embed=True) -> str:
       return f"[{to_copy}]({link})"
    else:
       return link
+
+async def shorten(session :aiohttp.client.ClientSession, link: str):
+   async with session.get("https://s.ze.ax/yourls-api.php", data={
+
+   }) as resp:
+      r = await resp.json(content_type=None)
+      return f"https://h.ze.ax/{r['key']}"
