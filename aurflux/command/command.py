@@ -63,7 +63,10 @@ class Command(aur.util.AutoRepr, AuthAware):
             # noinspection PyUnresolvedReferences,Mypy
             acc.append((param_name, detail.removesuffix("\\").strip() + "\n" + x))
          else:
-            param_name, detail = x.split(":", 1)
+            try:
+               param_name, detail = x.split(":", 1)
+            except ValueError as e:
+               raise ValueError(f"Command {self.cog}:{self.name} is missing a ':' in param: {x}")
             acc.append((param_name, detail))
          return acc
 
