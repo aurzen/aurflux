@@ -107,8 +107,7 @@ class FluxClient(discord.Client):
    async def startup(self, token, *args, **kwargs) -> None:
       for cog in self.cogs:
          logger.info(f"Starting up cog: {cog}")
-         await cog.startup()
-         logger.success(f"Successfully started up cog: {cog}")
+         aio.create_task(cog.startup()).add_done_callback(lambda _: logger.success(f"Successfully started up cog: {cog}"))
       # async def x():
       #    await aio.gather(*[cog.startup() for cog in self.cogs])
 
