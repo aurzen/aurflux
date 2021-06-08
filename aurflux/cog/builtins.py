@@ -550,8 +550,8 @@ class Builtins(FluxCog):
          config, value, *_ = [*args.split(" ", 1), None]
          if (cfgroot := config.split(".", 1)[0]) not in [cog.name for cog in self.flux.cogs]:
             raise CommandError(f"Cog name `{cfgroot or ' '}` not found in cogs: {','.join([cog.name for cog in self.flux.cogs])}")
-         value = value.strip()
          if value is not None:
+            value = value.strip()
             async with self.flux.CONFIG.writeable_conf(ctx.msg_ctx) as cfg:
                t = cfg
                for part in config.split("."):
