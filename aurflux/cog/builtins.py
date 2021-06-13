@@ -98,7 +98,7 @@ class Builtins(FluxCog):
          raise ValueError
 
       @self._commandeer(name="asif", default_auths=[Record.allow_all()])
-      async def __asif(ctx: GuildCommandCtx, args: str, ):
+      async def __asif(ctx: GuildCommandCtx, args: str, _=()):
          """
          asif [type] <target>/{target} command args*
          ==
@@ -167,7 +167,7 @@ class Builtins(FluxCog):
          return Response()
 
       @self._commandeer(name="setprefix", default_auths=[Record.allow_server_manager()])
-      async def __set_prefix(ctx: GuildCommandCtx, prefix: str):
+      async def __set_prefix(ctx: GuildCommandCtx, prefix: str, _):
          """
          setprefix prefix
          ==
@@ -186,7 +186,7 @@ class Builtins(FluxCog):
 
       # noinspection PyUnresolvedReferences
       @self._commandeer(name="exec", override_auths=[Record.deny_all()])
-      async def __exec(ctx: CommandCtx, script: str):
+      async def __exec(ctx: CommandCtx, script: str, _):
          """
          exec ute order 66
          ==
@@ -227,7 +227,7 @@ class Builtins(FluxCog):
                           f"```py\n{pformat(res)}\n```"), trashable=True)
 
       @self._commandeer(name="auth", default_auths=[Record.allow_server_manager()])
-      async def __auth(ctx: GuildCommandCtx, auth_str):
+      async def __auth(ctx: GuildCommandCtx, auth_str, _):
          """
          auth name [rule] [id_type] <id>/{perm}
          ==
@@ -275,7 +275,7 @@ class Builtins(FluxCog):
 
       # noinspection PyPep8Naming
       @self._commandeer(name="userinfo", default_auths=[Record.allow_server_manager()])
-      async def __userinfo(ctx: GuildCommandCtx, target_raw):
+      async def __userinfo(ctx: GuildCommandCtx, target_raw, _):
          """
          userinfo (<user/member>)
          ==
@@ -342,7 +342,7 @@ class Builtins(FluxCog):
          return Response(embed=embed)
 
       @self._commandeer(name="serverinfo", default_auths=[Record.allow_server_manager()])
-      async def __serverinfo(ctx: GuildCommandCtx, _):
+      async def __serverinfo(ctx: GuildCommandCtx, _, __):
          """
          serverinfo
          ==
@@ -463,7 +463,7 @@ class Builtins(FluxCog):
          pass
 
       @self._commandeer(name="help", default_auths=[Record.allow_all()])
-      async def __get_help(ctx: GuildCommandCtx, help_target: ty.Optional[str]):
+      async def __get_help(ctx: GuildCommandCtx, help_target: ty.Optional[str], _):
          """
          help (command_name/section)
          ==
@@ -532,7 +532,7 @@ class Builtins(FluxCog):
          return Response(embed=embed)
 
       @self._commandeer(name="config", default_auths=[Record.allow_server_manager()])
-      async def __config(ctx: GuildCommandCtx, args: str):
+      async def __config(ctx: GuildCommandCtx, args: str, _):
          """
          config configpath (value)
          ==
@@ -570,7 +570,7 @@ class Builtins(FluxCog):
             for part in config.split("."):
                t = t[part]
             cfg_msg = [[f"{config}", f"({(t['type'].title())}) {t['__meta']}"]]
-            cfg_msg.append(["-","-"])
+            cfg_msg.append(["-", "-"])
 
             for key in [k for k in t.keys() if k not in ('__meta', 'value', 'type')]:
                cfg_msg.append([f"\n{config}.{key}", f"({t[key]['type'].title()}) {t[key]['__meta']}", t[key]["value"] if "value" in t[key] else ""])

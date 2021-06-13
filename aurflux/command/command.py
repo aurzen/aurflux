@@ -49,6 +49,8 @@ class Command(aur.util.AutoRepr, AuthAware):
       func_doc = inspect.getdoc(self.func)
       if not func_doc:
          raise RuntimeError(f"{self.func} lacks a docstring!")
+      if self.func.__code__.co.argcount == 2:
+         raise logger.warning(f"Deprecation Warning: {self.func} missing argument for flags")
       try:
          usage, description, params, *_ = func_doc.split("==")
       except ValueError as e:
@@ -91,7 +93,7 @@ class Command(aur.util.AutoRepr, AuthAware):
             if self.decompose:
                res = self.func(cmd_ctx, *ev.args, **ev.kwargs)
             else:
-               if ev.cmd_flags:
+               if ev.cmd_flags or self.func.__code__.co_argcount == 3: #Todo: breaking release to remove this hack
                   res = self.func(cmd_ctx, ev.cmd_args, ev.cmd_flags)
                else:
                   res = self.func(cmd_ctx, ev.cmd_args)
