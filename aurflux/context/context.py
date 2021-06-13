@@ -8,7 +8,7 @@ import re
 import aurcore as aur
 
 from ..auth import AuthList
-
+from ..utils import parsers
 if ty.TYPE_CHECKING:
    import discord
    from .. import FluxClient
@@ -225,14 +225,16 @@ class GuildMessageCtx(GuildTextChannelCtx, MessageCtx, GuildMemberCtx):
       return self.member
 
    async def find_in_guild(self, _type: ty.Literal["member","channel","role", "message"], raw: str):
-      if type == "member":
-         return self.guild.get_member(int(raw))
-      if type == "channel":
-         return self.guild.get_channel(int(raw))
-      if type == "role":
-         return self.guild.get_role(int(raw))
-      if type == "message":
-         return await self.channel.fetch_message(int(raw))
+      raw_id = parsers.find_mentions(raw)
+      raw_id = raw_id and raw_id[0]
+      if _type == "member":
+         return self.guild.get_member(int(raw_id))
+      if _type == "channel":
+         return self.guild.get_channel(int(raw_id))
+      if _type == "role":
+         return self.guild.get_role(int(raw_id))
+      if _type == "message":
+         return await self.channel.fetch_message(int(raw_id))
       return None
 
 class DMMessageCtx(DMChannelCtx, MessageCtx):

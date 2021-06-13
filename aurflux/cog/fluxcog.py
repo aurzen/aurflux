@@ -8,7 +8,7 @@ from ..command import Command
 from aurcore.util import flattener
 
 flattener._DICT_FLATTEN_SEP = "."
-
+aur.log.setup()
 if ty.TYPE_CHECKING:
    from .. import FluxClient
    from ..context import GuildMessageCtx, ConfigCtx
@@ -20,9 +20,12 @@ class FluxCog(AuthAware, metaclass=abc.ABCMeta):
 
    async def cfg_get(self, cfg: ty.Dict, raw_key: ty.List[str]) -> ty.Union[list, str, int, float]:
       t = cfg[self.name]
-      for subkey in raw_key:
-         t = t[subkey]
-      return t["value"]
+      try:
+         for subkey in raw_key:
+            t = t[subkey]
+         return t["value"]
+      except ValueError as e:
+         logger.error(f"[{self}]\nFailed to access {raw_key} in {t}, full config: {cfg[self.name]}\n{e}")
 
    async def cfg_set(self, cfg_ctx: ConfigCtx, raw_key: ty.List[str], value:  ty.Union[list, str, int, float]) -> None:
       async with self.flux.CONFIG.writeable_conf(cfg_ctx) as w_cfg:

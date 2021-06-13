@@ -556,7 +556,8 @@ class Builtins(FluxCog):
                t = cfg
                for part in config.split("."):
                   t = t[part]
-               if value in t:
+
+               if t["type"] != "category":
                   if not await ctx.msg_ctx.find_in_guild(t["type"], value):
                      raise CommandError(f"{value} not recognizable or locatable as a {t['type']}")
                   t["value"] = value
@@ -568,9 +569,11 @@ class Builtins(FluxCog):
             t = cfg
             for part in config.split("."):
                t = t[part]
-            cfg_msg = [[f"{config}", f"{'(Category) ' if 'value' not in t.keys() else ''}{t['__meta']}"]]
-            for key in [k for k in t.keys() if k not in ('__meta', 'value')]:
-               cfg_msg.append([f"\n{config}.{key}", f"{'(Category) ' if 'value' not in t[key].keys() else ''}{t[key]['__meta']}"])
+            cfg_msg = [[f"{config}", f"({(t['type'].title())}) {t['__meta']}"]]
+            cfg_msg.append(["-","-"])
+
+            for key in [k for k in t.keys() if k not in ('__meta', 'value', 'type')]:
+               cfg_msg.append([f"\n{config}.{key}", f"({t[key]['type'].title()}) {t[key]['__meta']}"])
             return Response(f"```{tabulate.tabulate(cfg_msg, headers=('Config Key', 'Info'))}```")
 
       @self._commandeer(name="reload", allow_dm=True, default_auths=[Record.deny_all()])
