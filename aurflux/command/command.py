@@ -91,7 +91,11 @@ class Command(aur.util.AutoRepr, AuthAware):
             if self.decompose:
                res = self.func(cmd_ctx, *ev.args, **ev.kwargs)
             else:
-               res = self.func(cmd_ctx, ev.cmd_args)
+               if ev.cmd_flags:
+                  res = self.func(cmd_ctx, ev.cmd_args, ev.cmd_flags)
+               else:
+                  res = self.func(cmd_ctx, ev.cmd_args)
+
          if res:
             async for resp in aur.util.AwaitableAiter(res):
                await resp.execute(cmd_ctx) if resp else None

@@ -34,11 +34,12 @@ class FluxEvent(aur.Event):
 
 
 class CommandEvent(FluxEvent):
-   def __init__(self, flux: FluxClient, cmd_ctx: CommandCtx, cmd_args: ty.Optional[str], cmd_name: str):
+   def __init__(self, flux: FluxClient, cmd_ctx: CommandCtx, cmd_args: ty.Optional[str], cmd_name: str, cmd_flags:ty.List[str]):
       super().__init__(flux, f"flux:command:{cmd_name}")
       self.cmd_name = cmd_name
       self.cmd_ctx = cmd_ctx
       self.cmd_args = cmd_args
+      self.cmd_flags = cmd_flags
 
 
 class FluxClient(discord.Client):
@@ -133,10 +134,13 @@ class FluxClient(discord.Client):
 
          if not message.content.startswith(prefix):
             return
-         raw_cmd_name, args, *_ = [*message.content.split(" ", 1), None]
+         raw_cmd, args, *_ = [*message.content.split(" ", 1), None]
+
+         raw_cmd_name, raw_cmd_flags, *_ = raw_cmd.split(":"), None
+
          cmd_name = raw_cmd_name[len(prefix):]
 
-         await self.router.submit(event=CommandEvent(flux=self, cmd_ctx=CommandCtx(self, ctx, ctx, [ctx]), cmd_name=cmd_name, cmd_args=args.strip() if args else None))
+         await self.router.submit(event=CommandEvent(flux=self, cmd_ctx=CommandCtx(self, ctx, ctx, [ctx]), cmd_name=cmd_name, cmd_args=args.strip() if args else None, cmd_flags=raw_cmd_flags.split(",")))
 
       @self.router.listen_for(":resume")
       async def _(_):
