@@ -26,6 +26,7 @@ class FluxCog(AuthAware, metaclass=abc.ABCMeta):
          return t["value"]
       except KeyError as e:
          logger.error(f"[{self}]\nFailed to access {raw_key} in {t}, full config: {cfg[self.name]}\n{e}")
+         raise e
 
    async def cfg_set(self, cfg_ctx: ConfigCtx, raw_key: ty.List[str], value:  ty.Union[list, str, int, float]) -> None:
       async with self.flux.CONFIG.writeable_conf(cfg_ctx) as w_cfg:
