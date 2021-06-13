@@ -24,7 +24,7 @@ class FluxCog(AuthAware, metaclass=abc.ABCMeta):
          for subkey in raw_key:
             t = t[subkey]
          return t["value"]
-      except ValueError as e:
+      except KeyError as e:
          logger.error(f"[{self}]\nFailed to access {raw_key} in {t}, full config: {cfg[self.name]}\n{e}")
 
    async def cfg_set(self, cfg_ctx: ConfigCtx, raw_key: ty.List[str], value:  ty.Union[list, str, int, float]) -> None:
