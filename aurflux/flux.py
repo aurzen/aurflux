@@ -136,7 +136,7 @@ class FluxClient(discord.Client):
             return
          raw_cmd, args, *_ = [*message.content.split(" ", 1), None]
 
-         raw_cmd_name, raw_cmd_flags, *_ = raw_cmd.split(":"), []
+         raw_cmd_name, raw_cmd_flags, *_ = [*raw_cmd.split(":"), ""]
 
          cmd_name = raw_cmd_name[len(prefix):]
 
