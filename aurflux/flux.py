@@ -136,11 +136,11 @@ class FluxClient(discord.Client):
             return
          raw_cmd, args, *_ = [*message.content.split(" ", 1), None]
 
-         raw_cmd_name, raw_cmd_flags, *_ = [*raw_cmd.split(":"), ""]
+         raw_cmd_name, raw_cmd_flags, *_ = [*raw_cmd.split(":"), None]
 
          cmd_name = raw_cmd_name[len(prefix):]
 
-         await self.router.submit(event=CommandEvent(flux=self, cmd_ctx=CommandCtx(self, ctx, ctx, [ctx]), cmd_name=cmd_name, cmd_args=args.strip() if args else None, cmd_flags=raw_cmd_flags.split(",")))
+         await self.router.submit(event=CommandEvent(flux=self, cmd_ctx=CommandCtx(self, ctx, ctx, [ctx]), cmd_name=cmd_name, cmd_args=args.strip() if args else None, cmd_flags=raw_cmd_flags.split(",") if raw_cmd_flags else []))
 
       @self.router.listen_for(":resume")
       async def _(_):
