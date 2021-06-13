@@ -573,8 +573,8 @@ class Builtins(FluxCog):
             cfg_msg.append(["-","-"])
 
             for key in [k for k in t.keys() if k not in ('__meta', 'value', 'type')]:
-               cfg_msg.append([f"\n{config}.{key}", f"({t[key]['type'].title()}) {t[key]['__meta']}"])
-            return Response(f"```{tabulate.tabulate(cfg_msg, headers=('Config Key', 'Info'))}```")
+               cfg_msg.append([f"\n{config}.{key}", f"({t[key]['type'].title()}) {t[key]['__meta']}", t[key]["value"] if "value" in t[key] else ""])
+            return Response(f"```{tabulate.tabulate(cfg_msg, headers=('Config Key', 'Info', 'Value'))}```")
 
       @self._commandeer(name="reload", allow_dm=True, default_auths=[Record.deny_all()])
       async def __reload(ctx: CommandCtx, cog_name: str):
