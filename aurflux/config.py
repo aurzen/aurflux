@@ -18,6 +18,24 @@ CONFIG_DIR.mkdir(exist_ok=True)
 CACHED_CONFIGS = 100
 
 
+def merge_config(template, config, path=None):
+   if path is None: path = []
+   changed = False
+   for key in config:
+      if key in template:
+         if isinstance(template[key], dict) and isinstance(config[key], dict):
+            _, changed_ = merge_config(template[key], config[key], path + [str(key)])
+            changed = changed or changed_
+         elif template[key] == config[key]:
+            pass  # same leaf value
+         else:
+            template[key] = config[key]
+            changed = True
+
+      # else:
+      #    template[key] = config[key]
+   return template, changed
+
 # @ext.AutoRepr
 class Config(metaclass=aurcore.util.Singleton):
 
@@ -58,9 +76,12 @@ class Config(metaclass=aurcore.util.Singleton):
          configs = self.cached[identifier]
       else:
          local_config = self._load_config_file(identifier)
-         combined_dict = {**self.base_config, **local_config}
-         cleaned_dict = {k: combined_dict[k] for k in self.base_config}
-         if cleaned_dict != local_config:
+
+         cleaned_dict, changed = merge_config(self.base_config, local_config)
+         # combined_dict = {**self.base_config, **local_config}
+         #
+         # cleaned_dict = {k: combined_dict[k] for k in self.base_config}
+         if changed:
             self._write_config_file(identifier, cleaned_dict)
 
          self.cached[identifier] = cleaned_dict
