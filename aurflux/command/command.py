@@ -50,7 +50,7 @@ class Command(aur.util.AutoRepr, AuthAware):
       if not func_doc:
          raise RuntimeError(f"{self.func} lacks a docstring!")
       if self.func.__code__.co_argcount == 2:
-         raise logger.warning(f"Deprecation Warning: {self.func} missing argument for flags")
+         logger.warning(f"Deprecation Warning: {self.func} missing argument for flags")
       try:
          usage, description, params, *_ = func_doc.split("==")
       except ValueError as e:
