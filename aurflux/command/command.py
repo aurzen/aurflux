@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio.exceptions
 import functools as fnt
 import traceback
 import typing as ty
@@ -107,6 +108,8 @@ class Command(aur.util.AutoRepr, AuthAware):
       except errors.CommandInfo as e:
          info_message = f"{e}"
          await Response(content=info_message).execute(cmd_ctx)
+      except asyncio.exceptions.TimeoutError:
+         await Response(content="Timed out! Try again :(").execute(cmd_ctx)
       except Exception as e:
          print(traceback.format_exc())
          await Response(content=f"```Unexpected Exception:\n{str(e)}\n```", status="error", trashable=True).execute(cmd_ctx)

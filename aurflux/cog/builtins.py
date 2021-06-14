@@ -12,6 +12,8 @@ import tabulate
 from loguru import logger
 
 import dateparser
+
+import aurflux.utils
 from . import FluxCog
 from .. import CommandEvent, utils
 from ..auth import Auth, AuthList, Record
@@ -531,6 +533,39 @@ class Builtins(FluxCog):
             embed.add_field(name=arg.strip(), value=detail.strip(), inline=False)
 
          return Response(embed=embed)
+      @self._commandeer(name="purge", default_auths=[Record.allow_server_manager()])
+      async def __purge(ctx: GuildCommandCtx, args: str, flags: ty.List[str]):
+         """
+         purge n
+         ==
+         Purges messages from channel
+         ==
+         n: number of messages to purge. ALL for all messages
+         ==
+         :param ctx:
+         :param args:
+         :param flags:
+         :return:
+         """
+
+         if not args:
+            raise CommandError(f"Need to provide a number of messages to purge")
+         args = args.strip()
+         if args == "ALL":
+            num = None
+         else:
+            num = int(args.strip())
+
+         if not "f" in flags:
+            check_msg =  Response(f"Are you sure that you want to remove {num if num is not None else all} messages in this channel, {ctx.msg_ctx.channel.mention}?")
+            yield check_msg
+            await check_msg.message.add_reaction(aurflux.utils.EMOJI.check)
+
+            await self.flux.router.wait_for(":reaction_add", check=lambda ev: ev.args[1].id == ctx.author_ctx.author.id and str(ev.args[0].emoji) == aurflux.utils.EMOJI.check, timeout=15)
+
+         await ctx.msg_ctx.channel.purge(limit=num)
+
+
 
       @self._commandeer(name="config", default_auths=[Record.allow_server_manager()])
       async def __config(ctx: GuildCommandCtx, args: str, _):
