@@ -11,6 +11,7 @@ import discord
 import tabulate
 from loguru import logger
 
+import dateparser
 from . import FluxCog
 from .. import CommandEvent, utils
 from ..auth import Auth, AuthList, Record
@@ -550,8 +551,31 @@ class Builtins(FluxCog):
          config, value, *_ = [*args.split(" ", 1), None]
          if (cfgroot := config.split(".", 1)[0]) not in [cog.name for cog in self.flux.cogs]:
             raise CommandError(f"Cog name `{cfgroot or ' '}` not found in cogs: {','.join([cog.name for cog in self.flux.cogs])}")
+
+         ID_TYPES = ("user","channel","role","guild","member")
+
+         async def parse_config_value(val:str, config_type: ty.Literal["int","float","datetime","str","user","channel","role","guild","member"]):
+            val = val.strip()
+            try:
+               if config_type in ID_TYPES:
+                  obj = await ctx.msg_ctx.find_in_guild(t["type"], utils.find_mentions(val)[0])
+                  return obj.id
+               else:
+                  if config_type == "str":
+                     return val
+                  if config_type == "int":
+                     return int(val)
+                  if config_type == "float":
+                     return float(val)
+                  if config_type == "datetime":
+                     return dateparser.parse(val)
+            except (TypeError, ValueError, AttributeError):
+               raise CommandError(f"{val} not recognizable or locatable as a {t['type']}")
+
+
+
          if value is not None:
-            value = value.strip()
+            value : str = value.strip()
             async with self.flux.CONFIG.writeable_conf(ctx.msg_ctx) as cfg:
                t = cfg
                for part in config.split("."):
@@ -559,12 +583,12 @@ class Builtins(FluxCog):
 
                if t["type"] == "category":
                   raise CommandError(f"`{config}` is a category, not a setting!")
-               elif t["type"] in ("member","channel","role","guild"):
-                  if not (obj:= await ctx.msg_ctx.find_in_guild(t["type"], value)):
-                     raise CommandError(f"{value} not recognizable or locatable as a {t['type']}")
-                  t["value"] = obj.id
+               elif t["type"].startswith("list:"):
+                  raw_val_list = value.removeprefix("[").removesuffix("]").split(",")
+                  t["value"] = [await parse_config_value(raw_val, t["type"].removeprefix("list:")) for raw_val in raw_val_list]
                else:
-                  t["value"] = value
+                  t["value"] = await parse_config_value(value, t["type"])
+
                return Response(f'Set {config} to `{t["value"]}`')
          else:
             cfg = self.flux.CONFIG.of(ctx.msg_ctx)
