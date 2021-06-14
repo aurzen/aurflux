@@ -9,6 +9,7 @@ import aurcore as aur
 
 from ..auth import AuthList
 from ..utils import parsers
+
 if ty.TYPE_CHECKING:
    import discord
    from .. import FluxClient
@@ -52,20 +53,25 @@ class GuildAwareCtx(ConfigCtx):
 
    @property
    @abc.abstractmethod
-   def guild(self) -> discord.Guild: ...
+   def guild(self) -> discord.Guild:
+      ...
 
    @property
    def config_identifier(self) -> str:
       return str(self.guild.id)
 
-   async def find_in_guild(self, _type: ty.Literal["member","channel","role"], raw: str):
-      if type == "member":
-         return self.guild.get_member(int(raw))
-      if type == "channel":
-         return self.guild.get_channel(int(raw))
-      if type == "role":
-         return self.guild.get_role(int(raw))
+   async def find_in_guild(self, _type: ty.Literal["member", "channel", "role"], raw: str):
+      raw_id = parsers.find_mentions(raw)
+      raw_id = raw_id and raw_id[0]
+      if _type == "member":
+         return self.guild.get_member(int(raw_id))
+      if _type == "channel":
+         return self.guild.get_channel(int(raw_id))
+      if _type == "role":
+         return self.guild.get_role(int(raw_id))
+
       return None
+
 
 # class GuildCommandCtx(CommandCtx, GuildAwareCtx):
 #    def __init__(self, guild: discord.Guild, **kwargs):
@@ -158,7 +164,7 @@ class GuildMemberCtx(AuthAwareCtx, GuildAwareCtx):
 class MessageCtx(AuthAwareCtx, AuthorAwareCtx, metaclass=ABCMeta):
    def __init__(self, flux: FluxClient, message: discord.Message, **kwargs: ty.Any):
       super().__init__(flux=flux, **kwargs)
-      self.message : discord.Message = message
+      self.message: discord.Message = message
 
    @property
    def author(self) -> ty.Union[discord.Member, discord.User]:
@@ -224,7 +230,7 @@ class GuildMessageCtx(GuildTextChannelCtx, MessageCtx, GuildMemberCtx):
    def author(self) -> discord.Member:
       return self.member
 
-   async def find_in_guild(self, _type: ty.Literal["member","channel","role", "message"], raw: str):
+   async def find_in_guild(self, _type: ty.Literal["member", "channel", "role", "message"], raw: str):
       raw_id = parsers.find_mentions(raw)
       raw_id = raw_id and raw_id[0]
 
@@ -237,6 +243,7 @@ class GuildMessageCtx(GuildTextChannelCtx, MessageCtx, GuildMemberCtx):
       if _type == "message":
          return await self.channel.fetch_message(int(raw_id))
       return None
+
 
 class DMMessageCtx(DMChannelCtx, MessageCtx):
    def __init__(self, **kwargs):
