@@ -558,7 +558,7 @@ class Builtins(FluxCog):
             val = val.strip()
             try:
                if config_type in ID_TYPES:
-                  obj = await ctx.msg_ctx.find_in_guild(t["type"], utils.find_mentions(val)[0])
+                  obj = await ctx.msg_ctx.find_in_guild(t["type"], val)
                   return obj.id
                else:
                   if config_type == "str":
