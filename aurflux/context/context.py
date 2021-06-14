@@ -60,13 +60,13 @@ class GuildAwareCtx(ConfigCtx):
    def config_identifier(self) -> str:
       return str(self.guild.id)
 
-   async def find_in_guild(self, _type: ty.Literal["member", "channel", "role"], raw: str):
+   async def find_in_guild(self, _type: ty.Literal["member", "channel", "role"], id_: str):
       if _type == "member":
-         return self.guild.get_member(int(str))
+         return self.guild.get_member(int(id_))
       if _type == "channel":
-         return self.guild.get_channel(int(str))
+         return self.guild.get_channel(int(id_))
       if _type == "role":
-         return self.guild.get_role(int(str))
+         return self.guild.get_role(int(id_))
 
       return None
 
@@ -228,15 +228,15 @@ class GuildMessageCtx(GuildTextChannelCtx, MessageCtx, GuildMemberCtx):
    def author(self) -> discord.Member:
       return self.member
 
-   async def find_in_guild(self, _type: ty.Literal["member", "channel", "role", "message"], raw: str):
+   async def find_in_guild(self, _type: ty.Literal["member", "channel", "role", "message"], raw_id: str):
       if _type == "member":
-         return self.guild.get_member(int(raw))
+         return self.guild.get_member(int(raw_id))
       if _type == "channel":
-         return self.guild.get_channel(int(raw))
+         return self.guild.get_channel(int(raw_id))
       if _type == "role":
-         return self.guild.get_role(int(raw))
+         return self.guild.get_role(int(raw_id))
       if _type == "message":
-         return await self.channel.fetch_message(int(raw))
+         return await self.channel.fetch_message(int(raw_id))
       return None
 
 
