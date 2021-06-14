@@ -557,13 +557,15 @@ class Builtins(FluxCog):
                for part in config.split("."):
                   t = t[part]
 
-               if t["type"] != "category":
-                  if not await ctx.msg_ctx.find_in_guild(t["type"], value):
-                     raise CommandError(f"{value} not recognizable or locatable as a {t['type']}")
-                  t["value"] = value
-                  return Response(f"Set {config} to `{value}`")
-               else:
+               if t["type"] == "category":
                   raise CommandError(f"`{config}` is a category, not a setting!")
+               elif t["type"] in ("member","channel","role","guild"):
+                  if not (obj:= await ctx.msg_ctx.find_in_guild(t["type"], value)):
+                     raise CommandError(f"{value} not recognizable or locatable as a {t['type']}")
+                  t["value"] = obj.id
+               else:
+                  t["value"] = value
+               return Response(f'Set {config} to `{t["value"]}`')
          else:
             cfg = self.flux.CONFIG.of(ctx.msg_ctx)
             t = cfg
