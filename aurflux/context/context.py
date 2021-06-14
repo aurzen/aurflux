@@ -227,6 +227,7 @@ class GuildMessageCtx(GuildTextChannelCtx, MessageCtx, GuildMemberCtx):
    async def find_in_guild(self, _type: ty.Literal["member","channel","role", "message"], raw: str):
       raw_id = parsers.find_mentions(raw)
       raw_id = raw_id and raw_id[0]
+
       if _type == "member":
          return self.guild.get_member(int(raw_id))
       if _type == "channel":
