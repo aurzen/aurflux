@@ -61,14 +61,12 @@ class GuildAwareCtx(ConfigCtx):
       return str(self.guild.id)
 
    async def find_in_guild(self, _type: ty.Literal["member", "channel", "role"], raw: str):
-      raw_id = parsers.find_mentions(raw)
-      raw_id = raw_id and raw_id[0]
       if _type == "member":
-         return self.guild.get_member(int(raw_id))
+         return self.guild.get_member(int(str))
       if _type == "channel":
-         return self.guild.get_channel(int(raw_id))
+         return self.guild.get_channel(int(str))
       if _type == "role":
-         return self.guild.get_role(int(raw_id))
+         return self.guild.get_role(int(str))
 
       return None
 
@@ -231,17 +229,14 @@ class GuildMessageCtx(GuildTextChannelCtx, MessageCtx, GuildMemberCtx):
       return self.member
 
    async def find_in_guild(self, _type: ty.Literal["member", "channel", "role", "message"], raw: str):
-      raw_id = parsers.find_mentions(raw)
-      raw_id = raw_id and raw_id[0]
-
       if _type == "member":
-         return self.guild.get_member(int(raw_id))
+         return self.guild.get_member(int(raw))
       if _type == "channel":
-         return self.guild.get_channel(int(raw_id))
+         return self.guild.get_channel(int(raw))
       if _type == "role":
-         return self.guild.get_role(int(raw_id))
+         return self.guild.get_role(int(raw))
       if _type == "message":
-         return await self.channel.fetch_message(int(raw_id))
+         return await self.channel.fetch_message(int(raw))
       return None
 
 
