@@ -233,6 +233,17 @@ class Builtins(FluxCog):
 
       @self._commandeer(name="reboot", default_auths=[Record.deny_all()])
       async def __reboot(ctx: CommandCtx, _, __):
+         """
+         reboot
+         ==
+         Reboots...
+         ==
+         ==
+         :param ctx:
+         :param _:
+         :param __:
+         :return:
+         """
          sys.exit()
       @self._commandeer(name="auth", default_auths=[Record.allow_server_manager()])
       async def __auth(ctx: GuildCommandCtx, auth_str, _):
