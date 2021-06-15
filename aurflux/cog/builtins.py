@@ -4,6 +4,7 @@ import datetime
 import itertools as itt
 import json
 import re
+import sys
 import traceback
 import typing as ty
 
@@ -229,6 +230,10 @@ class Builtins(FluxCog):
                           f"**OUT**:\n"
                           f"```py\n{pformat(res)}\n```"), trashable=True)
 
+
+      @self._commandeer(name="reboot", default_auths=[Record.deny_all()])
+      async def __reboot(ctx: CommandCtx, _, __):
+         sys.exit()
       @self._commandeer(name="auth", default_auths=[Record.allow_server_manager()])
       async def __auth(ctx: GuildCommandCtx, auth_str, _):
          """
