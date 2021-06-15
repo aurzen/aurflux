@@ -211,6 +211,7 @@ class Builtins(FluxCog):
          # Utils for exec
          from .. import context
          # ==
+         _s = self
          _c = ctx.msg_ctx.dest
          _d = discord
          # noinspection PyTypeChecker
