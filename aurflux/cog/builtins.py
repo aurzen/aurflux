@@ -608,7 +608,7 @@ class Builtins(FluxCog):
                   if config_type == "float":
                      return float(val)
                   if config_type == "datetime":
-                     return dateparser.parse(val)
+                     return dateparser.parse(val).isoformat()
             except (TypeError, ValueError, AttributeError) as e:
                raise CommandError(f"{val} not recognizable or locatable as a {t['type']}\n{e}")
 
