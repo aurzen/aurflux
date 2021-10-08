@@ -610,7 +610,10 @@ class Builtins(FluxCog):
             val = val.strip()
             try:
                if config_type in ID_TYPES:
-                  obj = await ctx.msg_ctx.find_in_guild(t["type"], aurflux.utils.find_mentions(val)[0])
+                  try:
+                     obj = await ctx.msg_ctx.find_in_guild(t["type"], aurflux.utils.find_mentions(val)[0])
+                  except IndexError:
+                     return Response(f"Could not be parsed into a {t['type']}")
                   return obj.id
                else:
                   if config_type == "str":
@@ -629,10 +632,15 @@ class Builtins(FluxCog):
          if value is not None:
             value : str = value.strip()
             async with self.flux.CONFIG.writeable_conf(ctx.msg_ctx) as cfg:
-               t = cfg
-               for part in config.split("."):
-                  t = t[part]
+               print(ctx.msg_ctx)
+               print(cfg)
 
+               t = cfg
+               try:
+                  for part in config.split("."):
+                     t = t[part]
+               except KeyError:
+                  return Response(f"Not recognized as a config path!")
                if t["type"] == "category":
                   raise CommandError(f"`{config}` is a category, not a setting!")
                elif t["type"].startswith("list:"):
@@ -644,9 +652,13 @@ class Builtins(FluxCog):
                return Response(f'Set {config} to `{t["value"]}`')
          else:
             cfg = self.flux.CONFIG.of(ctx.msg_ctx)
+            print(ctx.msg_ctx.config_identifier)
             t = cfg
-            for part in config.split("."):
-               t = t[part]
+            try:
+               for part in config.split("."):
+                  t = t[part]
+            except KeyError:
+               return Response(f"Not a setting, or no settings for this cog.")
             cfg_msg = [[f"{config}", f"({(t['type'].title())}) {t['__meta']}"]]
             cfg_msg.append(["-", "-"])
 
