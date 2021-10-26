@@ -5,9 +5,7 @@ import aurcore as aur
 from loguru import logger
 from ..auth import AuthAware, Record
 from ..command import Command
-from aurcore.util import flattener
 
-flattener._DICT_FLATTEN_SEP = "."
 aur.log.setup()
 if ty.TYPE_CHECKING:
    from .. import FluxClient
