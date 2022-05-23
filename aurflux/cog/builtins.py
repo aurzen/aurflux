@@ -54,7 +54,7 @@ class Builtins(FluxCog):
          if type_ == "role":
             ids_ = utils.find_mentions(target_)
             role = ids_ and ctx.guild.get_role(ids_[0])
-            if role is None:
+            if not role:
                role = await ctx.find_in_guild("role", target_)
                if role:
                   return role.id
