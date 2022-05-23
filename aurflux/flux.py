@@ -34,7 +34,7 @@ class FluxEvent(aur.Event):
 
 
 class CommandEvent(FluxEvent):
-   def __init__(self, flux: FluxClient, cmd_ctx: CommandCtx, cmd_args: ty.Optional[str], cmd_name: str, cmd_flags:ty.List[str]):
+   def __init__(self, flux: FluxClient, cmd_ctx: CommandCtx, cmd_args: ty.Optional[str], cmd_name: str, cmd_flags:ty.List[str] = ()):
       super().__init__(flux, f"flux:command:{cmd_name}")
       self.cmd_name = cmd_name
       self.cmd_ctx = cmd_ctx
