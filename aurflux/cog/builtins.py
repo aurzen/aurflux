@@ -55,7 +55,7 @@ class Builtins(FluxCog):
             ids_ = utils.find_mentions(target_)
             role = ids_ and ctx.guild.get_role(ids_[0])
             if not role:
-               role = await ctx.find_in_guild("role", target_)
+               role = next((r for r in ctx.guild.roles if r.name == target_), None)
                if role:
                   return role.id
                raise CommandError(f"No role found with ID {target_}")
